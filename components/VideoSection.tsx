@@ -70,12 +70,14 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                 {videoSection.headline}
               </h2>
               <div className="mt-4 h-0.5 w-14 bg-[#68705A]/40" />
-              <p className="mt-4 text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
-                {videoSection.description}
-              </p>
+              {videoSection.description && (
+                <p className="mt-4 text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
+                  {videoSection.description}
+                </p>
+              )}
             </div>
 
-            {/* List of 8 Learning Outcomes */}
+            {/* List of Learning Outcomes */}
             <ul className="mt-6 space-y-2.5">
               {videoSection.learningPoints.map((point, idx) => (
                 <li
@@ -87,6 +89,18 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                 </li>
               ))}
             </ul>
+
+            {/* Biggest Takeaway Callout */}
+            {videoSection.takeawayText && (
+              <div className="mt-4.5 rounded-xl border border-[#464137]/12 bg-[#FAF8F2] p-4 sm:p-4.5">
+                <p className="text-[0.7rem] sm:text-xs font-semibold uppercase tracking-[0.18em] text-[#68705A]">
+                  {videoSection.takeawayHeading || "And the biggest takeaway:"}
+                </p>
+                <p className="mt-1.5 font-serif italic text-sm sm:text-[0.95rem] leading-relaxed text-[#292923]">
+                  {videoSection.takeawayText}
+                </p>
+              </div>
+            )}
 
             {/* CTA + Handwritten Note */}
             <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-5">

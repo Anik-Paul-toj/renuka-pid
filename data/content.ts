@@ -57,11 +57,13 @@ export interface MasterclassData {
   videoSection: {
     overline: string;
     headline: string;
-    description: string;
+    description?: string;
     videoTitle: string;
     videoThumbnail: string;
     youtubeId?: string;
     learningPoints: string[];
+    takeawayHeading?: string;
+    takeawayText?: string;
     ctaText: string;
     handwrittenNote?: string;
   };
@@ -355,22 +357,22 @@ export const masterclassData: MasterclassData = {
   },
   videoSection: {
     overline: "INSIDE THE SESSION",
-    headline: "What You Will Learn in This Live Masterclass",
-    description:
-      "By the end of this live 120-minute session, you will possess a gentle, repeatable blueprint to:",
+    headline: "What You’ll Learn in the Live Masterclass",
     videoTitle: "Watercolor for a Calmer, Brighter You — Studio Preview",
     videoThumbnail: "/images/video_preview.jpg",
     youtubeId: "I0q9IDdAFCs",
     learningPoints: [
-      "Observe light and gentle values before your brush ever touches the paper.",
-      "Simplify intricate botanical and natural references into calm, harmonious shapes.",
-      "Blend warm and cool watercolor washes cleanly without accidental muddiness.",
-      "Create luminous transparency and delicate atmospheric depth with confidence.",
-      "Master edge transitions: know when to keep edges crisp and when to let them soften.",
-      "Let go of perfectionism and embrace the organic, fluid beauty of watercolor.",
-      "Infuse mood, warmth, and personal feeling into ordinary botanical scenes.",
-      "Follow a reliable 3-step ritual that makes painting a daily restorative practice.",
+      "Why your watercolours look flat or muddy — and how to avoid the most common mistakes.",
+      "The secret of water control — understand exactly how much water to use for better results.",
+      "3 essential brush techniques that instantly improve your painting.",
+      "How to mix clean, beautiful colours without creating muddy shades.",
+      "How to create depth, light & realistic details without overworking your painting.",
+      "Follow along with a complete painting from start to finish.",
+      "A simple step-by-step approach you can repeat on your own after the class.",
     ],
+    takeawayHeading: "And the biggest takeaway:",
+    takeawayText:
+      "You’ll stop wondering, “Why doesn’t my painting look like the reference?” — and start understanding exactly what to do differently.",
     ctaText: "EXPLORE THE MASTERCLASS →",
     handwrittenNote: "Small Steps, Creative Big Changes",
   },
