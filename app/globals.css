@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fbf9f5;
+  --foreground: #1c1917;
+  --surface: #f4ede3;
+  --surface-alt: #eee5d7;
+  --card: #ffffff;
+  --primary: #1c1917;
+  --accent: #9a532d;
+  --icon: #8b4a24;
+  --subheading: #6e4729;
+  --cta: #c65328;
+  --cta-hover: #b0461f;
+  --cta-foreground: #ffffff;
+  --muted: #ece5d8;
+  --muted-foreground: #665f59;
+  --border: rgba(40, 32, 26, 0.12);
+  --border-subtle: rgba(40, 32, 26, 0.07);
+  --destructive: #dc2626;
 }
 
-@theme inline {
+@theme {
+  --font-sans: var(--font-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-hero: var(--font-playfair), Georgia, serif;
+  --font-ui: var(--font-outfit), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-card: var(--card);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-icon: var(--icon);
+  --color-subheading: var(--subheading);
+  --color-cta: var(--cta);
+  --color-cta-foreground: var(--cta-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Custom organic icon badge */
+.organic-badge {
+  border-radius: 42% 58% 46% 54% / 54% 44% 56% 46%;
+}
+
+/* Custom smooth accordion transition */
+@keyframes accordion-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height, auto);
+    opacity: 1;
   }
 }
 
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height, auto);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+/* Base resets and smooth behavior */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(40, 32, 26, 0.25);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cta);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

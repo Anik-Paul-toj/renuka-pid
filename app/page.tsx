@@ -1,69 +1,91 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState } from "react";
+import { Navbar } from "@/components/Navbar";
+import { Hero } from "@/components/Hero";
+import { InstructorIntro } from "@/components/InstructorIntro";
+import { AudienceSection } from "@/components/AudienceSection";
+import { VideoSection } from "@/components/VideoSection";
+import { Transformation } from "@/components/Transformation";
+import { MethodSection } from "@/components/MethodSection";
+import { CoreConcepts } from "@/components/CoreConcepts";
+import { Outcomes } from "@/components/Outcomes";
+import { InstructorStory } from "@/components/InstructorStory";
+import { Bonuses } from "@/components/Bonuses";
+import { FitCheck } from "@/components/FitCheck";
+import { IncludedSection } from "@/components/IncludedSection";
+import { FAQ } from "@/components/FAQ";
+import { FinalCTA } from "@/components/FinalCTA";
+import { Footer } from "@/components/Footer";
+import { StickyBottomBar } from "@/components/StickyBottomBar";
+import { RegistrationModal } from "@/components/RegistrationModal";
+import { GSAPProvider } from "@/components/GSAPProvider";
+
+export default function MasterclassLandingPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <GSAPProvider>
+      <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-accent/25 selection:text-primary">
+        {/* Sticky Header Navigation */}
+        <Navbar onOpenModal={handleOpenModal} />
+
+        <main className="flex-1">
+          {/* Section 01: Hero */}
+          <Hero onOpenModal={handleOpenModal} />
+
+          {/* Section 02: Trust & Instructor Introduction */}
+          <InstructorIntro />
+
+          {/* Section 03: Who This Is For */}
+          <AudienceSection />
+
+          {/* Section 04 & 05: Video Preview & Learning Outcomes */}
+          <VideoSection onOpenModal={handleOpenModal} />
+
+          {/* Section 06: Transformation (Old Way vs New Way) */}
+          <Transformation />
+
+          {/* Section 07: Framework & Methodology (Observe, Simplify, Express) */}
+          <MethodSection />
+
+          {/* Section 08: Core Concepts (The Three Secrets) */}
+          <CoreConcepts onOpenModal={handleOpenModal} />
+
+          {/* Section 09: Tangible Outcomes */}
+          <Outcomes />
+
+          {/* Section 10: Instructor Story & Philosophy */}
+          <InstructorStory />
+
+          {/* Section 11: Live Attendee Bonuses */}
+          <Bonuses />
+
+          {/* Section 12: Right Fit Qualification Check */}
+          <FitCheck />
+
+          {/* Section 13: Everything Included & Pricing Summary */}
+          <IncludedSection onOpenModal={handleOpenModal} />
+
+          {/* Section 14: Frequently Asked Questions */}
+          <FAQ />
+
+          {/* Section 15: Final Conversion Call to Action */}
+          <FinalCTA onOpenModal={handleOpenModal} />
+        </main>
+
+        {/* Section 16: Footer */}
+        <Footer />
+
+        {/* Persistent Sticky Bottom Conversion Bar */}
+        <StickyBottomBar onOpenModal={handleOpenModal} />
+
+        {/* Interactive Registration Modal Drawer */}
+        <RegistrationModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      </div>
+    </GSAPProvider>
   );
 }
