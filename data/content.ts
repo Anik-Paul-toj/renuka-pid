@@ -34,6 +34,15 @@ export interface MasterclassData {
     headlineHighlight: string;
     description: string;
   };
+  aboutArtist: {
+    eyebrow: string;
+    heading: string;
+    role: string;
+    introduction: string;
+    bio: string[];
+    qualifications: string[];
+    expertise: string[];
+  };
   targetAudience: {
     overline: string;
     headline: string;
@@ -266,6 +275,36 @@ export const masterclassData: MasterclassData = {
     headlineHighlight: "Lived the Practice",
     description:
       "Artistic confidence is not built through rushed tricks or pressure. It grows gently through observation, mindful practice, and discovering how each soft brushstroke can bring stillness, presence, and joy to everyday life.",
+  },
+  aboutArtist: {
+    eyebrow: "ABOUT THE ARTIST",
+    heading: "Meet Renuka Aggarwal",
+    role: "Art Educator | Founder, Art & Soul Studio",
+    introduction:
+      "With over 15 years of experience in art education, Renuka Aggarwal is an experienced Art Educator dedicated to helping people discover their creativity, build artistic confidence, and reconnect with the joy of creating.",
+    bio: [
+      "She is the Director and Co-Owner of Meraki Institute of Fine Art, an established art education institute where she has guided and mentored thousands of students across different age groups and skill levels.",
+      "Her teaching philosophy goes beyond simply learning techniques. Renuka believes that art is a way of seeing, expressing and connecting with ourselves. Through her online classes, she aims to make art approachable for beginners while also helping learners develop strong artistic foundations and their own creative voice.",
+    ],
+    qualifications: [
+      "BFA — College of Art, Delhi",
+      "Master’s in Fine Arts — Gwalior",
+      "Diploma in Fine Arts",
+      "Diploma in Photography",
+      "Diploma in Art Therapy",
+    ],
+    expertise: [
+      "Watercolour Painting",
+      "Oil Colour Painting",
+      "Perspective Drawing",
+      "Art Therapy & Creative Expression",
+      "Drawing & Observation",
+      "Composition & Visual Understanding",
+      "Art Fundamentals",
+      "Creative Exploration & Experimentation",
+      "Art Appreciation & Art History",
+      "Developing Confidence through Art",
+    ],
   },
   targetAudience: {
     overline: "WHO THIS IS FOR",

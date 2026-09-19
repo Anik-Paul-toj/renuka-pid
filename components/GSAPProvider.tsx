@@ -24,7 +24,7 @@ export const GSAPProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       // 2. Headings scroll-triggered reveal
-      gsap.utils.toArray<HTMLElement>("h2").forEach((heading) => {
+      gsap.utils.toArray<HTMLElement>("h2:not(.no-gsap)").forEach((heading) => {
         gsap.from(heading, {
           scrollTrigger: {
             trigger: heading,
