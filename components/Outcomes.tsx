@@ -8,19 +8,19 @@ export const Outcomes: React.FC = () => {
   const { outcomes } = masterclassData;
 
   return (
-    <section className="py-16 sm:py-24 border-t border-border/40 bg-background">
-      <div className="mx-auto max-w-6xl px-5">
+    <section className="py-16 sm:py-24 bg-[#EEE9DE] border-b border-[#464137]/10">
+      <div className="mx-auto max-w-6xl px-6">
         {/* Header */}
         <div>
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-subheading">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#68705A]">
             {outcomes.overline}
           </p>
-          <h2 className="mt-2.5 max-w-4xl font-display text-3xl font-semibold leading-tight tracking-tight text-primary sm:text-[2.6rem]">
+          <h2 className="mt-3 max-w-4xl font-serif text-3xl font-medium tracking-tight text-[#292923] sm:text-4xl lg:text-[2.6rem]">
             <span>{outcomes.headline}</span>
-            <span className="text-icon">{outcomes.headlineHighlight}</span>
+            <span className="italic">{outcomes.headlineHighlight}</span>
           </h2>
-          <div className="mt-5 h-0.5 w-16 bg-gradient-to-r from-icon/70 to-transparent" />
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <div className="mt-4 h-0.5 w-14 bg-[#68705A]/40" />
+          <p className="mt-4 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
             {outcomes.description}
           </p>
         </div>
@@ -30,16 +30,16 @@ export const Outcomes: React.FC = () => {
           {outcomes.items.map((item, idx) => (
             <li
               key={idx}
-              className="flex items-start gap-3 rounded-2xl bg-surface/60 p-4.5 text-sm leading-relaxed text-foreground ring-1 ring-border/40 transition-colors hover:bg-surface hover:ring-icon/30"
+              className="paper-card flex items-start gap-3 p-4 text-xs sm:text-sm leading-relaxed text-[#292923]"
             >
-              <Check className="mt-0.5 size-4.5 shrink-0 text-icon stroke-[2.5]" />
+              <Check className="mt-0.5 size-4 shrink-0 text-[#68705A] stroke-[2.2]" />
               <span>{item}</span>
             </li>
           ))}
         </ul>
 
         {/* Disclaimer */}
-        <p className="mt-8 text-xs leading-relaxed text-muted-foreground">
+        <p className="mt-8 text-xs leading-relaxed text-[#6F6B61]">
           {outcomes.disclaimer}
         </p>
       </div>

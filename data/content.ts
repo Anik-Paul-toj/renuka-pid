@@ -1,14 +1,16 @@
 export interface MasterclassData {
   brand: {
     name: string;
+    studioName: string;
     tagline: string;
-    logoText: string;
+    subTagline: string;
   };
   hero: {
     pillLabel: string;
     headlineStart: string;
     headlineHighlight: string;
     subheadline: string;
+    handwrittenPhrase: string;
     date: string;
     time: string;
     duration: string;
@@ -24,6 +26,7 @@ export interface MasterclassData {
   stats: Array<{
     number: string;
     label: string;
+    icon: string;
   }>;
   trustSection: {
     overline: string;
@@ -42,6 +45,7 @@ export interface MasterclassData {
       icon: string;
     }>;
     footerQuote: string;
+    handwrittenNote?: string;
   };
   videoSection: {
     overline: string;
@@ -52,6 +56,7 @@ export interface MasterclassData {
     youtubeId?: string;
     learningPoints: string[];
     ctaText: string;
+    handwrittenNote?: string;
   };
   transformation: {
     overline: string;
@@ -103,6 +108,7 @@ export interface MasterclassData {
     overline: string;
     headline: string;
     name: string;
+    subtitle: string;
     paragraphs: string[];
     quote: string;
     quoteAuthor: string;
@@ -147,8 +153,10 @@ export interface MasterclassData {
     answer: string;
   }>;
   finalCta: {
+    overline: string;
     headline: string;
     description: string;
+    handwrittenPhrase: string;
     ctaText: string;
     dateInfo: string;
     subNote: string;
@@ -162,443 +170,440 @@ export interface MasterclassData {
     contactEmail: string;
     copyrightYear: number;
     disclaimer: string;
+    handwrittenSignature: string;
   };
 }
 
 export const masterclassData: MasterclassData = {
   brand: {
-    name: "Renuka Atelier",
-    tagline: "Fine Art & Expressive Light Masterclasses",
-    logoText: "RENUKA ATELIER",
+    name: "Renuka Aggarwal",
+    studioName: "ART & SOUL STUDIO",
+    tagline: "ART | MINDFULNESS | A BRIGHTER YOU",
+    subTagline: "Mindful Watercolor & Creative Well-Being",
   },
   hero: {
-    pillLabel: "LIVE 120-MINUTE MASTERCLASS WITH RENUKA RAO",
-    headlineStart: "The Luminosity Blueprint™ ",
-    headlineHighlight: "for Expressive Realism",
+    pillLabel: "ART FOR A CALMER, BRIGHTER YOU",
+    headlineStart: "Learn Art. Rediscover Yourself. ",
+    headlineHighlight: "Create a Kinder You.",
     subheadline:
-      "Learn how to capture luminous light, atmospheric depth, and emotional resonance in your paintings without getting lost in endless detail.",
+      "Begin your creative journey with mindful, step-by-step watercolour courses designed for adults 25+ — no prior experience needed.",
+    handwrittenPhrase: "Art heals. Always.",
     date: "Saturday, 28 October 2026",
     time: "6:30 PM IST (9:00 AM EDT)",
     duration: "120 Minutes",
-    language: "English (with clear visual demonstrations)",
-    ctaText: "Reserve My Free Seat",
-    urgencyText: "Free live registration • Joining details by email • Registration closes 28 Oct, 6:30 PM IST",
-    guaranteeText: "Registration closes on 28 October 2026, 6:30 PM IST — or earlier when 200 live seats are filled.",
-    targetAudienceNote: "Designed for beginners and advancing visual artists. No formal academic art degree required.",
-    instructorName: "Renuka Rao",
-    instructorTitle: "Master Artist & Visual Mentor • Founder, Renuka Atelier",
+    language: "English (with gentle visual demonstrations)",
+    ctaText: "EXPLORE COURSES",
+    urgencyText: "Complimentary live registration • Gentle joining details by email",
+    guaranteeText: "Live intimate atelier broadcast • Limited to 200 interactive attendees.",
+    targetAudienceNote: "Designed warmly for beginners, working adults, and creative souls at every level.",
+    instructorName: "Renuka Aggarwal",
+    instructorTitle: "Art Educator | Founder, Art & Soul Studio",
     instructorImage: "/images/instructor_hero.jpg",
   },
   stats: [
     {
-      number: "25+ Years",
-      label: "of immersive studio practice and international exhibitions",
+      number: "15+ Years",
+      label: "of teaching experience and studio practice",
+      icon: "Sparkles",
     },
     {
-      number: "180+ Workshops",
-      label: "conducted globally across studio residencies and live sessions",
+      number: "1,000+ Students",
+      label: "guided to experience the gentle joy of watercolor",
+      icon: "Users",
     },
     {
-      number: "14 Countries",
-      label: "visited for plein-air studies, residencies, and cultural fellowships",
+      number: "Fine Arts Graduate",
+      label: "grounded in classical color theory and mindful craft",
+      icon: "GraduationCap",
     },
     {
-      number: "12,000+ Students",
-      label: "mentored to paint with confidence, structure, and distinct personal voice",
+      number: "Art for Well-being",
+      label: "dedicated to calm, personal growth, and creative healing",
+      icon: "Heart",
     },
   ],
   trustSection: {
-    overline: "YOUR MENTOR",
+    overline: "ABOUT THE PRACTICE",
     headline: "Learn from an Artist Who Has ",
     headlineHighlight: "Lived the Practice",
     description:
-      "Artistic confidence is never built through disconnected hacks or superficial tricks. It grows through decades of deliberate observation, disciplined simplification, and understanding how to make every brushstroke count with clear intention.",
+      "Artistic confidence is not built through rushed tricks or pressure. It grows gently through observation, mindful practice, and discovering how each soft brushstroke can bring stillness, presence, and joy to everyday life.",
   },
   targetAudience: {
-    overline: "WHO IT'S FOR",
+    overline: "WHO THIS IS FOR",
     headline: "This Masterclass Is for You If You Want to Paint with ",
-    headlineHighlight: "Clarity — Not Confusion",
+    headlineHighlight: "Clarity, Not Confusion",
     cards: [
       {
         id: "beginners",
         title: "Beginner Artists",
         description:
-          "Who want a structured, reliable starting process instead of wondering what step to take first.",
+          "Who want a structured, gentle starting process without fear, judgment, or feeling lost.",
         icon: "Compass",
       },
       {
         id: "self-taught",
-        title: "Self-Taught Painters",
+        title: "Self-Taught Learners",
         description:
-          "Who feel stuck in plateaus despite watching dozens of fragmented YouTube tutorials and time-lapses.",
+          "Who feel stuck despite watching endless tutorials and want a cohesive, mindful foundation.",
         icon: "Sparkles",
       },
       {
-        id: "advancing",
-        title: "Advancing Visual Artists",
+        id: "working-adults",
+        title: "Working Adults & Parents",
         description:
-          "Who want to command light, temperature contrast, and visual storytelling with greater emotional depth.",
+          "Returning to creativity and seeking a therapeutic, restorative practice that fits their busy life.",
+        icon: "Heart",
+      },
+      {
+        id: "advancing",
+        title: "Advancing Hobbyists",
+        description:
+          "Who want to capture luminous botanical light, soft transparency, and poetic depth.",
         icon: "Layers",
       },
       {
         id: "students",
-        title: "Design & Fine Art Students",
+        title: "Art & Design Students",
         description:
-          "Who need rock-solid foundation principles in tonal values, focal priority, and edge control.",
+          "Who want to build sound principles in color temperatures, edge control, and visual storytelling.",
         icon: "GraduationCap",
       },
       {
-        id: "professionals",
-        title: "Working Professionals & Creatives",
+        id: "creative-souls",
+        title: "Seekers of Well-Being",
         description:
-          "Returning to their creative passion and wanting focused, high-yield guidance that respects their time.",
-        icon: "Briefcase",
-      },
-      {
-        id: "instructors",
-        title: "Art Educators & Serious Hobbyists",
-        description:
-          "Who want a repeatable, articulate vocabulary to explain complex visual decisions clearly to others.",
-        icon: "Palette",
+          "Who believe that creative expression is a kinder, gentler way to be in the world.",
+        icon: "Flower2",
       },
     ],
-    footerQuote: "You do not need extraordinary raw talent. You need a clearer way to see, decide, and paint.",
+    footerQuote: "Creativity is a kinder way to be in the world.",
+    handwrittenNote: "Small steps, creative changes.",
   },
   videoSection: {
     overline: "INSIDE THE SESSION",
     headline: "What You Will Learn in This Live Masterclass",
-    description: "By the end of this live 120-minute session, you will possess a repeatable blueprint to:",
-    videoTitle: "The Luminosity Blueprint™ Studio Masterclass Preview",
+    description:
+      "By the end of this live 120-minute session, you will possess a gentle, repeatable blueprint to:",
+    videoTitle: "Watercolor for a Calmer, Brighter You — Studio Preview",
     videoThumbnail: "/images/video_preview.jpg",
     youtubeId: "I0q9IDdAFCs",
     learningPoints: [
-      "Identify and anchor your dominant light source before your brush ever touches paper.",
-      "Simplify complex, overwhelming photo references into 3 fundamental value masses.",
-      "Master warm and cool color temperature harmonies without creating dull, muddy mixtures.",
-      "Engineer compelling three-dimensional depth through deliberate atmospheric perspective.",
-      "Make decisive choices on what to render sharp, what to soften, and what to leave untouched.",
-      "Harness pigment transparency to create radiant luminosity and glowing undertones.",
-      "Infuse mood, emotion, and visual storytelling into everyday ordinary subjects.",
-      "Follow a reliable 3-phase framework that eliminates creative hesitation and second-guessing.",
+      "Observe light and gentle values before your brush ever touches the paper.",
+      "Simplify intricate botanical and natural references into calm, harmonious shapes.",
+      "Blend warm and cool watercolor washes cleanly without accidental muddiness.",
+      "Create luminous transparency and delicate atmospheric depth with confidence.",
+      "Master edge transitions: know when to keep edges crisp and when to let them soften.",
+      "Let go of perfectionism and embrace the organic, fluid beauty of watercolor.",
+      "Infuse mood, warmth, and personal feeling into ordinary botanical scenes.",
+      "Follow a reliable 3-step ritual that makes painting a daily restorative practice.",
     ],
-    ctaText: "Yes, I Want to Paint with Confidence — Join Free",
+    ctaText: "EXPLORE THE MASTERCLASS →",
+    handwrittenNote: "Small Steps, Creative Big Changes",
   },
   transformation: {
     overline: "THE SHIFT",
-    headline: "More Tutorials Are Not the Answer. ",
+    headline: "More Overthinking Is Not the Answer. ",
     headlineHighlight: "Better Decisions Are.",
     beforeTitle: "THE OLD WAY",
     beforePoints: [
-      "Blindly copying every visible surface detail from photographs",
-      "Beginning a painting without a clear tonal value strategy",
-      "Selecting individual colors object-by-object in total isolation",
-      "Constantly scrubbing and correcting until the work is overworked and lifeless",
-      "Depending rigidly on the reference photo for every tiny mark",
-      "Chasing realism through obsessive rendering rather than light relationships",
-      "Judging artistic worth solely by the final outcome rather than process",
+      "Copying photo references blindly with tension and performance anxiety",
+      "Beginning a painting without a clear light and value plan",
+      "Overworking wet washes until the paper turns dull and muddy",
+      "Judging your creative worth strictly by instant perfection",
+      "Treating art like an intimidating test rather than a gentle sanctuary",
+      "Abandoning unfinished paintings whenever a mistake occurs",
+      "Feeling disconnected from the mindful, therapeutic pleasure of the process",
     ],
-    afterTitle: "THE LUMINOSITY BLUEPRINT™ WAY",
+    afterTitle: "THE ART & SOUL WAY",
     afterPoints: [
-      "Distilling the reference to discover what truly creates the visual story",
-      "Establishing one dominant, unambiguous light vector across the canvas",
-      "Building unified warm-cool temperature dialogues across all planes",
-      "Preserving fresh, luminous passages through intentional suggestion and lost edges",
-      "Interpreting the scene with personal creative authority and confidence",
-      "Achieving breathtaking realism through values, edges, and atmospheric air",
-      "Following a proven, repeatable decision hierarchy every single time",
+      "Observing the soul and light of the subject with peaceful curiosity",
+      "Anchoring one dominant light vector to organize values naturally",
+      "Letting watercolor flow freely with fresh, transparent pigment washes",
+      "Embracing gentle imperfections and lost edges that invite imagination",
+      "Experiencing painting as mindful self-care and authentic creative expression",
+      "Navigating unexpected water blooms into expressive organic marks",
+      "Cultivating a lifelong, repeatable practice of calm artistic confidence",
     ],
     takeaway:
-      "The goal is never to reproduce a photographic copy. The goal is to understand the soul of the scene deeply enough to reimagine it with light, atmosphere, and feeling.",
+      "The goal is never to reproduce a photographic copy. The goal is to slow down, observe with love, and paint from the heart.",
   },
   methodFramework: {
     overline: "THE METHOD",
     headline: "A Clear Philosophy for ",
-    headlineHighlight: "Every Masterpiece",
+    headlineHighlight: "Every Watercolor Piece",
     steps: [
       {
         number: "01",
         title: "OBSERVE",
-        subtitle: "See the structural architecture behind the subject.",
+        subtitle: "Pause, breathe, and see the structure behind the light.",
         description:
-          "Analyze the dominant light angle, value distribution, temperature shifts, and emotional character before mixing a single drop of paint.",
+          "Notice the gentle direction of illumination, value hierarchy, and emotional mood of the scene before mixing pigments.",
         icon: "Eye",
       },
       {
         number: "02",
         title: "SIMPLIFY",
-        subtitle: "Transform overwhelming complexity into clear shapes.",
+        subtitle: "Transform complexity into soft, manageable shapes.",
         description:
-          "Reduce the visual world into three primary value families, define the emotional focal center, and establish a harmonious limited palette.",
+          "Distill overwhelming botanical details into three gentle value masses and a harmonious limited palette.",
         icon: "Layers",
       },
       {
         number: "03",
-        title: "EXPRESS",
-        subtitle: "Apply pigments with intention, freshness, and restraint.",
+        title: "CREATE",
+        subtitle: "Apply pigments with intention, freshness, and release.",
         description:
-          "Sequence your washes, manage edge transitions from razor-sharp to lost, and preserve radiant paper whites for maximum luminosity.",
+          "Sequence your transparent washes, preserve luminous paper whites, and let water do its natural, organic magic.",
         icon: "Brush",
       },
     ],
-    pillSummary: "Observe → Simplify → Express: See clearly. Decide confidently. Paint intentionally.",
+    pillSummary: "Observe → Simplify → Create: Pause. Breathe. Paint with joy.",
   },
   coreSecrets: {
     overline: "WHAT YOU'LL UNLOCK",
     headline: "The Three Secrets Behind ",
-    headlineHighlight: "Stunning Realism",
+    headlineHighlight: "Luminous Watercolors",
     secrets: [
       {
         number: "Secret 01",
-        title: "The Single Light Vector Rule™",
-        subtitle: "Generate convincing light and dimensional space",
+        title: "The Mindful Light Principle™",
+        subtitle: "Create radiant luminosity and breathing space",
         description:
-          "Learn how establishing one governing light direction simplifies all value choices, unifies cast shadows, and makes flat paper spring into dynamic three dimensions.",
+          "Discover how establishing one governing light direction simplifies every value choice, illuminates petal layers, and gives flat paper vibrant life.",
         bullets: [
-          "How to locate or deliberately invent the dominant light direction.",
-          "Why value relationships matter ten times more than local object color.",
-          "How form shadows, cast shadows, and ambient bounce light interact.",
-          "How to safeguard the brightest light passages to maintain pure brilliance.",
+          "How to locate or gently invent the dominant light source.",
+          "Why value relationships matter far more than mixing exact local colors.",
+          "How cast shadows and ambient glow interplay on natural forms.",
+          "How to safeguard the pure, untouched white paper for maximum brilliance.",
         ],
         icon: "Sun",
       },
       {
         number: "Secret 02",
-        title: "Chromatic Temperature Harmony™",
-        subtitle: "Create vibrant harmony without accidental muddy mixtures",
+        title: "Soft Petal & Pigment Flow™",
+        subtitle: "Create vibrant harmony without muddy mixtures",
         description:
-          "Unlock the secret dialogues of warm against cool tones, learn clean mixing principles, and let complementary colors vibrate without dulling down your painting.",
+          "Understand the delicate dance of water-to-pigment ratios, warm and cool dialogues, and how to let watercolors mix optically on the page.",
         bullets: [
-          "Why 'mud' is almost always the result of value confusion, not color mixing.",
-          "How warm-versus-cool contrast creates depth far faster than heavy pigment.",
-          "How a restrained 5-pigment palette produces far richer unity.",
-          "When to blend on the palette versus allowing optical blending on the surface.",
+          "Why muddiness stems from uncertain values rather than too many colors.",
+          "How warm-versus-cool contrast brings botanical forms forward effortlessly.",
+          "Building a timeless, unified palette with just 4 to 5 essential pigments.",
+          "Knowing when to mix in the ceramic well versus letting colors fuse on cotton.",
         ],
         icon: "Palette",
       },
       {
         number: "Secret 03",
-        title: "The Atmospheric Suggestion System™",
-        subtitle: "Transform mere references into evocative emotional stories",
+        title: "The Soulful Storytelling Method™",
+        subtitle: "Turn everyday flora into meaningful emotional art",
         description:
-          "Discover how leaving certain passages soft, suggested, or unresolved invites the viewer's imagination to complete the story with unforgettable resonance.",
+          "Learn how intentional suggestion, soft lost edges, and atmospheric washes invite the viewer's heart into the artwork.",
         bullets: [
-          "How to identify the emotional heartbeat of any scene.",
-          "How lost edges and atmospheric haze create breathtaking depth.",
-          "Why over-explaining every background element ruins the focal narrative.",
-          "How to transition from photographic mimicry to authentic artistic expression.",
+          "How to identify the emotional center of any floral or landscape subject.",
+          "Using edge control (sharp, soft, lost) to guide the viewer's gaze.",
+          "Why under-rendering background details actually elevates your main subject.",
+          "Shifting from photographic copying to authentic, personal expression.",
         ],
-        icon: "Compass",
+        icon: "Heart",
       },
     ],
     bottomNote:
-      "During the live demonstration, Renuka will weave all three secrets together in real-time, walking you through every decision from empty white canvas to complete expressive artwork.",
-    ctaText: "Unlock the Three Secrets — Register Free",
+      "During the live demonstration, Renuka will paint a complete floral watercolor piece step-by-step, explaining every brushstroke and mindful decision in real-time.",
+    ctaText: "RESERVE MY FREE SEAT →",
   },
   outcomes: {
     overline: "THE OUTCOME",
     headline: "What Changes When Your ",
     headlineHighlight: "Decisions Become Clear",
-    description: "Once you adopt this systematic way of seeing and painting, you will begin to:",
+    description: "Once you embrace this gentle, structured approach to painting, you will begin to:",
     items: [
-      "Approach an empty canvas with calm excitement instead of paralysis and fear.",
-      "Mix clean, singing color chords without fear of creating accidental grey mud.",
-      "Build commanding value hierarchies that read powerfully from across the room.",
-      "Distill intricate cityscapes, landscapes, and portraits into effortless large shapes.",
-      "Intentionally control hard, soft, and lost edges to orchestrate where the eye travels.",
-      "Stop overworking paintings and know precisely when a piece is finished.",
-      "Infuse ordinary, everyday scenes with poetic light, atmosphere, and mood.",
-      "Evaluate your own work using objective visual principles rather than vague self-criticism.",
-      "Break free from relying on paint-by-numbers tutorials and develop your own style.",
-      "Build lasting artistic momentum with a repeatable practice you can trust for life.",
+      "Approach an empty sheet of paper with calm anticipation instead of hesitation.",
+      "Mix clean, singing color washes without fear of creating accidental grey mud.",
+      "Build commanding value hierarchies that read clearly and feel dimensional.",
+      "Distill complex botanical blossoms and landscapes into graceful, large shapes.",
+      "Master edge transitions to effortlessly guide the viewer’s eye.",
+      "Stop overworking paintings and recognize the sweet moment a piece is complete.",
+      "Infuse ordinary moments and flowers with poetic mood, warmth, and emotion.",
+      "Evaluate your practice with kindness and curiosity rather than harsh self-criticism.",
+      "Break free from painting-by-numbers tutorials and develop your own creative voice.",
+      "Find genuine peace, mindfulness, and creative rejuvenation in your painting time.",
     ],
     disclaimer:
-      "The masterclass provides rigorous artistic education and live demonstration. Individual artistic progress naturally depends on deliberate practice and application; no instant magical outcomes are promised.",
+      "The masterclass provides mindful artistic education and live demonstration. Individual artistic progress naturally depends on deliberate practice and personal application.",
   },
   instructorStory: {
-    overline: "MEET YOUR MENTOR",
-    headline: "Meet Your Mentor, ",
-    name: "Renuka Rao",
+    overline: "ABOUT ME",
+    headline: "Hi, I'm ",
+    name: "Renuka Aggarwal",
+    subtitle: "ART EDUCATOR | FOUNDER, ART & SOUL STUDIO",
     paragraphs: [
-      "Renuka Rao is an acclaimed contemporary realist painter, visual mentor, and the founder of Renuka Atelier. Over a career spanning 25 years of dedicated studio practice, her works have been exhibited across prestigious galleries in London, New York, Paris, and Mumbai.",
-      "Before committing fully to her fine art studio, Renuka spent over a decade leading visual design architectures and human perception research. That unique intersection of rigorous analytical thinking and expressive fine art allows her to break down intimidating artistic concepts into clear, structured, and repeatable frameworks.",
-      "Through Renuka Atelier, her mission is to guide 100,000 artists worldwide to overcome self-doubt, master the language of light and value, and paint with deep personal conviction and effortless craft.",
+      "With over 15 years of teaching experience, I help adults discover the joy of art through simple, mindful and well-structured watercolour courses. My goal is to make art accessible, meaningful and a part of your everyday life — no matter where you are in your journey.",
+      "I believe everyone holds a natural, innate creative impulse that often gets buried under the busyness of adult life. In my studio, we step away from competition and rigid expectations. We return to the tactile pleasure of water, natural pigment, and mindful breathing.",
+      "Through Art & Soul Studio, I have had the privilege of guiding more than 1,000 students worldwide to rediscover their creative confidence, quiet their inner critic, and experience art as a kinder, restorative companion.",
     ],
-    quote: "Art is never about duplicating what is in front of the lens. It is about illuminating the unseen emotional story living within the light, the air, and the brush.",
-    quoteAuthor: "Renuka Rao",
+    quote: "My art is always an invitation to slow down, breathe, and discover the quiet beauty hidden within everyday moments.",
+    quoteAuthor: "Renuka Aggarwal",
     image: "/images/instructor_story.jpg",
   },
   bonuses: {
-    overline: "LIVE-ATTENDEE BONUSES",
-    headline: "Attend Live and Unlock Three ",
-    headlineHighlight: "Exclusive Learning Resources",
+    overline: "LIVE ATTENDEE GIFTS",
+    headline: "Attend Live and Receive Three ",
+    headlineHighlight: "Art Studio Resources",
     items: [
       {
         id: "bonus-1",
-        title: "The Studio Field Guide to Common Painting Traps",
+        title: "The Mindful Watercolor Field Guide",
         description:
-          "A practical, 28-page visual handbook to diagnose and correct muddy washes, chalky values, pigment overworking, and weak compositional focal points.",
-        type: "EXCLUSIVE E-BOOK (PDF)",
+          "A beautifully illustrated 24-page guide addressing water control, clean color recipes, and gentle remedies for common beginner challenges.",
+        type: "EXCLUSIVE COMPENDIUM (PDF)",
         icon: "BookOpen",
       },
       {
         id: "bonus-2",
-        title: "Mastering Pigment Characteristics & Color Harmony",
+        title: "Botanical Pigment & Color Harmony Chart",
         description:
-          "A curated guide to pigment transparency, granulating properties, staining ratings, and building timeless limited palettes with modern lightfast colors.",
-        type: "CURATED REFERENCE COMPENDIUM",
+          "A curated guide to pigment transparency, granulating washes, and mixing luminous floral greens and blush pinks with a minimal palette.",
+        type: "STUDIO REFERENCE PALETTE",
         icon: "Sliders",
       },
       {
         id: "bonus-3",
-        title: "Uncut High-Definition Master Demonstration Replay",
+        title: "Full-Length Floral Master Demonstration Replay",
         description:
-          "Lifetime access to an uncut, dual-camera studio demonstration capturing palette mixing and brush application from first wash to final glaze.",
-        type: "RECORDED MASTER DEMO ACCESS",
+          "48-hour access to an uncut, dual-camera video recording of Renuka painting a complete botanical watercolor piece with detailed commentary.",
+        type: "RECORDED DEMO ACCESS",
         icon: "Video",
       },
     ],
     deliveryNote:
-      "Access instructions and digital assets will be shared directly with eligible live attendees during the masterclass via registered email and VIP community broadcast.",
+      "Access links and downloadable studio guides will be shared directly with live attendees during the broadcast via email and the community channel.",
   },
   fitCheck: {
     overline: "RIGHT FIT CHECK",
     headline: "Who Should Attend — and Who Should Not",
-    fitTitle: "This masterclass is a powerful fit if you:",
+    fitTitle: "This masterclass is a wonderful fit if you:",
     fitPoints: [
-      "Are genuinely passionate about elevating your painting craft and visual understanding.",
-      "Seek a disciplined, systematic framework rather than collecting random disjointed tips.",
-      "Are ready to commit 120 uninterrupted, focused minutes to the live educational experience.",
-      "Are eager to take the principles and actively paint and apply them in your own studio.",
-      "Want to master light, temperature, tonal values, lost edges, and storytelling.",
-      "Understand that artistic maturity rewards thoughtful observation and deliberate repetition.",
+      "Are looking for a calming, joyful, and creative sanctuary away from daily stress.",
+      "Want clear, step-by-step guidance rather than overwhelming, disjointed video clips.",
+      "Can set aside 120 uninterrupted minutes to immerse yourself in art and learning.",
+      "Are excited to explore watercolor with curiosity, patience, and a playful spirit.",
+      "Wish to learn mindful principles of light, botanical transparency, and edge softness.",
+      "Value personal growth, kindness toward yourself, and the meditative joy of creating.",
     ],
     unfitTitle: "This masterclass may not be right for you if you:",
     unfitPoints: [
-      "Are hunting for an overnight shortcut that requires zero brush mileage or practice.",
-      "Only wish to collect free PDF downloads with no intention of attending the masterclass.",
-      "Expect one masterclass alone to substitute for ongoing creative effort.",
-      "Are defensive about trying new techniques or reflecting honestly on past habits.",
-      "Are unable or unwilling to set aside 120 focused minutes to engage with the session.",
+      "Are seeking a rushed, overnight shortcut that promises mastery without brush mileage.",
+      "Only want downloadable files and have no intention of joining the live community.",
+      "Believe art must be stressful, high-pressure, or strictly commercial.",
+      "Are closed to reflecting on your creative habits with gentleness and curiosity.",
+      "Cannot commit to 120 focused minutes of quiet, mindful presence.",
     ],
     closingNote:
-      "There is zero shame in realizing the timing may not fit your schedule. This experience is intentionally curated for artists ready to invest focused attention and elevate their craft.",
+      "There is no pressure if the timing does not feel right today. We honor where you are on your creative journey and welcome you whenever you are ready.",
   },
   included: {
     overline: "WHAT'S INCLUDED",
     headline: "Everything Included in Your Free Registration",
     items: [
       {
-        title: "Live 120-Minute Masterclass: The Luminosity Blueprint™ for Expressive Realism",
-        status: "Free",
+        title: "Live 120-Minute Masterclass: Watercolor for a Calmer, Brighter You",
+        status: "Complimentary",
       },
       {
-        title: "Interactive Live Q&A Session with Renuka Rao",
+        title: "Live Interactive Q&A with Renuka Aggarwal",
         status: "Included Free",
       },
       {
-        title: "E-Book: The Studio Field Guide to Common Painting Traps",
+        title: "E-Book: The Mindful Watercolor Field Guide",
         status: "Included Free",
       },
       {
-        title: "Reference Compendium: Pigment Characteristics & Color Harmony",
+        title: "Color Chart: Botanical Pigment & Harmony Palette",
         status: "Included Free",
       },
       {
-        title: "High-Definition Master Demonstration Video Access",
+        title: "Master Demonstration Replay Access (48 Hours)",
         status: "Included Free",
       },
       {
-        title: "Official calendar reminders, workbook downloads, and email onboarding",
+        title: "Calendar invitation, preparation checklist, and email reminders",
         status: "Included",
       },
     ],
-    feeLabel: "Registration fee during the current campaign",
+    feeLabel: "Registration fee for this live broadcast",
     feeValue: "Free",
-    ctaText: "Reserve My Free Seat",
-    guaranteeNote: "One focused session. One proven framework. A lifetime of confident painting decisions.",
+    ctaText: "RESERVE MY FREE SEAT →",
+    guaranteeNote: "One gentle session. One clear framework. A lifetime of calm creative joy.",
   },
   faqs: [
     {
-      question: "Is this masterclass suitable for complete beginners?",
+      question: "Is this masterclass truly suitable for complete beginners?",
       answer:
-        "Yes, absolutely. Renuka breaks down painting principles from their fundamental visual roots (light, shapes, and value hierarchy) without using confusing academic jargon. Whether you have never picked up a brush or are restarting after years, you will find the framework logical, approachable, and immediately actionable.",
+        "Yes, with all my heart. My teaching is designed specifically for adults who have never held a watercolor brush or haven't painted since childhood. We strip away intimidation and focus on simple, reassuring steps that anyone can follow with delight.",
     },
     {
-      question: "I have watched hundreds of tutorials but still struggle when painting alone. How is this different?",
+      question: "I have tried watercolor before and made a muddy mess. Can I really learn?",
       answer:
-        "Most online tutorials only show what an artist does stroke-by-stroke, which encourages mechanical copying. This masterclass teaches you why decisions are made: how to analyze reference photos, identify light vectors, and organize values. You will leave with a decision-making system that works on any subject, without needing anyone to guide your hand.",
+        "Muddy watercolor is never a lack of talent—it is simply a misunderstanding of water-to-pigment balance and timing. In this masterclass, I will show you the exact moment to let paper dry and how to keep colors radiant, fresh, and singing.",
     },
     {
-      question: "What medium will be used during the demonstration?",
+      question: "What supplies do I need to attend the live masterclass?",
       answer:
-        "Renuka demonstrates primarily in expressive watercolor and fluid media, but the foundational core—light vectors, tonal values, chromatic temperature, and edge control—applies equally to oils, acrylics, gouache, and digital painting.",
+        "You do not need any supplies to attend and enjoy the live session! I recommend bringing a warm cup of tea and a notebook to absorb the ideas without pressure. You can apply the techniques later with whatever materials you have at home.",
     },
     {
-      question: "How long is the live session?",
+      question: "How long is the session and when will it take place?",
       answer:
-        "The masterclass is a focused 120-minute session. We begin promptly with 80 minutes of structured teaching and live painting demonstration, followed by 40 minutes of live interactive Q&A where Renuka answers participant questions.",
+        "The masterclass runs for 120 minutes on Saturday, 28 October 2026 at 6:30 PM IST (9:00 AM EDT). It includes 80 minutes of structured demonstration followed by 40 minutes of live, personal Q&A.",
     },
     {
-      question: "When and where does the masterclass take place?",
+      question: "Will there be a replay if I cannot make it live?",
       answer:
-        "It takes place live on Saturday, 28 October 2026 at 6:30 PM IST (9:00 AM EDT). It is hosted online via high-definition private live stream. You can attend from any computer, tablet, or mobile phone with a stable internet connection.",
+        "A limited 48-hour replay link will be shared with registered attendees who join the live broadcast. The gifts and bonus studio guides are exclusive to live participants.",
     },
     {
-      question: "What language will be used during the session?",
+      question: "What language will the class be conducted in?",
       answer:
-        "The masterclass is conducted in clear, accessible English with clear visual annotations, step-by-step close-up camera angles, and on-screen diagrams.",
+        "The masterclass is taught in clear, warm, and gentle English, with close-up overhead camera angles so every brushstroke and paint mixture is clearly visible.",
     },
     {
-      question: "Do I need special art materials to attend?",
+      question: "Is registration genuinely free?",
       answer:
-        "No materials are required to attend the live session! We strongly recommend attending with a notebook and pen so you can absorb the concepts without distraction. You can apply the techniques with your own supplies at your own pace afterwards.",
+        "Yes, 100% complimentary. There is no credit card required. This is my gift to introduce you to our mindful art community at Art & Soul Studio.",
     },
     {
-      question: "Will I receive a recording if I cannot attend live?",
+      question: "Will you try to sell something aggressively during the class?",
       answer:
-        "The masterclass is designed primarily as a live interactive experience. A limited 48-hour replay link will be shared exclusively with registered participants who join the live broadcast. Bonuses are reserved for live attendees.",
-    },
-    {
-      question: "How do I receive the joining link and reminders?",
-      answer:
-        "Immediately upon reserving your seat, you will receive a confirmation email with calendar invitation links. You will also receive reminder notifications 24 hours, 2 hours, and 15 minutes before the broadcast begins.",
-    },
-    {
-      question: "Is registration genuinely 100% free?",
-      answer:
-        "Yes, 100% free. There is no credit card required and no hidden subscription fees. Our live masterclasses are our way of introducing serious artists to the Renuka Atelier educational philosophy.",
-    },
-    {
-      question: "Will you try to sell a long-term program during the session?",
-      answer:
-        "At the conclusion of the 120-minute masterclass, for those who wish to continue their mentorship and join our intensive year-long atelier curriculum, Renuka will briefly share details on how to apply. There is zero high-pressure selling, and the free masterclass itself is a complete, self-contained educational experience with immediate value.",
-    },
-    {
-      question: "Can teenagers or students under 18 join?",
-      answer:
-        "Yes, enthusiastic young artists and students over the age of 13 are very welcome to attend and participate with parent or guardian awareness.",
+        "Not at all. Aggressive sales have no place in a peaceful art studio. At the very end of the masterclass, for those who want to continue their journey with me, I will gently share details about my comprehensive courses. The masterclass itself is a complete, enriching experience.",
     },
   ],
   finalCta: {
-    headline: "Your Next Painting Does Not Need More Guesswork",
+    overline: "START TODAY",
+    headline: "Ready to Begin Your Creative Journey?",
     description:
-      "Give yourself 120 focused minutes to understand how light, color temperature, and emotion work in harmony. Learn a repeatable process for seeing clearly, simplifying confidently, and painting with true intention.",
-    ctaText: "Reserve My Free Seat",
-    dateInfo: "Live on Saturday, 28 October 2026 at 6:30 PM IST (9:00 AM EDT)",
-    subNote: "Suitable for beginners and advancing artists • 100% Free Registration • Instant Email Confirmation",
+      "Join a supportive community and experience the transformative, calming power of art. Give yourself 120 mindful minutes to pause, breathe, and paint.",
+    handwrittenPhrase: "Create. Pause. Breathe. Heal.",
+    ctaText: "EXPLORE COURSES →",
+    dateInfo: "Live on Saturday, 28 October 2026 at 6:30 PM IST",
+    subNote: "100% Free Registration • Instant Email Confirmation • Suitable for all levels",
   },
   footer: {
     brandDescription:
-      "Renuka Atelier provides premier visual art education, live demonstrations, and creative mentorship. Master light, value, and emotional depth through structured, repeatable artistic frameworks.",
+      "Renuka Aggarwal | Art & Soul Studio. Mindful watercolor courses, creative well-being, and artistic mentorship designed to nurture a calmer, brighter you.",
     links: [
+      { label: "Home", href: "#" },
+      { label: "About", href: "#about" },
+      { label: "Courses", href: "#courses" },
+      { label: "Testimonials", href: "#testimonials" },
+      { label: "Blog", href: "#blog" },
+      { label: "Contact", href: "#contact" },
       { label: "Privacy Policy", href: "#privacy" },
-      { label: "Terms of Service", href: "#terms" },
-      { label: "Atelier Code of Ethics", href: "#ethics" },
-      { label: "Contact: admissions@renukaatelier.com", href: "mailto:admissions@renukaatelier.com" },
     ],
-    contactEmail: "admissions@renukaatelier.com",
+    contactEmail: "hello@renukaartstudio.com",
     copyrightYear: 2026,
     disclaimer:
-      "Renuka Atelier provides educational fine art instruction. Demonstrations and examples are illustrative of core techniques. Individual artistic progress naturally varies according to prior foundation and dedicated personal practice.",
+      "Art & Soul Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
+    handwrittenSignature: "Keep Creating ♡",
   },
 };

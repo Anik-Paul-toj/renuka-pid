@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Check, ArrowRight, Shield } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { masterclassData } from "@/data/content";
 
 interface IncludedSectionProps {
@@ -12,33 +12,33 @@ export const IncludedSection: React.FC<IncludedSectionProps> = ({ onOpenModal })
   const { included } = masterclassData;
 
   return (
-    <section className="py-16 sm:py-24 border-t border-border/40 bg-background">
-      <div className="mx-auto max-w-6xl px-5">
+    <section className="py-16 sm:py-24 bg-[#EEE9DE] border-b border-[#464137]/10">
+      <div className="mx-auto max-w-6xl px-6">
         {/* Header */}
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-subheading">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#68705A]">
             {included.overline}
           </p>
-          <h2 className="mt-2.5 font-display text-3xl font-semibold leading-tight tracking-tight text-primary sm:text-[2.6rem]">
+          <h2 className="mt-3 font-serif text-3xl font-medium tracking-tight text-[#292923] sm:text-4xl lg:text-[2.6rem]">
             {included.headline}
           </h2>
-          <div className="mx-auto mt-5 h-0.5 w-16 bg-gradient-to-r from-icon/70 via-icon/30 to-transparent" />
+          <div className="mx-auto mt-4 h-0.5 w-14 bg-[#68705A]/40" />
         </div>
 
         {/* Value Box Container */}
         <div className="mx-auto mt-12 grid max-w-4xl gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
           {/* Left Inclusions List */}
-          <div className="overflow-hidden rounded-2xl ring-1 ring-border/60 bg-card/60 divide-y divide-border/50">
+          <div className="paper-card overflow-hidden divide-y divide-[#464137]/10 bg-[#FAF8F2]">
             {included.items.map((item, idx) => (
               <div
                 key={idx}
-                className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-5 sm:py-4 transition-colors hover:bg-surface/50"
+                className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-5 sm:py-4 transition-colors hover:bg-[#F7F4EC]"
               >
-                <span className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed text-foreground font-medium">
-                  <Check className="mt-0.5 size-4 shrink-0 text-icon stroke-[2.5]" />
+                <span className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed text-[#292923] font-medium">
+                  <Check className="mt-0.5 size-4 shrink-0 text-[#68705A] stroke-[2.2]" />
                   <span>{item.title}</span>
                 </span>
-                <span className="text-xs font-bold text-icon whitespace-nowrap bg-icon/10 px-2.5 py-0.5 rounded-full">
+                <span className="text-[0.7rem] font-semibold tracking-wider uppercase text-[#68705A] bg-[#C8D1C7]/30 px-2.5 py-0.5 rounded-md">
                   {item.status}
                 </span>
               </div>
@@ -46,12 +46,12 @@ export const IncludedSection: React.FC<IncludedSectionProps> = ({ onOpenModal })
           </div>
 
           {/* Right Free Registration Fee Card */}
-          <div className="rounded-[1.75rem] bg-surface/80 p-6 sm:p-8 text-center ring-1 ring-icon/30 shadow-[0_20px_48px_-20px_rgba(40,32,26,0.25)] flex flex-col justify-between">
+          <div className="paper-card p-6 sm:p-8 text-center bg-[#FAF8F2] border-[#68705A]/25 flex flex-col justify-between">
             <div>
-              <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+              <p className="text-xs sm:text-sm font-medium text-[#6F6B61]">
                 {included.feeLabel}
               </p>
-              <p className="mt-3 font-display text-5xl font-bold tracking-tight text-primary">
+              <p className="mt-2 font-serif text-5xl font-bold tracking-tight text-[#292923]">
                 {included.feeValue}
               </p>
             </div>
@@ -59,13 +59,13 @@ export const IncludedSection: React.FC<IncludedSectionProps> = ({ onOpenModal })
             <div className="mt-6">
               <button
                 onClick={onOpenModal}
-                className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-cta px-6 py-4 text-sm font-semibold text-cta-foreground shadow-sm transition-all hover:bg-cta/90 hover:shadow-[0_14px_30px_-14px_rgba(198,83,40,0.9)] cursor-pointer"
+                className="btn-studio w-full py-4 text-xs tracking-wider"
               >
                 <span>{included.ctaText}</span>
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="size-4" />
               </button>
 
-              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+              <p className="mt-4 text-xs leading-relaxed text-[#6F6B61]">
                 {included.guaranteeNote}
               </p>
             </div>

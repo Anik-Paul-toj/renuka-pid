@@ -1,35 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fbf9f5;
-  --foreground: #1c1917;
-  --surface: #f4ede3;
-  --surface-alt: #eee5d7;
-  --card: #ffffff;
-  --primary: #1c1917;
-  --accent: #9a532d;
-  --icon: #8b4a24;
-  --subheading: #6e4729;
-  --cta: #c65328;
-  --cta-hover: #b0461f;
-  --cta-foreground: #ffffff;
-  --muted: #ece5d8;
-  --muted-foreground: #665f59;
-  --border: rgba(40, 32, 26, 0.12);
-  --border-subtle: rgba(40, 32, 26, 0.07);
-  --destructive: #dc2626;
+  /* Warm Muted Natural Palette */
+  --background: #F7F4EC;
+  --background-secondary: #EEE9DE;
+  --background-card: #FAF8F2;
+
+  --foreground: #292923;
+  --foreground-muted: #6F6B61;
+
+  --sage: #68705A;
+  --sage-hover: #565D4A;
+  --sage-light: #C8D1C7;
+  --sage-wash: rgba(200, 209, 199, 0.35);
+
+  --blush: #D9BDB2;
+  --blush-light: #F2E4DE;
+  --blush-wash: rgba(217, 189, 178, 0.25);
+
+  --paper: #E8DED0;
+  --gold: #B7A16B;
+
+  --border: rgba(70, 65, 55, 0.12);
+  --border-light: rgba(70, 65, 55, 0.07);
+
+  /* Legacy variable bridges for seamless integration */
+  --surface: var(--background-secondary);
+  --card: var(--background-card);
+  --primary: var(--foreground);
+  --accent: var(--sage);
+  --icon: var(--sage);
+  --subheading: var(--foreground-muted);
+  --cta: var(--sage);
+  --cta-foreground: #F7F4EC;
+  --muted: var(--paper);
+  --muted-foreground: var(--foreground-muted);
+  --destructive: #A24B4B;
 }
 
 @theme {
-  --font-sans: var(--font-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: var(--font-playfair), Georgia, serif;
-  --font-hero: var(--font-playfair), Georgia, serif;
-  --font-ui: var(--font-outfit), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-script: var(--font-script), "Brush Script MT", cursive;
 
   --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-card: var(--background-card);
+
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+
+  --color-sage: var(--sage);
+  --color-sage-hover: var(--sage-hover);
+  --color-sage-light: var(--sage-light);
+  --color-blush: var(--blush);
+  --color-blush-light: var(--blush-light);
+  --color-paper: var(--paper);
+  --color-gold: var(--gold);
+
   --color-surface: var(--surface);
-  --color-surface-alt: var(--surface-alt);
   --color-card: var(--card);
   --color-primary: var(--primary);
   --color-accent: var(--accent);
@@ -43,37 +72,10 @@
   --color-destructive: var(--destructive);
 }
 
-/* Custom organic icon badge */
-.organic-badge {
-  border-radius: 42% 58% 46% 54% / 54% 44% 56% 46%;
-}
-
-/* Custom smooth accordion transition */
-@keyframes accordion-down {
-  from {
-    height: 0;
-    opacity: 0;
-  }
-  to {
-    height: var(--radix-accordion-content-height, auto);
-    opacity: 1;
-  }
-}
-
-@keyframes accordion-up {
-  from {
-    height: var(--radix-accordion-content-height, auto);
-    opacity: 1;
-  }
-  to {
-    height: 0;
-    opacity: 0;
-  }
-}
-
-/* Base resets and smooth behavior */
+/* Base resets & typography */
 html {
   scroll-behavior: smooth;
+  background-color: var(--background);
 }
 
 body {
@@ -81,27 +83,84 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbar */
+/* Elegant Art Studio Button */
+.btn-studio {
+  background-color: var(--sage);
+  color: #F7F4EC;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: 1px solid rgba(104, 112, 90, 0.4);
+}
+
+.btn-studio:hover {
+  background-color: var(--sage-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(104, 112, 90, 0.22);
+}
+
+.btn-studio:hover svg {
+  transform: translateX(3px);
+}
+
+.btn-studio svg {
+  transition: transform 0.25s ease;
+}
+
+/* Paper Card Treatment */
+.paper-card {
+  background-color: var(--background-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(50, 45, 35, 0.04);
+  transition: all 0.3s ease;
+}
+
+.paper-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(50, 45, 35, 0.07);
+  border-color: rgba(104, 112, 90, 0.25);
+}
+
+/* Watercolor Wash Accents */
+.watercolor-bg-sage {
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(200, 209, 199, 0.45) 0%, rgba(247, 244, 236, 0) 75%);
+}
+
+.watercolor-bg-blush {
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(217, 189, 178, 0.35) 0%, rgba(247, 244, 236, 0) 75%);
+}
+
+/* Custom subtle scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--surface);
+  background: var(--background-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(40, 32, 26, 0.25);
+  background: rgba(111, 107, 97, 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--cta);
+  background: var(--sage);
 }
 
-/* Respect reduced motion */
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

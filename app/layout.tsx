@@ -1,50 +1,53 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Playfair_Display, Outfit } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans, Caveat } from "next/font/google";
 import "./globals.css";
 
+const cormorant = Cormorant_Garamond({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
 const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const caveat = Caveat({
+  variable: "--font-script",
   subsets: ["latin"],
-  display: "swap",
-});
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://renukaatelier.com"),
-  title: "Free Live Masterclass — The Luminosity Blueprint™ | Renuka Atelier",
+  metadataBase: new URL("https://renukaartstudio.com"),
+  title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal — Art & Soul Studio",
   description:
-    "Join Renuka Rao for a transformative 120-minute live masterclass. Master light vectors, warm-cool color harmonies, and emotional depth in your paintings.",
+    "Join Renuka Aggarwal for a transformative 120-minute live watercolor masterclass. Step-by-step mindful watercolor courses designed for adults 25+ — no prior experience needed.",
   openGraph: {
-    title: "Free Live Masterclass — The Luminosity Blueprint™ | Renuka Atelier",
+    title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal",
     description:
-      "Join Renuka Rao for a transformative 120-minute live masterclass. Master light vectors, warm-cool color harmonies, and emotional depth in your paintings.",
+      "Join Renuka Aggarwal for a transformative 120-minute live watercolor masterclass. Step-by-step mindful watercolor courses designed for adults 25+.",
     type: "website",
-    url: "https://renukaatelier.com/masterclass",
+    url: "https://renukaartstudio.com",
     images: [
       {
         url: "/images/instructor_hero.jpg",
         width: 1200,
         height: 630,
-        alt: "The Luminosity Blueprint Masterclass with Renuka Rao",
+        alt: "Renuka Aggarwal — Art & Soul Studio Masterclass",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free Live Masterclass — The Luminosity Blueprint™ | Renuka Atelier",
+    title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal",
     description:
-      "Join Renuka Rao for a transformative 120-minute live masterclass. Master light vectors, warm-cool color harmonies, and emotional depth in your paintings.",
+      "Join Renuka Aggarwal for a transformative 120-minute live watercolor masterclass.",
     images: ["/images/instructor_hero.jpg"],
   },
 };
@@ -57,9 +60,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${jakarta.variable} ${playfair.variable} ${outfit.variable} scroll-smooth antialiased`}
+      className={`${cormorant.variable} ${jakarta.variable} ${caveat.variable} scroll-smooth antialiased`}
     >
-      <body className="min-h-screen bg-background text-foreground font-sans selection:bg-accent/20 selection:text-primary">
+      <body className="min-h-screen bg-background text-foreground font-sans selection:bg-sage-light/40 selection:text-foreground">
         {children}
       </body>
     </html>

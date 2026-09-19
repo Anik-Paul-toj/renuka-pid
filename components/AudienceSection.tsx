@@ -4,66 +4,68 @@ import React from "react";
 import {
   Compass,
   Sparkles,
+  Heart,
   Layers,
   GraduationCap,
-  Briefcase,
-  Palette,
-  Users,
+  Flower2,
 } from "lucide-react";
 import { masterclassData } from "@/data/content";
 
 const iconMap: Record<string, React.ReactNode> = {
-  Compass: <Compass className="size-5 text-icon" />,
-  Sparkles: <Sparkles className="size-5 text-icon" />,
-  Layers: <Layers className="size-5 text-icon" />,
-  GraduationCap: <GraduationCap className="size-5 text-icon" />,
-  Briefcase: <Briefcase className="size-5 text-icon" />,
-  Palette: <Palette className="size-5 text-icon" />,
+  Compass: <Compass className="size-5 text-[#68705A]" strokeWidth={1.5} />,
+  Sparkles: <Sparkles className="size-5 text-[#68705A]" strokeWidth={1.5} />,
+  Heart: <Heart className="size-5 text-[#68705A]" strokeWidth={1.5} />,
+  Layers: <Layers className="size-5 text-[#68705A]" strokeWidth={1.5} />,
+  GraduationCap: <GraduationCap className="size-5 text-[#68705A]" strokeWidth={1.5} />,
+  Flower2: <Flower2 className="size-5 text-[#68705A]" strokeWidth={1.5} />,
 };
 
 export const AudienceSection: React.FC = () => {
   const { targetAudience } = masterclassData;
 
   return (
-    <section className="py-16 sm:py-24 bg-surface/30 border-t border-border/40">
-      <div className="mx-auto max-w-6xl px-5">
-        <div>
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-subheading">
+    <section className="py-16 sm:py-24 bg-[#F7F4EC] border-b border-[#464137]/10">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="text-center max-w-3xl mx-auto">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#68705A]">
             {targetAudience.overline}
           </p>
-          <h2 className="mt-2.5 max-w-4xl font-display text-3xl font-semibold leading-tight tracking-tight text-primary sm:text-[2.6rem]">
+          <h2 className="mt-3 font-serif text-3xl font-medium tracking-tight text-[#292923] sm:text-4xl lg:text-[2.6rem]">
             <span>{targetAudience.headline}</span>
-            <span className="text-icon">{targetAudience.headlineHighlight}</span>
+            <span className="italic">{targetAudience.headlineHighlight}</span>
           </h2>
-          <div className="mt-5 h-0.5 w-16 bg-gradient-to-r from-icon/70 to-transparent" />
+          <div className="mt-4 h-0.5 w-14 bg-[#68705A]/40 mx-auto" />
         </div>
 
         {/* 6 Audience Cards */}
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {targetAudience.cards.map((card) => (
             <div
               key={card.id}
-              className="flex gap-4 rounded-2xl bg-surface/70 p-6 ring-1 ring-border/50 transition-all duration-300 hover:-translate-y-1 hover:bg-card hover:ring-icon/40 hover:shadow-[0_18px_40px_-24px_rgba(40,32,26,0.2)]"
+              className="paper-card p-6 flex flex-col items-start"
             >
-              <span className="grid size-11 shrink-0 place-items-center rounded-[42%_58%_46%_54%/54%_44%_56%_46%] bg-icon/12">
-                {iconMap[card.icon] || <Users className="size-5 text-icon" />}
+              <span className="grid size-11 place-items-center rounded-full bg-[#C8D1C7]/35 mb-4">
+                {iconMap[card.icon] || <Sparkles className="size-5 text-[#68705A]" strokeWidth={1.5} />}
               </span>
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-[0.08em] text-icon">
-                  {card.title}
-                </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  {card.description}
-                </p>
-              </div>
+              <h3 className="font-serif text-lg font-bold text-[#292923]">
+                {card.title}
+              </h3>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
+                {card.description}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Closing Highlight Quote */}
-        <p className="mx-auto mt-12 max-w-3xl text-center font-display text-lg sm:text-xl font-medium leading-relaxed text-subheading">
-          “{targetAudience.footerQuote}”
-        </p>
+        {/* Editorial Handwritten Quote Accent */}
+        <div className="mt-16 text-center">
+          <p className="font-script text-3xl sm:text-4xl text-[#68705A]">
+            "{targetAudience.footerQuote}"
+          </p>
+          <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#6F6B61]">
+            — Art & Soul Studio Philosophy
+          </p>
+        </div>
       </div>
     </section>
   );

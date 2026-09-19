@@ -1,13 +1,13 @@
 "use client";
 
 import React from "react";
-import { Sun, Palette, Compass, Minus, ArrowRight } from "lucide-react";
+import { Sun, Palette, Heart, Minus, ArrowRight } from "lucide-react";
 import { masterclassData } from "@/data/content";
 
 const iconMap: Record<string, React.ReactNode> = {
-  Sun: <Sun className="size-5 text-icon" />,
-  Palette: <Palette className="size-5 text-icon" />,
-  Compass: <Compass className="size-5 text-icon" />,
+  Sun: <Sun className="size-5 text-[#68705A]" strokeWidth={1.5} />,
+  Palette: <Palette className="size-5 text-[#68705A]" strokeWidth={1.5} />,
+  Heart: <Heart className="size-5 text-[#68705A]" strokeWidth={1.5} />,
 };
 
 interface CoreConceptsProps {
@@ -18,18 +18,18 @@ export const CoreConcepts: React.FC<CoreConceptsProps> = ({ onOpenModal }) => {
   const { coreSecrets } = masterclassData;
 
   return (
-    <section className="py-16 sm:py-24 bg-surface/30 border-t border-border/40">
-      <div className="mx-auto max-w-6xl px-5">
+    <section className="py-16 sm:py-24 bg-[#F7F4EC] border-b border-[#464137]/10">
+      <div className="mx-auto max-w-6xl px-6">
         {/* Header */}
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-subheading">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#68705A]">
             {coreSecrets.overline}
           </p>
-          <h2 className="mt-2.5 font-display text-3xl font-semibold leading-tight tracking-tight text-primary sm:text-[2.6rem]">
+          <h2 className="mt-3 font-serif text-3xl font-medium tracking-tight text-[#292923] sm:text-4xl lg:text-[2.6rem]">
             <span>{coreSecrets.headline}</span>
-            <span className="text-icon">{coreSecrets.headlineHighlight}</span>
+            <span className="italic">{coreSecrets.headlineHighlight}</span>
           </h2>
-          <div className="mx-auto mt-5 h-0.5 w-16 bg-gradient-to-r from-icon/70 via-icon/30 to-transparent" />
+          <div className="mx-auto mt-4 h-0.5 w-14 bg-[#68705A]/40" />
         </div>
 
         {/* 3 Secret Cards */}
@@ -37,35 +37,38 @@ export const CoreConcepts: React.FC<CoreConceptsProps> = ({ onOpenModal }) => {
           {coreSecrets.secrets.map((secret, idx) => (
             <div
               key={idx}
-              className="flex flex-col justify-between rounded-[1.75rem] bg-card/85 p-6 sm:p-7 ring-1 ring-border/50 shadow-[0_18px_40px_-24px_rgba(40,32,26,0.18)] transition-all duration-300 hover:-translate-y-1 hover:bg-card hover:ring-icon/40"
+              className="paper-card p-6 sm:p-7 flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-bold uppercase tracking-[0.2em] text-subheading">
+                  <span className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-[#68705A]">
                     {secret.number}
                   </span>
-                  <span className="grid size-10 place-items-center rounded-[42%_58%_46%_54%/54%_44%_56%_46%] bg-icon/12">
-                    {iconMap[secret.icon] || <Sun className="size-5 text-icon" />}
+                  <span className="grid size-9 place-items-center rounded-full bg-[#C8D1C7]/35">
+                    {iconMap[secret.icon] || <Sun className="size-4.5 text-[#68705A]" strokeWidth={1.5} />}
                   </span>
                 </div>
 
-                <h3 className="mt-4 font-display text-2xl font-bold leading-snug text-primary">
+                <h3 className="mt-4 font-serif text-2xl font-bold leading-snug text-[#292923]">
                   {secret.title}
                 </h3>
 
-                <p className="mt-1.5 text-sm font-semibold text-icon">
+                <p className="mt-1.5 text-xs sm:text-sm font-semibold text-[#68705A]">
                   {secret.subtitle}
                 </p>
 
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-3 text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
                   {secret.description}
                 </p>
 
                 {/* Bullets */}
-                <ul className="mt-5 space-y-2.5 border-t border-border/40 pt-4">
+                <ul className="mt-5 space-y-2.5 border-t border-[#464137]/10 pt-4">
                   {secret.bullets.map((bullet, bIdx) => (
-                    <li key={bIdx} className="flex items-start gap-2 text-sm leading-relaxed text-foreground">
-                      <Minus className="mt-1 size-3.5 shrink-0 text-icon" />
+                    <li
+                      key={bIdx}
+                      className="flex items-start gap-2 text-xs sm:text-sm leading-relaxed text-[#292923]"
+                    >
+                      <Minus className="mt-1 size-3.5 shrink-0 text-[#68705A]" />
                       <span>{bullet}</span>
                     </li>
                   ))}
@@ -77,16 +80,16 @@ export const CoreConcepts: React.FC<CoreConceptsProps> = ({ onOpenModal }) => {
 
         {/* Narrative & CTA */}
         <div className="mt-12 text-center">
-          <p className="mx-auto max-w-3xl text-sm sm:text-base leading-relaxed text-muted-foreground">
+          <p className="mx-auto max-w-3xl text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
             {coreSecrets.bottomNote}
           </p>
 
           <button
             onClick={onOpenModal}
-            className="group mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-cta px-8 py-3.5 text-sm font-semibold text-cta-foreground shadow-sm transition-all hover:bg-cta/90 hover:shadow-[0_14px_30px_-14px_rgba(198,83,40,0.85)] cursor-pointer"
+            className="btn-studio mt-6 px-8 py-3.5"
           >
             <span>{coreSecrets.ctaText}</span>
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="size-4" />
           </button>
         </div>
       </div>
