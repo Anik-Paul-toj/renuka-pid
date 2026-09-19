@@ -14,7 +14,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
   const [isExpired, setIsExpired] = useState(false);
 
   return (
-    <section className="relative overflow-hidden bg-[#F7F4EC] pt-2 pb-4 sm:pt-3 sm:pb-6 lg:pt-3 lg:pb-5 border-b border-[#464137]/10">
+    <section className="relative overflow-hidden bg-[#F7F4EC] pt-4 pb-7 sm:pt-6 sm:pb-9 lg:pt-7 lg:pb-10 border-b border-[#464137]/10">
       {/* Delicate watercolor washes in the background */}
       <div
         aria-hidden="true"
@@ -25,8 +25,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
         className="pointer-events-none absolute top-1/2 left-[-10%] size-[32rem] rounded-full bg-[#D9BDB2]/20 blur-3xl"
       />
 
-      <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
-        <div className="grid gap-6 lg:gap-12 lg:grid-cols-[1.16fr_0.84fr] lg:items-center">
+      <div className="relative mx-auto max-w-7xl xl:max-w-[1400px] px-6 sm:px-8 lg:px-12">
+        <div className="grid gap-8 lg:gap-14 lg:grid-cols-[1.18fr_0.82fr] lg:items-center">
           {/* Left Column: Workshop Poster Content */}
           <div className="flex flex-col items-start w-full">
             {/* 1. Eyebrow */}
@@ -67,7 +67,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
             </div>
 
             {/* 5. Workshop Details Block */}
-            <div className="mt-3.5 w-full max-w-xl rounded-lg bg-[#FAF8F2] p-3 sm:p-4 border border-[#464137]/15 shadow-sm">
+            <div className="mt-3.5 w-full max-w-2xl rounded-lg bg-[#FAF8F2] p-3.5 sm:p-4 border border-[#464137]/15 shadow-sm">
               <div className="grid grid-cols-2 gap-y-2.5 gap-x-6 text-xs sm:text-sm text-[#292923]">
                 {/* Date */}
                 <div className="flex items-start gap-2">
@@ -161,7 +161,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
           </div>
 
           {/* Artist Studio Artwork & Photograph Container: Appears on right on desktop, below content on mobile */}
-          <div className="relative mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[370px] mt-6 lg:mt-0">
+          <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[430px] xl:max-w-[460px] mt-6 lg:mt-0">
             {/* Subtle organic watercolor wash backdrop */}
             <div
               aria-hidden="true"
@@ -176,7 +176,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
                   fill
                   priority
                   className="object-cover object-center transition-transform duration-700 hover:scale-105"
-                  sizes="(max-width: 1024px) 340px, 370px"
+                  sizes="(max-width: 1024px) 380px, 460px"
                 />
               </div>
 

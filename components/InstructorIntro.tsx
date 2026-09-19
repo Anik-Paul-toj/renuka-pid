@@ -132,9 +132,9 @@ export const InstructorIntro: React.FC = () => {
     <section
       ref={sectionRef}
       id="about-artist"
-      className="relative py-20 sm:py-28 lg:py-32 bg-[#FAF8F2] border-b border-[#464137]/10 overflow-hidden"
+      className="relative pt-10 pb-16 sm:pt-12 sm:pb-20 lg:pt-14 lg:pb-24 bg-[#F7F4EC] border-b border-[#464137]/10 overflow-hidden"
     >
-      <div className="relative mx-auto max-w-5xl px-6">
+      <div className="relative mx-auto max-w-6xl px-6 sm:px-8">
         {/* Header Block: Eyebrow, Heading, Role & Divider */}
         <div>
           {/* Eyebrow */}
