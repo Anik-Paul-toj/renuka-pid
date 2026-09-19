@@ -1,128 +1,192 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import {
-  CalendarDays,
-  Clock,
-  MessageCircle,
-  Hourglass,
-  ArrowRight,
-} from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { ArrowRight, Calendar, Clock, Globe, Hourglass } from "lucide-react";
+import { workshopData, masterclassData } from "@/data/content";
+import { CountdownTimer } from "@/components/CountdownTimer";
 
 interface HeroProps {
   onOpenModal: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
-  const { hero } = masterclassData;
+  const [isExpired, setIsExpired] = useState(false);
 
   return (
-    <section className="relative overflow-hidden bg-[#F7F4EC] pt-2 pb-6 sm:pt-3 sm:pb-8 lg:pt-4 lg:pb-8 border-b border-[#464137]/10">
+    <section className="relative overflow-hidden bg-[#F7F4EC] pt-2 pb-4 sm:pt-3 sm:pb-6 lg:pt-3 lg:pb-5 border-b border-[#464137]/10">
       {/* Delicate watercolor washes in the background */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 right-[-5%] size-[34rem] rounded-full bg-[#C8D1C7]/30 blur-3xl"
+        className="pointer-events-none absolute -top-24 right-[-5%] size-[38rem] rounded-full bg-[#C8D1C7]/30 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-[-10%] size-[28rem] rounded-full bg-[#D9BDB2]/20 blur-3xl"
+        className="pointer-events-none absolute top-1/2 left-[-10%] size-[32rem] rounded-full bg-[#D9BDB2]/20 blur-3xl"
       />
 
-      <div className="relative mx-auto max-w-6xl px-6">
-        <div className="grid gap-8 lg:gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-          {/* Left Column: Content */}
-          <div className="flex flex-col items-start">
-            {/* Eyebrow Category Label */}
-            <span className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-[#68705A]">
-              {hero.pillLabel}
+      <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+        <div className="grid gap-6 lg:gap-12 lg:grid-cols-[1.16fr_0.84fr] lg:items-center">
+          {/* Left Column: Workshop Poster Content */}
+          <div className="flex flex-col items-start w-full">
+            {/* 1. Eyebrow */}
+            <span className="text-[0.7rem] sm:text-xs font-semibold uppercase tracking-[0.25em] text-[#68705A]">
+              {workshopData.type}
             </span>
 
-            {/* Editorial Serif Headline */}
-            <h1 className="mt-2.5 font-serif text-[2.35rem] sm:text-4xl lg:text-[3.25rem] font-medium leading-[1.08] tracking-tight text-[#292923]">
-              <span>Learn Art.</span>
+            {/* 2. Main Hero Heading */}
+            <h1 className="mt-1 font-serif text-[2.35rem] sm:text-4xl lg:text-[2.85rem] xl:text-[3.15rem] font-medium leading-[1.06] tracking-tight text-[#292923]">
+              <span>The </span>
+              <span className="font-bold tracking-tight uppercase">WATERCOLOUR</span>
               <br />
-              <span className="italic font-normal">Rediscover Yourself.</span>
-              <br />
-              <span>Create a Kinder You.</span>
+              <span className="italic font-normal">Roadmap:</span>
             </h1>
 
-            {/* Subheading */}
-            <p className="mt-3 max-w-lg text-sm sm:text-base leading-relaxed text-[#6F6B61]">
-              {hero.subheadline}
-            </p>
-
-            {/* Primary Button & Handwritten Quote */}
-            <div className="mt-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <button
-                onClick={onOpenModal}
-                className="btn-studio px-7 py-3 text-xs sm:text-sm"
-              >
-                <span>{hero.ctaText}</span>
-                <ArrowRight className="size-4" />
-              </button>
-
-              {/* Handwritten artistic quote */}
-              <span className="font-script text-2xl text-[#68705A] select-none">
-                {hero.handwrittenPhrase}
+            {/* 3. Transformation Statement */}
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs sm:text-sm lg:text-base">
+              <span className="font-serif italic text-[#6F6B61]">
+                {workshopData.transformationBefore}
+              </span>
+              <span className="text-[#68705A] font-sans font-medium px-1 text-xs sm:text-sm">
+                →
+              </span>
+              <span className="font-serif font-bold text-[#292923]">
+                {workshopData.transformationAfter}
               </span>
             </div>
 
-            {/* Masterclass Schedule & Details */}
-            <div className="mt-6 w-full border-t border-[#464137]/10 pt-4">
-              <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-medium text-[#6F6B61]">
-                <li className="flex items-center gap-1.5">
-                  <CalendarDays className="size-3.5 text-[#68705A] shrink-0" />
-                  <span>{hero.date}</span>
-                </li>
-                <li className="flex items-center gap-1.5">
-                  <Clock className="size-3.5 text-[#68705A] shrink-0" />
-                  <span>{hero.time}</span>
-                </li>
-                <li className="flex items-center gap-1.5">
-                  <Hourglass className="size-3.5 text-[#68705A] shrink-0" />
-                  <span>{hero.duration}</span>
-                </li>
-                <li className="flex items-center gap-1.5">
-                  <MessageCircle className="size-3.5 text-[#68705A] shrink-0" />
-                  <span>{hero.language}</span>
-                </li>
-              </ul>
+            {/* 4. Masterclass Description */}
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-[0.68rem] sm:text-xs font-semibold uppercase tracking-[0.16em] text-[#68705A]">
+                {workshopData.format}
+              </span>
+              <span className="text-[#6F6B61]/60">·</span>
+              <span className="text-[0.68rem] sm:text-xs font-medium uppercase tracking-[0.16em] text-[#6F6B61]">
+                {workshopData.focus}
+              </span>
+            </div>
 
-              <p className="mt-2 text-xs text-[#68705A] font-medium">
-                {hero.guaranteeText}
-              </p>
+            {/* 5. Workshop Details Block */}
+            <div className="mt-3.5 w-full max-w-xl rounded-lg bg-[#FAF8F2] p-3 sm:p-4 border border-[#464137]/15 shadow-sm">
+              <div className="grid grid-cols-2 gap-y-2.5 gap-x-6 text-xs sm:text-sm text-[#292923]">
+                {/* Date */}
+                <div className="flex items-start gap-2">
+                  <Calendar className="size-3.5 text-[#68705A] shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <div>
+                    <span className="text-[0.65rem] uppercase tracking-wider text-[#6F6B61] block leading-none mb-0.5">
+                      Date
+                    </span>
+                    <span className="font-medium text-xs sm:text-sm text-[#292923]">{workshopData.date}</span>
+                  </div>
+                </div>
+
+                {/* Time */}
+                <div className="flex items-start gap-2">
+                  <Clock className="size-3.5 text-[#68705A] shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <div>
+                    <span className="text-[0.65rem] uppercase tracking-wider text-[#6F6B61] block leading-none mb-0.5">
+                      Time
+                    </span>
+                    <span className="font-medium text-xs sm:text-sm text-[#292923]">{workshopData.time}</span>
+                  </div>
+                </div>
+
+                {/* Language */}
+                <div className="flex items-start gap-2">
+                  <Globe className="size-3.5 text-[#68705A] shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <div>
+                    <span className="text-[0.65rem] uppercase tracking-wider text-[#6F6B61] block leading-none mb-0.5">
+                      Language
+                    </span>
+                    <span className="font-semibold text-[#68705A] tracking-wider text-xs sm:text-sm">
+                      {workshopData.language}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Duration */}
+                <div className="flex items-start gap-2">
+                  <Hourglass className="size-3.5 text-[#68705A] shrink-0 mt-0.5" strokeWidth={1.75} />
+                  <div>
+                    <span className="text-[0.65rem] uppercase tracking-wider text-[#6F6B61] block leading-none mb-0.5">
+                      Duration
+                    </span>
+                    <span className="font-medium text-xs sm:text-sm text-[#292923]">{workshopData.duration}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fee Row */}
+              <div className="mt-2.5 pt-2 border-t border-[#464137]/10 flex items-center justify-between">
+                <span className="text-xs uppercase tracking-wider font-semibold text-[#6F6B61]">
+                  Workshop Fee:
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="line-through text-[#6F6B61]/70 text-xs sm:text-sm">
+                    ₹{workshopData.originalPrice}
+                  </span>
+                  <span className="font-serif text-lg sm:text-2xl font-bold text-[#292923]">
+                    ₹{workshopData.offerPrice}
+                  </span>
+                  <span className="text-[0.62rem] uppercase tracking-wider font-semibold text-[#68705A] bg-[#C8D1C7]/30 px-2 py-0.5 rounded-sm">
+                    Special Offer
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 6. Primary Register CTA + Handwritten Note */}
+            <div className="mt-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3.5 w-full sm:w-auto">
+              <button
+                onClick={onOpenModal}
+                disabled={isExpired}
+                className="btn-studio w-full sm:w-auto px-7 py-3 text-xs sm:text-sm tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>{isExpired ? "REGISTRATION CLOSED" : `${workshopData.cta} →`}</span>
+              </button>
+
+              {/* Handwritten artistic annotation */}
+              <span className="font-script text-xl sm:text-2xl text-[#68705A] select-none">
+                {workshopData.handwrittenPhrase}
+              </span>
+            </div>
+
+            {/* 7. Live Registration Countdown */}
+            <div className="mt-3 w-full pt-2.5 border-t border-[#464137]/10">
+              <CountdownTimer
+                deadline={workshopData.registrationDeadline}
+                onExpireChange={setIsExpired}
+              />
             </div>
           </div>
 
-          {/* Right Column: Warm Artist Studio Photograph */}
-          <div className="relative mx-auto w-full max-w-[310px] sm:max-w-[340px] lg:max-w-[365px]">
+          {/* Artist Studio Artwork & Photograph Container: Appears on right on desktop, below content on mobile */}
+          <div className="relative mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[370px] mt-6 lg:mt-0">
             {/* Subtle organic watercolor wash backdrop */}
             <div
               aria-hidden="true"
-              className="absolute -inset-2 rounded-[14px] bg-gradient-to-tr from-[#D9BDB2]/35 via-[#C8D1C7]/40 to-transparent blur-md"
+              className="absolute -inset-3 rounded-[16px] bg-gradient-to-tr from-[#D9BDB2]/35 via-[#C8D1C7]/40 to-transparent blur-md"
             />
 
-            <div className="paper-card relative overflow-hidden p-2 shadow-[0_10px_28px_rgba(50,45,35,0.06)]">
-              <div className="relative aspect-[4/4.85] w-full overflow-hidden rounded-md">
+            <div className="paper-card relative overflow-hidden p-2 shadow-[0_12px_32px_rgba(50,45,35,0.07)]">
+              <div className="relative aspect-[4/4.5] w-full overflow-hidden rounded-md">
                 <Image
-                  src={hero.instructorImage}
-                  alt={`${hero.instructorName} in her sunny art studio`}
+                  src={masterclassData.hero.instructorImage}
+                  alt={`${masterclassData.hero.instructorName} in her sunny art studio`}
                   fill
                   priority
                   className="object-cover object-center transition-transform duration-700 hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 365px"
+                  sizes="(max-width: 1024px) 340px, 370px"
                 />
               </div>
 
               {/* Studio Descriptor Tag */}
-              <div className="mt-1.5 px-2 py-1 text-center">
+              <div className="mt-1.5 px-2 py-0.5 text-center">
                 <p className="font-serif text-sm font-semibold text-[#292923]">
-                  {hero.instructorName}
+                  {masterclassData.hero.instructorName}
                 </p>
-                <p className="text-[0.66rem] tracking-wider uppercase text-[#6F6B61]">
-                  {hero.instructorTitle}
+                <p className="text-[0.64rem] tracking-wider uppercase text-[#6F6B61]">
+                  {masterclassData.hero.instructorTitle}
                 </p>
               </div>
             </div>

@@ -174,6 +174,44 @@ export interface MasterclassData {
   };
 }
 
+export interface WorkshopData {
+  type: string;
+  title: string;
+  transformation: string;
+  transformationBefore: string;
+  transformationAfter: string;
+  format: string;
+  focus: string;
+  date: string;
+  time: string;
+  language: string;
+  duration: string;
+  originalPrice: number;
+  offerPrice: number;
+  registrationDeadline: string;
+  cta: string;
+  handwrittenPhrase: string;
+}
+
+export const workshopData: WorkshopData = {
+  type: "LIVE WORKSHOP",
+  title: "The WATERCOLOUR Roadmap:",
+  transformation: "“I Can’t Paint” → “I Painted This Myself.”",
+  transformationBefore: "“I Can’t Paint”",
+  transformationAfter: "“I Painted This Myself.”",
+  format: "One-Day Masterclass",
+  focus: "To Fix Basics",
+  date: "Saturday, 28 October 2026",
+  time: "6:30 PM – 8:30 PM IST",
+  language: "HINGLISH",
+  duration: "120 Minutes",
+  originalPrice: 599,
+  offerPrice: 199,
+  registrationDeadline: "2026-10-28T18:30:00+05:30",
+  cta: "REGISTER NOW",
+  handwrittenPhrase: "Art heals. Always.",
+};
+
 export const masterclassData: MasterclassData = {
   brand: {
     name: "Renuka Aggarwal",
@@ -198,7 +236,7 @@ export const masterclassData: MasterclassData = {
     targetAudienceNote: "Designed warmly for beginners, working adults, and creative souls at every level.",
     instructorName: "Renuka Aggarwal",
     instructorTitle: "Art Educator | Founder, Art & Soul Studio",
-    instructorImage: "/images/instructor_hero.jpg",
+    instructorImage: "/images/instructor_hero.jpeg",
   },
   stats: [
     {

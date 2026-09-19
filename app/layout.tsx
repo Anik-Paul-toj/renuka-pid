@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     url: "https://renukaartstudio.com",
     images: [
       {
-        url: "/images/instructor_hero.jpg",
+        url: "/images/instructor_hero.jpeg",
         width: 1200,
         height: 630,
         alt: "Renuka Aggarwal — Art & Soul Studio Masterclass",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal",
     description:
       "Join Renuka Aggarwal for a transformative 120-minute live watercolor masterclass.",
-    images: ["/images/instructor_hero.jpg"],
+    images: ["/images/instructor_hero.jpeg"],
   },
 };
 
@@ -60,9 +60,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${cormorant.variable} ${jakarta.variable} ${caveat.variable} scroll-smooth antialiased`}
     >
-      <body className="min-h-screen bg-background text-foreground font-sans selection:bg-sage-light/40 selection:text-foreground">
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-background text-foreground font-sans selection:bg-sage-light/40 selection:text-foreground"
+      >
         {children}
       </body>
     </html>
