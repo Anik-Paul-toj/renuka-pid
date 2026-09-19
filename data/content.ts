@@ -44,17 +44,15 @@ export interface MasterclassData {
     expertise: string[];
   };
   targetAudience: {
-    overline: string;
-    headline: string;
-    headlineHighlight: string;
-    cards: Array<{
+    heading: string;
+    items: Array<{
       id: string;
       title: string;
       description: string;
+      quote?: string;
       icon: string;
+      isConclusion?: boolean;
     }>;
-    footerQuote: string;
-    handwrittenNote?: string;
   };
   videoSection: {
     overline: string;
@@ -307,55 +305,53 @@ export const masterclassData: MasterclassData = {
     ],
   },
   targetAudience: {
-    overline: "WHO THIS IS FOR",
-    headline: "This Masterclass Is for You If You Want to Paint with ",
-    headlineHighlight: "Clarity, Not Confusion",
-    cards: [
+    heading: "This Workshop Is Ideal For:",
+    items: [
       {
         id: "beginners",
-        title: "Beginner Artists",
-        description:
-          "Who want a structured, gentle starting process without fear, judgment, or feeling lost.",
-        icon: "Compass",
+        title: "COMPLETE BEGINNERS",
+        description: "Who want to start watercolour but don’t know how.",
+        icon: "User",
       },
       {
-        id: "self-taught",
-        title: "Self-Taught Learners",
-        description:
-          "Who feel stuck despite watching endless tutorials and want a cohesive, mindful foundation.",
-        icon: "Sparkles",
+        id: "water-control",
+        title: "PEOPLE WHO STRUGGLE TO CONTROL WATER AND COLOURS",
+        description: "Who find it difficult to control water and colours while painting.",
+        icon: "Droplets",
       },
       {
-        id: "working-adults",
-        title: "Working Adults & Parents",
-        description:
-          "Returning to creativity and seeking a therapeutic, restorative practice that fits their busy life.",
-        icon: "Heart",
+        id: "flat-paintings",
+        title: "PEOPLE WHOSE PAINTINGS LOOK FLAT, MUDDY OR LIFELESS",
+        description: "Anyone whose paintings look flat, muddy or lifeless despite knowing the basics.",
+        icon: "Palette",
       },
       {
-        id: "advancing",
-        title: "Advancing Hobbyists",
-        description:
-          "Who want to capture luminous botanical light, soft transparency, and poetic depth.",
-        icon: "Layers",
+        id: "hobby-artists",
+        title: "HOBBY ARTISTS",
+        description: "Who want to understand how to create depth, light and realistic effects in watercolour.",
+        icon: "Brush",
       },
       {
-        id: "students",
-        title: "Art & Design Students",
-        description:
-          "Who want to build sound principles in color temperatures, edge control, and visual storytelling.",
+        id: "youtube-tutorials",
+        title: "PEOPLE WHO HAVE TRIED YOUTUBE TUTORIALS",
+        description: "Who still feel:",
+        quote: "“I can copy, but I can’t paint on my own.”",
+        icon: "BookOpen",
+      },
+      {
+        id: "learn-professionally",
+        title: "ANYONE CURIOUS TO LEARN PROFESSIONALLY",
+        description: "Anyone curious to experience a structured, professional way of learning watercolour before joining a complete course.",
         icon: "GraduationCap",
       },
       {
-        id: "creative-souls",
-        title: "Seekers of Well-Being",
-        description:
-          "Who believe that creative expression is a kinder, gentler way to be in the world.",
-        icon: "Flower2",
+        id: "conclusion",
+        title: "THIS WORKSHOP IS FOR YOU IF...",
+        description: "You love watercolour but struggle to get the results you imagine.",
+        icon: "Heart",
+        isConclusion: true,
       },
     ],
-    footerQuote: "Creativity is a kinder way to be in the world.",
-    handwrittenNote: "Small steps, creative changes.",
   },
   videoSection: {
     overline: "INSIDE THE SESSION",
