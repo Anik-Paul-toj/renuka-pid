@@ -610,32 +610,42 @@ ALTER TABLE public.message_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.broadcasts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notification_logs ENABLE ROW LEVEL SECURITY;
 
--- Helper function to check if caller is an active admin (SECURITY DEFINER to avoid RLS recursion)
+-- Helper function to check if caller is an active admin (SECURITY DEFINER in plpgsql to avoid RLS inlining recursion)
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN
-LANGUAGE sql
+LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, pg_temp
 STABLE
 AS $$
-  SELECT COALESCE(
-    (SELECT is_active FROM public.admin_users WHERE id = auth.uid()),
-    false
-  );
+DECLARE
+  v_is_active BOOLEAN;
+BEGIN
+  SELECT is_active INTO v_is_active
+  FROM public.admin_users
+  WHERE id = auth.uid();
+  
+  RETURN COALESCE(v_is_active, false);
+END;
 $$;
 
--- Helper function to check if caller is an active super admin (SECURITY DEFINER to avoid RLS recursion)
+-- Helper function to check if caller is an active super admin (SECURITY DEFINER in plpgsql to avoid RLS inlining recursion)
 CREATE OR REPLACE FUNCTION public.is_super_admin()
 RETURNS BOOLEAN
-LANGUAGE sql
+LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, pg_temp
 STABLE
 AS $$
-  SELECT COALESCE(
-    (SELECT (role = 'super_admin' AND is_active = true) FROM public.admin_users WHERE id = auth.uid()),
-    false
-  );
+DECLARE
+  v_is_super BOOLEAN;
+BEGIN
+  SELECT (role = 'super_admin' AND is_active = true) INTO v_is_super
+  FROM public.admin_users
+  WHERE id = auth.uid();
+  
+  RETURN COALESCE(v_is_super, false);
+END;
 $$;
 
 -- 15.1 Courses RLS
@@ -701,16 +711,11 @@ TO authenticated
 USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
--- 15.8 Admin Users RLS (Protected via is_super_admin and direct auth.uid() check)
+-- 15.8 Admin Users RLS (Self-view for authenticated users, super_admin for mutations)
 CREATE POLICY "Admins view own profile"
 ON public.admin_users FOR SELECT
 TO authenticated
 USING (id = auth.uid() AND is_active = true);
-
-CREATE POLICY "Super admins view all admin users"
-ON public.admin_users FOR SELECT
-TO authenticated
-USING (public.is_super_admin());
 
 CREATE POLICY "Super admins insert admin users"
 ON public.admin_users FOR INSERT

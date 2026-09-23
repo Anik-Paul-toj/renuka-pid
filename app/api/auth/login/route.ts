@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Invalid email or password.",
+          error: authError?.message || "Invalid email or password.",
         },
         { status: 401 }
       );
@@ -51,13 +51,14 @@ export async function POST(request: Request) {
       .single();
 
     if (profileError || !adminProfile) {
+      console.error("Admin profile lookup error:", profileError);
       // Sign out immediately to invalidate session cookies for unauthorized users
       await supabase.auth.signOut();
 
       return NextResponse.json(
         {
           success: false,
-          error: "Access denied. You do not have an active administrator profile.",
+          error: profileError?.message || "Access denied. You do not have an active administrator profile.",
         },
         { status: 403 }
       );
