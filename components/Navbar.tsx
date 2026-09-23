@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal }) => {
             onClick={onOpenModal}
             className="btn-studio px-5 py-2.5 shadow-none"
           >
-            <span>Let's Create</span>
+            <span>Let&apos;s Create</span>
             <ArrowRight className="size-3.5" />
           </button>
         </div>

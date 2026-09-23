@@ -178,7 +178,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             <div className="mt-6 rounded-md bg-[#F7F4EC] p-4 text-left border border-[#464137]/10 text-xs space-y-2">
               <p className="font-semibold text-[#68705A]">Important Next Steps:</p>
               <p className="text-[#6F6B61]">
-                1. Check your inbox for the calendar invite so you don't miss the live stream.
+                1. Check your inbox for the calendar invite so you don&apos;t miss the live stream.
               </p>
               <p className="text-[#6F6B61]">
                 2. Live attendee bonuses (Guides & demo access) unlock during the broadcast.

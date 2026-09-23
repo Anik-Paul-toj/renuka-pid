@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { ArrowRight, Calendar, Clock, Globe, Hourglass } from "lucide-react";
+import { Calendar, Clock, Globe, Hourglass } from "lucide-react";
 import { workshopData, masterclassData } from "@/data/content";
 import { CountdownTimer } from "@/components/CountdownTimer";
 

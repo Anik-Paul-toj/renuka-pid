@@ -29,6 +29,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
 
     const calculateTime = () => {

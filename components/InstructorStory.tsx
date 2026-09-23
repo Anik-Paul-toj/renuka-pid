@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { GraduationCap, BookOpen, Users, Heart, ArrowRight } from "lucide-react";
+import { GraduationCap, BookOpen, Users, Heart } from "lucide-react";
 import { masterclassData } from "@/data/content";
 
 export const InstructorStory: React.FC = () => {
@@ -38,7 +38,7 @@ export const InstructorStory: React.FC = () => {
               {/* Handwritten artistic overlay badge */}
               <div className="mt-3 px-3 py-2 text-center">
                 <p className="font-script text-2xl sm:text-3xl text-[#68705A]">
-                  "Creativity is a kinder way to be in the world."
+                  &ldquo;Creativity is a kinder way to be in the world.&rdquo;
                 </p>
               </div>
             </div>
