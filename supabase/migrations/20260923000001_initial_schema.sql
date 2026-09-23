@@ -5,7 +5,8 @@
 -- This file represents the final Phase 2 schema/security state after verification.
 -- It is the canonical migration for a fresh database.
 -- Do NOT rerun it wholesale against the already-migrated project database.
--- Apply future changes as incremental patches.
+-- Apply future changes as incremental patches. The trigger blocks below are
+-- also idempotent so accidental re-execution will not fail on duplicate triggers.
 -- ==============================================================================
 
 -- 1. Enable Required Extensions
@@ -34,9 +35,20 @@ CREATE TABLE IF NOT EXISTS public.admin_users (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_admin_users_updated_at
-BEFORE UPDATE ON public.admin_users
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_admin_users_updated_at'
+      AND tgrelid = 'public.admin_users'::regclass
+  ) THEN
+    CREATE TRIGGER set_admin_users_updated_at
+    BEFORE UPDATE ON public.admin_users
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 -- ------------------------------------------------------------------------------
 -- 4. Table: courses
@@ -55,9 +67,20 @@ CREATE TABLE IF NOT EXISTS public.courses (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_courses_updated_at
-BEFORE UPDATE ON public.courses
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_courses_updated_at'
+      AND tgrelid = 'public.courses'::regclass
+  ) THEN
+    CREATE TRIGGER set_courses_updated_at
+    BEFORE UPDATE ON public.courses
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 CREATE INDEX IF NOT EXISTS idx_courses_slug ON public.courses(slug);
 CREATE INDEX IF NOT EXISTS idx_courses_active ON public.courses(is_active);
@@ -83,9 +106,20 @@ CREATE TABLE IF NOT EXISTS public.cohort_batches (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_cohort_batches_updated_at
-BEFORE UPDATE ON public.cohort_batches
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_cohort_batches_updated_at'
+      AND tgrelid = 'public.cohort_batches'::regclass
+  ) THEN
+    CREATE TRIGGER set_cohort_batches_updated_at
+    BEFORE UPDATE ON public.cohort_batches
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 CREATE INDEX IF NOT EXISTS idx_cohort_batches_course_id ON public.cohort_batches(course_id);
 CREATE INDEX IF NOT EXISTS idx_cohort_batches_start_date ON public.cohort_batches(start_date);
@@ -104,11 +138,22 @@ CREATE TABLE IF NOT EXISTS public.customers (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_customers_updated_at
-BEFORE UPDATE ON public.customers
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_customers_updated_at'
+      AND tgrelid = 'public.customers'::regclass
+  ) THEN
+    CREATE TRIGGER set_customers_updated_at
+    BEFORE UPDATE ON public.customers
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
-CREATE INDEX IF NOT EXISTS idx_customers_email ON public.customers(lower(email));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_email_unique ON public.customers(lower(email));
 CREATE INDEX IF NOT EXISTS idx_customers_whatsapp ON public.customers(whatsapp_phone);
 
 -- ------------------------------------------------------------------------------
@@ -128,9 +173,20 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_bookings_updated_at
-BEFORE UPDATE ON public.bookings
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_bookings_updated_at'
+      AND tgrelid = 'public.bookings'::regclass
+  ) THEN
+    CREATE TRIGGER set_bookings_updated_at
+    BEFORE UPDATE ON public.bookings
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 CREATE INDEX IF NOT EXISTS idx_bookings_reference ON public.bookings(booking_reference);
 CREATE INDEX IF NOT EXISTS idx_bookings_batch_status ON public.bookings(batch_id, status);
@@ -155,9 +211,20 @@ CREATE TABLE IF NOT EXISTS public.payments (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_payments_updated_at
-BEFORE UPDATE ON public.payments
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_payments_updated_at'
+      AND tgrelid = 'public.payments'::regclass
+  ) THEN
+    CREATE TRIGGER set_payments_updated_at
+    BEFORE UPDATE ON public.payments
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 CREATE INDEX IF NOT EXISTS idx_payments_order_id ON public.payments(razorpay_order_id);
 CREATE INDEX IF NOT EXISTS idx_payments_booking_id ON public.payments(booking_id);
@@ -179,9 +246,20 @@ CREATE TABLE IF NOT EXISTS public.landing_content (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_landing_content_updated_at
-BEFORE UPDATE ON public.landing_content
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_landing_content_updated_at'
+      AND tgrelid = 'public.landing_content'::regclass
+  ) THEN
+    CREATE TRIGGER set_landing_content_updated_at
+    BEFORE UPDATE ON public.landing_content
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 -- Enforce exactly one active published record per section
 CREATE UNIQUE INDEX IF NOT EXISTS idx_landing_content_unique_published
@@ -208,9 +286,20 @@ CREATE TABLE IF NOT EXISTS public.media_assets (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_media_assets_updated_at
-BEFORE UPDATE ON public.media_assets
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_media_assets_updated_at'
+      AND tgrelid = 'public.media_assets'::regclass
+  ) THEN
+    CREATE TRIGGER set_media_assets_updated_at
+    BEFORE UPDATE ON public.media_assets
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 CREATE INDEX IF NOT EXISTS idx_media_assets_category ON public.media_assets(category);
 
@@ -230,9 +319,20 @@ CREATE TABLE IF NOT EXISTS public.message_templates (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_message_templates_updated_at
-BEFORE UPDATE ON public.message_templates
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_message_templates_updated_at'
+      AND tgrelid = 'public.message_templates'::regclass
+  ) THEN
+    CREATE TRIGGER set_message_templates_updated_at
+    BEFORE UPDATE ON public.message_templates
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 CREATE INDEX IF NOT EXISTS idx_message_templates_slug ON public.message_templates(slug);
 
@@ -255,9 +355,20 @@ CREATE TABLE IF NOT EXISTS public.broadcasts (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_broadcasts_updated_at
-BEFORE UPDATE ON public.broadcasts
-FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'set_broadcasts_updated_at'
+      AND tgrelid = 'public.broadcasts'::regclass
+  ) THEN
+    CREATE TRIGGER set_broadcasts_updated_at
+    BEFORE UPDATE ON public.broadcasts
+    FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+  END IF;
+END;
+$$;
 
 -- ------------------------------------------------------------------------------
 -- 13. Table: notification_logs
