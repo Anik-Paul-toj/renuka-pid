@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendBookingConfirmationEmail } from "@/lib/notifications/service";
 import crypto from "crypto";
 
 export interface PaymentServiceError {
@@ -136,6 +137,11 @@ export async function createOrderForBooking(
         updated_at: new Date().toISOString(),
       })
       .eq("id", booking.id);
+
+    // Trigger transactional confirmation notification asynchronously
+    sendBookingConfirmationEmail(booking.id).catch((err) => {
+      console.error("Zero-amount: Confirmation notification error:", err);
+    });
 
     return {
       success: true,
@@ -320,6 +326,9 @@ export async function verifyPayment(input: {
       (p: any) => p.razorpay_payment_id === input.razorpayPaymentId
     );
     if (existingPayment) {
+      // Idempotently trigger confirmation notification (deduplicated by notification service)
+      sendBookingConfirmationEmail(booking.id).catch(() => {});
+
       return {
         success: true,
         data: {
@@ -430,6 +439,11 @@ export async function verifyPayment(input: {
       })
       .eq("id", booking.id);
 
+    // Trigger transactional confirmation notification asynchronously
+    sendBookingConfirmationEmail(booking.id).catch((err) => {
+      console.error("Payment verification: Confirmation notification error:", err);
+    });
+
     return {
       success: true,
       data: {
@@ -534,6 +548,11 @@ export async function handleWebhookEvent(
         })
         .eq("id", payment.booking_id);
     }
+
+    // Trigger transactional confirmation notification idempotently
+    sendBookingConfirmationEmail(payment.booking_id).catch((err) => {
+      console.error("Webhook: Confirmation notification error:", err);
+    });
 
     return { status: 200, message: "Payment captured successfully.", handled: true };
   }
