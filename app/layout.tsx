@@ -25,7 +25,7 @@ const caveat = Caveat({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://renukaartstudio.com"),
-  title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal — Art & Soul Studio",
+  title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal — Art Studio",
   description:
     "Join Renuka Aggarwal for a transformative 120-minute live watercolor masterclass. Step-by-step mindful watercolor courses designed for adults 25+ — no prior experience needed.",
   openGraph: {
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
         url: "/images/instructor_hero.jpeg",
         width: 1200,
         height: 630,
-        alt: "Renuka Aggarwal — Art & Soul Studio Masterclass",
+        alt: "Renuka Aggarwal — Art Studio Masterclass",
       },
     ],
   },

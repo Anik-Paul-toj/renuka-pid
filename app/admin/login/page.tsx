@@ -123,7 +123,7 @@ export default function AdminLoginPage() {
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 rounded-full bg-[#C8D1C7]/35 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#68705A] mb-3">
           <Sparkles className="size-3.5" />
-          <span>Art & Soul Studio</span>
+          <span>Art Studio</span>
         </div>
         <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#292923]">
           Admin Portal Login

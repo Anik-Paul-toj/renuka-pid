@@ -224,7 +224,7 @@ export const workshopData: WorkshopData = {
 export const masterclassData: MasterclassData = {
   brand: {
     name: "Renuka Aggarwal",
-    studioName: "ART & SOUL STUDIO",
+    studioName: "ART STUDIO",
     tagline: "ART | MINDFULNESS | A BRIGHTER YOU",
     subTagline: "Mindful Watercolor & Creative Well-Being",
   },
@@ -244,7 +244,7 @@ export const masterclassData: MasterclassData = {
     guaranteeText: "Live intimate atelier broadcast • Limited to 200 interactive attendees.",
     targetAudienceNote: "Designed warmly for beginners, working adults, and creative souls at every level.",
     instructorName: "Renuka Aggarwal",
-    instructorTitle: "Art Educator | Founder, Art & Soul Studio",
+    instructorTitle: "Art Educator | Founder, Art Studio",
     instructorImage: "/images/instructor_hero.jpeg",
   },
   stats: [
@@ -279,7 +279,7 @@ export const masterclassData: MasterclassData = {
   aboutArtist: {
     eyebrow: "ABOUT THE ARTIST",
     heading: "Meet Renuka Aggarwal",
-    role: "Art Educator | Founder, Art & Soul Studio",
+    role: "Art Educator | Founder, Art Studio",
     introduction:
       "With over 15 years of experience in art education, Renuka Aggarwal is an experienced Art Educator dedicated to helping people discover their creativity, build artistic confidence, and reconnect with the joy of creating.",
     bio: [
@@ -511,7 +511,7 @@ export const masterclassData: MasterclassData = {
     overline: "ABOUT ME",
     headline: "Hi, I'm ",
     name: "Renuka Aggarwal",
-    subtitle: "ART EDUCATOR | FOUNDER, ART & SOUL STUDIO",
+    subtitle: "ART EDUCATOR | FOUNDER, ART STUDIO",
     paragraphs: [
       "With over 15 years of teaching experience, I help adults discover the joy of art through simple, mindful and well-structured watercolour courses. My goal is to make art accessible, meaningful and a part of your everyday life — no matter where you are in your journey.",
       "I believe everyone holds a natural, innate creative impulse that often gets buried under the busyness of adult life. In my studio, we step away from competition and rigid expectations. We return to the tactile pleasure of water, natural pigment, and mindful breathing.",
@@ -645,7 +645,7 @@ export const masterclassData: MasterclassData = {
     {
       question: "Is registration genuinely free?",
       answer:
-        "Yes, 100% complimentary. There is no credit card required. This is my gift to introduce you to our mindful art community at Art & Soul Studio.",
+        "Yes, 100% complimentary. There is no credit card required. This is my gift to introduce you to our mindful art community at Art Studio.",
     },
     {
       question: "Will you try to sell something aggressively during the class?",
@@ -665,7 +665,7 @@ export const masterclassData: MasterclassData = {
   },
   footer: {
     brandDescription:
-      "Renuka Aggarwal | Art & Soul Studio. Mindful watercolor courses, creative well-being, and artistic mentorship designed to nurture a calmer, brighter you.",
+      "Renuka Aggarwal | Art Studio. Mindful watercolor courses, creative well-being, and artistic mentorship designed to nurture a calmer, brighter you.",
     links: [
       { label: "Home", href: "#" },
       { label: "About", href: "#about" },
@@ -678,7 +678,7 @@ export const masterclassData: MasterclassData = {
     contactEmail: "hello@renukaartstudio.com",
     copyrightYear: 2026,
     disclaimer:
-      "Art & Soul Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
+      "Art Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
     handwrittenSignature: "Keep Creating ♡",
   },
 };

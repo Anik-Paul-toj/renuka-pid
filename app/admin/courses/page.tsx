@@ -28,7 +28,7 @@ export default async function AdminCoursesPage() {
             <span className="inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider bg-[#68705A] text-[#FAF8F2]">
               Active Course
             </span>
-            <h3 className="font-bold text-sm text-[#292923]">The Art & Soul of Watercolors Masterclass</h3>
+            <h3 className="font-bold text-sm text-[#292923]">The Art of Watercolors Masterclass</h3>
             <p className="text-xs text-[#6F6B61]">Slug: <code className="font-mono">watercolor-masterclass</code> • Duration: 150 mins</p>
           </div>
           <div className="text-right sm:text-left">

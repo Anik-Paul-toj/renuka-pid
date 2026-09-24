@@ -206,7 +206,7 @@ function simulateCmsApi(
 const validFixtures: Record<CMSSectionKey, any> = {
   brand: {
     name: "Renuka Aggarwal",
-    studioName: "ART & SOUL STUDIO",
+    studioName: "ART STUDIO",
     tagline: "ART | MINDFULNESS | A BRIGHTER YOU",
     subTagline: "Mindful Watercolor & Creative Well-Being",
   },
@@ -241,7 +241,7 @@ const validFixtures: Record<CMSSectionKey, any> = {
   aboutArtist: {
     eyebrow: "MEET YOUR GUIDE",
     heading: "From gentle brushstrokes to lifelong confidence.",
-    role: "Art Educator | Founder, Art & Soul Studio",
+    role: "Art Educator | Founder, Art Studio",
     introduction: "I believe that everyone carries an innate creative light.",
     bio: ["Paragraph 1", "Paragraph 2"],
     qualifications: ["Master of Fine Arts", "15+ Years Practice"],
@@ -320,7 +320,7 @@ const validFixtures: Record<CMSSectionKey, any> = {
     overline: "THE STORY",
     headline: "Why I Started Teaching Watercolor",
     name: "Renuka Aggarwal",
-    subtitle: "Founder, Art & Soul Studio",
+    subtitle: "Founder, Art Studio",
     paragraphs: ["Art saved me during a hectic chapter of life."],
     quote: "When water meets paper, the mind finally rests.",
     quoteAuthor: "Renuka Aggarwal",
@@ -377,7 +377,7 @@ const validFixtures: Record<CMSSectionKey, any> = {
     subNote: "Limited to 200 live attendees.",
   },
   footer: {
-    brandDescription: "Art & Soul Studio is dedicated to bringing mindfulness through watercolor.",
+    brandDescription: "Art Studio is dedicated to bringing mindfulness through watercolor.",
     links: [
       { label: "Courses", href: "#courses" },
       { label: "About Renuka", href: "#about" },
