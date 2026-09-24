@@ -1,17 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, CheckCircle2, Calendar, Clock, Sparkles, ArrowRight } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, CheckCircle2, Calendar, Clock, Sparkles, ArrowRight, AlertCircle } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface RegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  batchId?: string;
+}
+
+interface ActiveBatchInfo {
+  id: string;
+  batchName: string;
+  startDate: string;
+  startTime: string;
+  endTime: string;
+  isEnrollmentOpen: boolean;
+  isSoldOut: boolean;
+}
+
+interface ConfirmedBookingInfo {
+  bookingReference: string;
+  status: string;
+  batchName: string;
+  startDate: string;
+  startTime: string;
 }
 
 export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   isOpen,
   onClose,
+  batchId: propBatchId,
 }) => {
   const { hero } = useLandingContent();
   const [name, setName] = useState("");
@@ -19,18 +39,120 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   const [phone, setPhone] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeBatch, setActiveBatch] = useState<ActiveBatchInfo | null>(null);
+  const [bookingInfo, setBookingInfo] = useState<ConfirmedBookingInfo | null>(null);
+
+  // Helper to fetch active batch
+  const fetchActiveBatch = async (): Promise<ActiveBatchInfo | null> => {
+    try {
+      const res = await fetch("/api/cohort-batches/active");
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data?.success && data?.batch?.id) {
+        const batchInfo: ActiveBatchInfo = {
+          id: data.batch.id,
+          batchName: data.batch.batchName,
+          startDate: data.batch.startDate,
+          startTime: data.batch.startTime,
+          endTime: data.batch.endTime,
+          isEnrollmentOpen: Boolean(data.batch.isEnrollmentOpen),
+          isSoldOut: Boolean(data.batch.isSoldOut),
+        };
+        setActiveBatch(batchInfo);
+        return batchInfo;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Fetch active cohort batch details immediately on mount and when modal opens
+  useEffect(() => {
+    fetchActiveBatch();
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && !activeBatch) {
+      fetchActiveBatch();
+    }
+  }, [isOpen, activeBatch]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !name) return;
-    setIsLoading(true);
 
-    setTimeout(() => {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    // Resolve batch ID with on-demand fallback if state is not yet populated
+    let currentBatch = activeBatch;
+    let resolvedBatchId = propBatchId || currentBatch?.id;
+
+    if (!resolvedBatchId) {
+      currentBatch = await fetchActiveBatch();
+      resolvedBatchId = propBatchId || currentBatch?.id;
+    }
+
+    if (!resolvedBatchId) {
+      setErrorMessage("No active cohort batch is available for registration right now.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (currentBatch?.isSoldOut) {
+      setErrorMessage("This workshop cohort is completely sold out.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (currentBatch && !currentBatch.isEnrollmentOpen) {
+      setErrorMessage("Enrollment is currently closed for this batch.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: name.trim(),
+          email: email.trim(),
+          phone: phone.trim() || undefined,
+          batchId: resolvedBatchId,
+        }),
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success) {
+        const errorMsg =
+          result?.error?.message || "Unable to reserve your seat. Please try again.";
+        setErrorMessage(errorMsg);
+        setIsLoading(false);
+        return;
+      }
+
+      setBookingInfo({
+        bookingReference: result.booking.bookingReference,
+        status: result.booking.status,
+        batchName: result.booking.batchName,
+        startDate: result.booking.startDate,
+        startTime: result.booking.startTime,
+      });
+
       setIsLoading(false);
       setIsSubmitted(true);
-    }, 600);
+    } catch {
+      setErrorMessage("A network error occurred. Please check your connection and try again.");
+      setIsLoading(false);
+    }
   };
 
   const handleReset = () => {
@@ -38,6 +160,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     setName("");
     setEmail("");
     setPhone("");
+    setErrorMessage(null);
+    setBookingInfo(null);
     onClose();
   };
 
@@ -90,13 +214,21 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             <div className="mt-4 rounded-md bg-[#F7F4EC] p-3.5 border border-[#464137]/10 text-xs text-[#292923] flex flex-col gap-1.5">
               <div className="flex items-center gap-2 font-medium">
                 <Calendar className="size-3.5 text-[#68705A] shrink-0" />
-                <span>{hero.date}</span>
+                <span>{activeBatch?.startDate ? `${activeBatch.batchName} (${activeBatch.startDate})` : hero.date}</span>
               </div>
               <div className="flex items-center gap-2 font-medium">
                 <Clock className="size-3.5 text-[#68705A] shrink-0" />
-                <span>{hero.time} ({hero.duration})</span>
+                <span>{activeBatch?.startTime ? `${activeBatch.startTime} – ${activeBatch.endTime} IST` : `${hero.time} (${hero.duration})`}</span>
               </div>
             </div>
+
+            {/* Error Message Alert */}
+            {errorMessage && (
+              <div className="mt-4 flex items-start gap-2.5 rounded-md border border-rose-300 bg-rose-50/80 p-3 text-xs text-rose-800">
+                <AlertCircle className="size-4 shrink-0 text-rose-600 mt-0.5" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -143,11 +275,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
               <button
                 type="submit"
-                disabled={isLoading}
-                className="btn-studio w-full py-3.5 mt-2"
+                disabled={isLoading || activeBatch?.isSoldOut}
+                className="btn-studio w-full py-3.5 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <span>Reserving Your Seat...</span>
+                ) : activeBatch?.isSoldOut ? (
+                  <span>Cohort Sold Out</span>
                 ) : (
                   <>
                     <span>Confirm Free Reservation</span>
@@ -171,7 +305,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               Your Seat Is Confirmed, {name}!
             </h3>
 
-            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
+            {bookingInfo?.bookingReference && (
+              <div className="mt-3 inline-block rounded-md bg-[#EEE9DE] px-3.5 py-1.5 border border-[#464137]/10 text-xs font-mono font-bold text-[#292923]">
+                Ref: {bookingInfo.bookingReference}
+              </div>
+            )}
+
+            <p className="mt-3 text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
               We have sent the private access link and calendar invitations to:
             </p>
             <p className="mt-1 font-semibold text-[#68705A]">{email}</p>
@@ -183,6 +323,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               </p>
               <p className="text-[#6F6B61]">
                 2. Live attendee bonuses (Guides & demo access) unlock during the broadcast.
+              </p>
+              <p className="text-[#6F6B61]">
+                3. Your booking is registered under reference <span className="font-mono font-medium">{bookingInfo?.bookingReference}</span>.
               </p>
             </div>
 
