@@ -3,10 +3,10 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 export const InstructorIntro: React.FC = () => {
-  const { aboutArtist } = masterclassData;
+  const { aboutArtist } = useLandingContent();
 
   const sectionRef = useRef<HTMLElement>(null);
   const eyebrowRef = useRef<HTMLParagraphElement>(null);

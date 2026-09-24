@@ -2,10 +2,10 @@
 
 import React from "react";
 import { Check } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 export const Outcomes: React.FC = () => {
-  const { outcomes } = masterclassData;
+  const { outcomes } = useLandingContent();
 
   return (
     <section className="py-16 sm:py-24 bg-[#EEE9DE] border-b border-[#464137]/10">

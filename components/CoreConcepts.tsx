@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Sun, Palette, Heart, Minus, ArrowRight } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 const iconMap: Record<string, React.ReactNode> = {
   Sun: <Sun className="size-5 text-[#68705A]" strokeWidth={1.5} />,
@@ -15,7 +15,7 @@ interface CoreConceptsProps {
 }
 
 export const CoreConcepts: React.FC<CoreConceptsProps> = ({ onOpenModal }) => {
-  const { coreSecrets } = masterclassData;
+  const { coreSecrets } = useLandingContent();
 
   return (
     <section className="py-16 sm:py-24 bg-[#F7F4EC] border-b border-[#464137]/10">

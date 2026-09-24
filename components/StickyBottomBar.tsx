@@ -2,14 +2,14 @@
 
 import React from "react";
 import { ArrowRight } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface StickyBottomBarProps {
   onOpenModal: () => void;
 }
 
 export const StickyBottomBar: React.FC<StickyBottomBarProps> = ({ onOpenModal }) => {
-  const { hero } = masterclassData;
+  const { hero } = useLandingContent();
 
   return (
     <aside

@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 export const Footer: React.FC = () => {
-  const { brand, footer } = masterclassData;
+  const { brand, footer } = useLandingContent();
 
   return (
     <footer className="border-t border-[#464137]/10 bg-[#F7F4EC] py-14 pb-28 sm:pb-32">

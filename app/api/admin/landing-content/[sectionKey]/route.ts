@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getAdminSession } from "@/lib/auth/admin";
 import { createClient } from "@/lib/supabase/server";
 import { CMSSectionKey } from "@/lib/types/cms";
@@ -367,6 +368,11 @@ export async function PUT(
             .eq("id", draftRecord.id);
         }
 
+        try {
+          revalidateTag("landing_content", "max");
+        } catch {}
+        revalidatePath("/");
+
         return NextResponse.json({
           success: true,
           data: {
@@ -409,6 +415,11 @@ export async function PUT(
             .delete()
             .eq("id", draftRecord.id);
         }
+
+        try {
+          revalidateTag("landing_content", "max");
+        } catch {}
+        revalidatePath("/");
 
         return NextResponse.json({
           success: true,

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Eye, Layers, Brush } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 const iconMap: Record<string, React.ReactNode> = {
   Eye: <Eye className="size-5 text-[#68705A]" strokeWidth={1.5} />,
@@ -11,7 +11,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export const MethodSection: React.FC = () => {
-  const { methodFramework } = masterclassData;
+  const { methodFramework } = useLandingContent();
 
   return (
     <section className="py-16 sm:py-24 bg-[#EEE9DE] border-b border-[#464137]/10">

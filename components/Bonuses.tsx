@@ -2,7 +2,7 @@
 
 import React from "react";
 import { BookOpen, Sliders, Video, Gift } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 const iconMap: Record<string, React.ReactNode> = {
   BookOpen: <BookOpen className="size-5 text-[#68705A]" strokeWidth={1.5} />,
@@ -11,7 +11,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export const Bonuses: React.FC = () => {
-  const { bonuses } = masterclassData;
+  const { bonuses } = useLandingContent();
 
   return (
     <section className="py-16 sm:py-24 bg-[#EEE9DE] border-b border-[#464137]/10">

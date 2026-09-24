@@ -3,10 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import { GraduationCap, BookOpen, Users, Heart } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 export const InstructorStory: React.FC = () => {
-  const { instructorStory } = masterclassData;
+  const { instructorStory } = useLandingContent();
 
   return (
     <section id="about" className="py-16 sm:py-24 bg-[#F7F4EC] border-b border-[#464137]/10">

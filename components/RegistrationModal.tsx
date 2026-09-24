@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X, CheckCircle2, Calendar, Clock, Sparkles, ArrowRight } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { hero } = useLandingContent();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -89,11 +90,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             <div className="mt-4 rounded-md bg-[#F7F4EC] p-3.5 border border-[#464137]/10 text-xs text-[#292923] flex flex-col gap-1.5">
               <div className="flex items-center gap-2 font-medium">
                 <Calendar className="size-3.5 text-[#68705A] shrink-0" />
-                <span>{masterclassData.hero.date}</span>
+                <span>{hero.date}</span>
               </div>
               <div className="flex items-center gap-2 font-medium">
                 <Clock className="size-3.5 text-[#68705A] shrink-0" />
-                <span>{masterclassData.hero.time} ({masterclassData.hero.duration})</span>
+                <span>{hero.time} ({hero.duration})</span>
               </div>
             </div>
 

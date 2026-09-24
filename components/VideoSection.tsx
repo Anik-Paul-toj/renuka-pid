@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Play, Check, ArrowRight } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface VideoSectionProps {
   onOpenModal: () => void;
 }
 
 export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
-  const { videoSection } = masterclassData;
+  const { videoSection } = useLandingContent();
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (

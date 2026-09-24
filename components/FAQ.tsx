@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 export const FAQ: React.FC = () => {
-  const { faqs } = masterclassData;
+  const { faqs } = useLandingContent();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleFAQ = (index: number) => {

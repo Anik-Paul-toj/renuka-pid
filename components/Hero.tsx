@@ -3,15 +3,19 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Calendar, Clock, Globe, Hourglass } from "lucide-react";
-import { workshopData, masterclassData } from "@/data/content";
+import { workshopData, MasterclassData } from "@/data/content";
 import { CountdownTimer } from "@/components/CountdownTimer";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface HeroProps {
   onOpenModal: () => void;
+  content?: MasterclassData["hero"];
 }
 
-export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
+export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
   const [isExpired, setIsExpired] = useState(false);
+  const { hero: contextHero } = useLandingContent();
+  const heroContent = content || contextHero;
 
   return (
     <section className="relative overflow-hidden bg-[#F7F4EC] pt-4 pb-7 sm:pt-6 sm:pb-9 lg:pt-7 lg:pb-10 border-b border-[#464137]/10">
@@ -171,8 +175,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
             <div className="paper-card relative overflow-hidden p-2 shadow-[0_12px_32px_rgba(50,45,35,0.07)]">
               <div className="relative aspect-[4/4.5] w-full overflow-hidden rounded-md">
                 <Image
-                  src={masterclassData.hero.instructorImage}
-                  alt={`${masterclassData.hero.instructorName} in her sunny art studio`}
+                  src={heroContent.instructorImage}
+                  alt={`${heroContent.instructorName} in her sunny art studio`}
                   fill
                   priority
                   className="object-cover object-center transition-transform duration-700 hover:scale-105"
@@ -183,10 +187,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
               {/* Studio Descriptor Tag */}
               <div className="mt-1.5 px-2 py-0.5 text-center">
                 <p className="font-serif text-sm font-semibold text-[#292923]">
-                  {masterclassData.hero.instructorName}
+                  {heroContent.instructorName}
                 </p>
                 <p className="text-[0.64rem] tracking-wider uppercase text-[#6F6B61]">
-                  {masterclassData.hero.instructorTitle}
+                  {heroContent.instructorTitle}
                 </p>
               </div>
             </div>

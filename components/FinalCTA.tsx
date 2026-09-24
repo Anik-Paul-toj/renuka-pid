@@ -2,14 +2,14 @@
 
 import React from "react";
 import { ArrowRight } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface FinalCTAProps {
   onOpenModal: () => void;
 }
 
 export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
-  const { finalCta } = masterclassData;
+  const { finalCta } = useLandingContent();
 
   return (
     <section className="py-16 sm:py-24 bg-[#EEE9DE] border-b border-[#464137]/10">

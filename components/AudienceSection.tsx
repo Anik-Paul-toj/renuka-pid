@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { masterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 const iconMap: Record<string, React.ReactNode> = {
   User: <User className="size-5 text-[#24425F]" strokeWidth={1.5} />,
@@ -25,7 +25,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export const AudienceSection: React.FC = () => {
-  const { targetAudience } = masterclassData;
+  const { targetAudience } = useLandingContent();
 
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);

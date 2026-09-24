@@ -2,23 +2,28 @@
 
 import React from "react";
 import { ArrowRight } from "lucide-react";
-import { masterclassData } from "@/data/content";
+import { MasterclassData } from "@/data/content";
+import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface NavbarProps {
   onOpenModal: () => void;
+  content?: MasterclassData["brand"];
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenModal }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
+  const { brand: contextBrand } = useLandingContent();
+  const brand = content || contextBrand;
+
   return (
     <header className="sticky top-0 z-40 border-b border-[#464137]/10 bg-[#F7F4EC]/95 backdrop-blur-sm transition-all">
       <div className="mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between px-6">
         {/* Brand Logo */}
         <a href="#" className="flex flex-col group">
           <span className="font-serif text-2xl tracking-tight text-[#292923] font-semibold">
-            {masterclassData.brand.name}
+            {brand.name}
           </span>
           <span className="text-[0.68rem] tracking-[0.22em] text-[#6F6B61] uppercase font-medium">
-            {masterclassData.brand.studioName}
+            {brand.studioName}
           </span>
         </a>
 
