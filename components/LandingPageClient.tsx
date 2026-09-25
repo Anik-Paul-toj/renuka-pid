@@ -7,7 +7,6 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { AudienceSection } from "@/components/AudienceSection";
 import { VideoSection } from "@/components/VideoSection";
-import { Outcomes } from "@/components/Outcomes";
 import { InstructorStory } from "@/components/InstructorStory";
 import { FAQ } from "@/components/FAQ";
 import { FinalCTA } from "@/components/FinalCTA";
@@ -43,10 +42,7 @@ export function LandingPageClient({
             {/* Section 03: Video Preview */}
             <VideoSection onOpenModal={handleOpenModal} />
 
-            {/* Section 04: Tangible Learning Outcomes */}
-            <Outcomes />
-
-            {/* Section 05: Instructor Story & Philosophy */}
+            {/* Section 04: Instructor Story & Philosophy */}
             <InstructorStory />
 
             {/* Section 06: Frequently Asked Questions */}
