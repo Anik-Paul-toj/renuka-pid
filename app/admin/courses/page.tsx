@@ -38,7 +38,7 @@ export default async function AdminCoursesPage() {
         </div>
 
         <div className="rounded-lg bg-[#EEE9DE]/60 p-4 border border-[#464137]/10 text-xs text-[#6F6B61]">
-          📌 <strong>Phase 5 Shell Active:</strong> Real-time course editing, price updates (paise handling), and multi-course management will be wired in future phases.
+          📌 <strong>Note:</strong> Course curriculum and pricing rules are synchronized with active cohort batches.
         </div>
       </div>
     </div>

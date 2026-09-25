@@ -798,7 +798,7 @@ export function BroadcastManager({
                 </div>
                 <div>
                   <span className="font-semibold text-stone-800">To: </span>
-                  Anik Paul &lt;anik.paul@example.com&gt;
+                  Student Recipient &lt;student@renukaartstudio.com&gt;
                 </div>
                 <div>
                   <span className="font-semibold text-stone-800">Subject: </span>

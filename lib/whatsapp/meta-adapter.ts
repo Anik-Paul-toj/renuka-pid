@@ -42,7 +42,10 @@ export class MetaWhatsAppAdapter implements WhatsAppTransport {
   }) {
     this.apiVersion = overrides?.apiVersion || process.env.WHATSAPP_API_VERSION || "v21.0";
     this.phoneNumberId = overrides?.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID;
-    this.accessToken = overrides?.accessToken || process.env.WHATSAPP_ACCESS_TOKEN;
+    this.accessToken =
+      overrides?.accessToken ||
+      process.env.WHATSAPP_ACCESS_TOKEN ||
+      process.env.WHATSAPP_API_TOKEN;
     this.businessAccountId = overrides?.businessAccountId || process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
   }
 
@@ -53,7 +56,7 @@ export class MetaWhatsAppAdapter implements WhatsAppTransport {
   public getConfigStatus(): WhatsAppConfigStatus {
     const missing: string[] = [];
     if (!this.phoneNumberId) missing.push("WHATSAPP_PHONE_NUMBER_ID");
-    if (!this.accessToken) missing.push("WHATSAPP_ACCESS_TOKEN");
+    if (!this.accessToken) missing.push("WHATSAPP_API_TOKEN");
 
     if (missing.length > 0) {
       return {

@@ -98,6 +98,20 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     }
   }, [isOpen, activeBatch]);
 
+  const handleReset = () => {
+    if (isPaymentLocked) return;
+    setIsSubmitted(false);
+    setName("");
+    setEmail("");
+    setPhone("");
+    setErrorMessage(null);
+    setBookingInfo(null);
+    setPaymentPending(false);
+    setPendingBookingRef(null);
+    setIsPaymentLocked(false);
+    onClose();
+  };
+
   // Handle Escape key: lock dismissal during active payment/verification
   useEffect(() => {
     if (!isOpen) return;
@@ -367,20 +381,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       setIsLoading(false);
       setIsPaymentLocked(false);
     }
-  };
-
-  const handleReset = () => {
-    if (isPaymentLocked) return;
-    setIsSubmitted(false);
-    setName("");
-    setEmail("");
-    setPhone("");
-    setErrorMessage(null);
-    setBookingInfo(null);
-    setPaymentPending(false);
-    setPendingBookingRef(null);
-    setIsPaymentLocked(false);
-    onClose();
   };
 
   return (

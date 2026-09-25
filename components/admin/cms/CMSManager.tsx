@@ -262,7 +262,7 @@ export function CMSManager({
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-0.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#68705A]">
             <Sparkles className="size-3" />
-            <span>Phase 6 • Dynamic Content Management</span>
+            <span>Content Management System</span>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#292923]">
             Landing Page CMS
@@ -291,7 +291,7 @@ export function CMSManager({
           <div className="p-3 bg-[#FAF8F2] border border-[#464137]/15 rounded-xl shadow-xs space-y-1">
             <div className="px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-[#6F6B61] flex items-center justify-between">
               <span>All 18 Sections</span>
-              <span className="font-mono text-[0.6rem] text-[#68705A]">Canonical Phase 3</span>
+              <span className="font-mono text-[0.6rem] text-[#68705A]">Active Sections</span>
             </div>
 
             <div className="space-y-1 max-h-[600px] overflow-y-auto pr-1">

@@ -38,7 +38,7 @@ export default async function AdminBatchesPage() {
         </div>
 
         <div className="rounded-lg bg-[#EEE9DE]/60 p-4 border border-[#464137]/10 text-xs text-[#6F6B61]">
-          📌 <strong>Phase 5 Shell Active:</strong> Batch creation, atomic seat locks, and Zoom URL management will be wired in future phases.
+          📌 <strong>Note:</strong> Batch schedules and seat reservations are linked directly to the live booking engine.
         </div>
       </div>
     </div>
