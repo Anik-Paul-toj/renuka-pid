@@ -7,6 +7,7 @@ import {
   TargetFilterInput,
 } from "@/lib/validations/broadcast";
 import { sendTransactionalEmail } from "@/lib/notifications/email";
+import { getSettings } from "@/lib/settings/service";
 
 export interface ResolvedRecipient {
   customerId: string;
@@ -598,6 +599,8 @@ export async function sendBroadcast(
   const courseTitle = targetFilter.courseName || "The WATERCOLOUR Roadmap: One-Day Masterclass";
   const batchName = targetFilter.batchName || "Live Masterclass — 28 Oct 2026";
 
+  const appSettings = await getSettings();
+
   // 4. Dispatch to each recipient sequentially
   for (const recipient of recipients) {
     try {
@@ -632,12 +635,12 @@ export async function sendBroadcast(
       const emailHtml = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #ffffff; border: 1px solid #e7e5e4; border-radius: 12px;">
           <div style="margin-bottom: 24px; border-bottom: 2px solid #f5f5f4; padding-bottom: 16px;">
-            <h2 style="margin: 0; color: #1c1917; font-size: 20px;">Art &amp; Soul Studio</h2>
+            <h2 style="margin: 0; color: #1c1917; font-size: 20px;">${appSettings.studioName}</h2>
             <p style="margin: 4px 0 0 0; color: #78716c; font-size: 13px;">Announcements &amp; Updates</p>
           </div>
           <div>${paragraphs}</div>
           <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #f5f5f4; font-size: 12px; color: #a8a29e;">
-            <p style="margin: 0;">Sent with warmth by Renuka Aggarwal • Art &amp; Soul Studio</p>
+            <p style="margin: 0;">Sent with warmth by ${appSettings.instructorName} • ${appSettings.studioName}</p>
           </div>
         </div>
       `;
@@ -648,6 +651,7 @@ export async function sendBroadcast(
         subject: resolvedSubject,
         html: emailHtml,
         text: cleanBody,
+        replyTo: appSettings.replyToEmail || undefined,
       });
 
       if (sendResult.success) {

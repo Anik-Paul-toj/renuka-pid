@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { renderBookingConfirmationEmail } from "@/lib/notifications/templates";
 import { sendTransactionalEmail } from "@/lib/notifications/email";
+import { getSettings } from "@/lib/settings/service";
 
 export interface NotificationServiceResult {
   success: boolean;
@@ -173,12 +174,15 @@ export async function sendBookingConfirmationEmail(
       zoomPasscode: batch?.zoom_passcode || null,
     });
 
+    const appSettings = await getSettings();
+
     // 6. Dispatch Email via Provider
     const sendResult = await sendTransactionalEmail({
       to: customer.email,
       subject: rendered.subject,
       html: rendered.html,
       text: rendered.text,
+      replyTo: appSettings.replyToEmail || undefined,
     });
 
     const nowIso = new Date().toISOString();
