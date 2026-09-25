@@ -19,17 +19,28 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
 
   return (
     <section className="relative overflow-hidden bg-[#F7F4EC] pt-4 pb-7 sm:pt-6 sm:pb-9 lg:pt-7 lg:pb-10 border-b border-[#464137]/10">
+      {/* Botanical Watercolor Background Art */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <Image
+          src="/images/background/ChatGPT Image Sep 25, 2026, 07_06_12 PM.png"
+          alt=""
+          fill
+          priority
+          className="object-cover object-center opacity-30 mix-blend-multiply select-none"
+        />
+      </div>
+
       {/* Delicate watercolor washes in the background */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 right-[-5%] size-[38rem] rounded-full bg-[#C8D1C7]/30 blur-3xl"
+        className="pointer-events-none absolute -top-24 right-[-5%] size-[38rem] rounded-full bg-[#C8D1C7]/20 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-[-10%] size-[32rem] rounded-full bg-[#D9BDB2]/20 blur-3xl"
+        className="pointer-events-none absolute top-1/2 left-[-10%] size-[32rem] rounded-full bg-[#D9BDB2]/15 blur-3xl"
       />
 
-      <div className="relative mx-auto max-w-7xl xl:max-w-[1400px] px-6 sm:px-8 lg:px-12">
+      <div className="relative z-10 mx-auto max-w-7xl xl:max-w-[1400px] px-6 sm:px-8 lg:px-12">
         <div className="grid gap-8 lg:gap-14 lg:grid-cols-[1.18fr_0.82fr] lg:items-center">
           {/* Left Column: Workshop Poster Content */}
           <div className="flex flex-col items-start w-full">
