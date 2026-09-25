@@ -105,9 +105,9 @@ INSERT INTO public.media_assets (
 (
   '33333333-3333-3333-3333-333333333302',
   'media',
-  'images/instructor_story.jpg',
-  '/images/instructor_story.jpg',
-  'instructor_story.jpg',
+  'images/instructor_story.jpeg',
+  '/images/instructor_story.jpeg',
+  'instructor_story.jpeg',
   'image/jpeg',
   925976,
   'Renuka Aggarwal in her watercolor art studio',
@@ -564,7 +564,7 @@ VALUES (
     ],
     "quote": "My art is always an invitation to slow down, breathe, and discover the quiet beauty hidden within everyday moments.",
     "quoteAuthor": "Renuka Aggarwal",
-    "image": "/images/instructor_story.jpg"
+    "image": "/images/instructor_story.jpeg"
   }$json$::jsonb,
   'published',
   1,

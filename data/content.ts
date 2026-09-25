@@ -519,7 +519,7 @@ export const masterclassData: MasterclassData = {
     ],
     quote: "My art is always an invitation to slow down, breathe, and discover the quiet beauty hidden within everyday moments.",
     quoteAuthor: "Renuka Aggarwal",
-    image: "/images/instructor_story.jpg",
+    image: "/images/instructor_story.jpeg",
   },
   bonuses: {
     overline: "LIVE ATTENDEE GIFTS",

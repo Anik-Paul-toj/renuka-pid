@@ -332,7 +332,7 @@
     "version": 1,
     "content_json": {
       "name": "Renuka Aggarwal",
-      "image": "/images/instructor_story.jpg",
+        "image": "/images/instructor_story.jpeg",
       "quote": "My art is always an invitation to slow down, breathe, and discover the quiet beauty hidden within everyday moments.",
       "headline": "Hi, I'm ",
       "overline": "ABOUT ME",

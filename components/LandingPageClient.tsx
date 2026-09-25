@@ -5,17 +5,10 @@ import { MasterclassData } from "@/data/content";
 import { LandingContentProvider } from "@/components/LandingContentProvider";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { InstructorIntro } from "@/components/InstructorIntro";
 import { AudienceSection } from "@/components/AudienceSection";
 import { VideoSection } from "@/components/VideoSection";
-import { Transformation } from "@/components/Transformation";
-import { MethodSection } from "@/components/MethodSection";
-import { CoreConcepts } from "@/components/CoreConcepts";
 import { Outcomes } from "@/components/Outcomes";
 import { InstructorStory } from "@/components/InstructorStory";
-import { Bonuses } from "@/components/Bonuses";
-import { FitCheck } from "@/components/FitCheck";
-import { IncludedSection } from "@/components/IncludedSection";
 import { FAQ } from "@/components/FAQ";
 import { FinalCTA } from "@/components/FinalCTA";
 import { Footer } from "@/components/Footer";
@@ -41,50 +34,29 @@ export function LandingPageClient({
           <Navbar onOpenModal={handleOpenModal} />
 
           <main className="flex-1">
-            {/* Section 01: Hero */}
+            {/* Section 01: Hero & Stats */}
             <Hero onOpenModal={handleOpenModal} />
 
-            {/* Section 02: Trust & Instructor Introduction */}
-            <InstructorIntro />
-
-            {/* Section 03: Who This Is For */}
+            {/* Section 02: Who This Is For (Target Audience) */}
             <AudienceSection />
 
-            {/* Section 04 & 05: Video Preview & Learning Outcomes */}
+            {/* Section 03: Video Preview */}
             <VideoSection onOpenModal={handleOpenModal} />
 
-            {/* Section 06: Transformation (Old Way vs New Way) */}
-            <Transformation />
-
-            {/* Section 07: Framework & Methodology (Observe, Simplify, Express) */}
-            <MethodSection />
-
-            {/* Section 08: Core Concepts (The Three Secrets) */}
-            <CoreConcepts onOpenModal={handleOpenModal} />
-
-            {/* Section 09: Tangible Outcomes */}
+            {/* Section 04: Tangible Learning Outcomes */}
             <Outcomes />
 
-            {/* Section 10: Instructor Story & Philosophy */}
+            {/* Section 05: Instructor Story & Philosophy */}
             <InstructorStory />
 
-            {/* Section 11: Live Attendee Bonuses */}
-            <Bonuses />
-
-            {/* Section 12: Right Fit Qualification Check */}
-            <FitCheck />
-
-            {/* Section 13: Everything Included & Pricing Summary */}
-            <IncludedSection onOpenModal={handleOpenModal} />
-
-            {/* Section 14: Frequently Asked Questions */}
+            {/* Section 06: Frequently Asked Questions */}
             <FAQ />
 
-            {/* Section 15: Final Conversion Call to Action */}
+            {/* Section 07: Final Conversion Call to Action */}
             <FinalCTA onOpenModal={handleOpenModal} />
           </main>
 
-          {/* Section 16: Footer */}
+          {/* Section 08: Footer */}
           <Footer />
 
           {/* Persistent Sticky Bottom Conversion Bar */}

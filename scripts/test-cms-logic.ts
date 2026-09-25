@@ -324,7 +324,7 @@ const validFixtures: Record<CMSSectionKey, any> = {
     paragraphs: ["Art saved me during a hectic chapter of life."],
     quote: "When water meets paper, the mind finally rests.",
     quoteAuthor: "Renuka Aggarwal",
-    image: "/images/instructor_story.jpg",
+    image: "/images/instructor_story.jpeg",
   },
   bonuses: {
     overline: "SPECIAL ENROLLMENT GIFTS",
