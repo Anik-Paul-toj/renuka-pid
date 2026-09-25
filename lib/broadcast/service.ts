@@ -8,12 +8,15 @@ import {
 } from "@/lib/validations/broadcast";
 import { sendTransactionalEmail } from "@/lib/notifications/email";
 import { getSettings } from "@/lib/settings/service";
+import { getWhatsAppTransport } from "@/lib/whatsapp/client";
+import { isValidWhatsAppNumber } from "@/lib/whatsapp/meta-adapter";
 
 export interface ResolvedRecipient {
   customerId: string;
   fullName: string;
   email: string;
   phone?: string | null;
+  whatsappPhone?: string | null;
   courseTitle?: string | null;
   batchName?: string | null;
   startDate?: string | null;
@@ -65,7 +68,7 @@ export async function resolveBroadcastRecipients(
     // 1. All registered students with a valid email
     let query = adminClient
       .from("customers")
-      .select("id, full_name, email, phone")
+      .select("id, full_name, email, phone, whatsapp_phone")
       .not("email", "is", null);
 
     const { data: customers, error } = await query;
@@ -87,22 +90,26 @@ export async function resolveBroadcastRecipients(
 
       for (const c of customers || []) {
         if (c.email && confirmedCustomerIds.has(c.id)) {
+          const resolvedPhone = c.whatsapp_phone || c.phone;
           recipientsMap.set(c.id, {
             customerId: c.id,
             fullName: c.full_name,
             email: c.email.trim(),
-            phone: c.phone,
+            phone: resolvedPhone,
+            whatsappPhone: resolvedPhone,
           });
         }
       }
     } else {
       for (const c of customers || []) {
         if (c.email && c.email.trim()) {
+          const resolvedPhone = c.whatsapp_phone || c.phone;
           recipientsMap.set(c.id, {
             customerId: c.id,
             fullName: c.full_name,
             email: c.email.trim(),
-            phone: c.phone,
+            phone: resolvedPhone,
+            whatsappPhone: resolvedPhone,
           });
         }
       }
@@ -124,7 +131,7 @@ export async function resolveBroadcastRecipients(
 
     let bookingQuery = adminClient
       .from("bookings")
-      .select("customer_id, batch_id, status, customers(id, full_name, email, phone)")
+      .select("customer_id, batch_id, status, customers(id, full_name, email, phone, whatsapp_phone)")
       .in("batch_id", batchIds);
 
     if (filter.confirmedOnly) {
@@ -141,11 +148,13 @@ export async function resolveBroadcastRecipients(
       const cust = b.customers as any;
       if (cust && cust.email && cust.email.trim() && !recipientsMap.has(cust.id)) {
         const batchInfo = batchMap.get(b.batch_id);
+        const resolvedPhone = cust.whatsapp_phone || cust.phone;
         recipientsMap.set(cust.id, {
           customerId: cust.id,
           fullName: cust.full_name,
           email: cust.email.trim(),
-          phone: cust.phone,
+          phone: resolvedPhone,
+          whatsappPhone: resolvedPhone,
           courseTitle: filter.courseName || null,
           batchName: batchInfo?.batch_name || null,
           startDate: batchInfo?.start_date || null,
@@ -167,7 +176,7 @@ export async function resolveBroadcastRecipients(
 
     let bookingQuery = adminClient
       .from("bookings")
-      .select("customer_id, status, customers(id, full_name, email, phone)")
+      .select("customer_id, status, customers(id, full_name, email, phone, whatsapp_phone)")
       .eq("batch_id", filter.batchId);
 
     if (filter.confirmedOnly) {
@@ -183,11 +192,13 @@ export async function resolveBroadcastRecipients(
     for (const b of bookings || []) {
       const cust = b.customers as any;
       if (cust && cust.email && cust.email.trim() && !recipientsMap.has(cust.id)) {
+        const resolvedPhone = cust.whatsapp_phone || cust.phone;
         recipientsMap.set(cust.id, {
           customerId: cust.id,
           fullName: cust.full_name,
           email: cust.email.trim(),
-          phone: cust.phone,
+          phone: resolvedPhone,
+          whatsappPhone: resolvedPhone,
           courseTitle: filter.courseName || null,
           batchName: batchInfo?.batch_name || null,
           startDate: batchInfo?.start_date || null,
@@ -201,7 +212,7 @@ export async function resolveBroadcastRecipients(
     // 4. Confirmed Students across all bookings
     const { data: bookings, error } = await adminClient
       .from("bookings")
-      .select("customer_id, customers(id, full_name, email, phone)")
+      .select("customer_id, customers(id, full_name, email, phone, whatsapp_phone)")
       .eq("status", "confirmed");
 
     if (error) {
@@ -212,11 +223,13 @@ export async function resolveBroadcastRecipients(
     for (const b of bookings || []) {
       const cust = b.customers as any;
       if (cust && cust.email && cust.email.trim() && !recipientsMap.has(cust.id)) {
+        const resolvedPhone = cust.whatsapp_phone || cust.phone;
         recipientsMap.set(cust.id, {
           customerId: cust.id,
           fullName: cust.full_name,
           email: cust.email.trim(),
-          phone: cust.phone,
+          phone: resolvedPhone,
+          whatsappPhone: resolvedPhone,
         });
       }
     }
@@ -626,55 +639,126 @@ export async function sendBroadcast(
         .replace(/\[Join Link\]|\[Zoom Link\]|\{\{zoom_link\}\}/gi, recipient.zoomJoinUrl || defaultJoinLink)
         .replace(/\[Booking Reference\]|\{\{booking_reference\}\}/gi, "N/A");
 
-      // Format HTML with paragraphs for clean email presentation
-      const paragraphs = cleanBody
-        .split("\n\n")
-        .map((p: string) => `<p style="margin: 0 0 16px 0; line-height: 1.6; color: #292524;">${p.replace(/\n/g, "<br/>")}</p>`)
-        .join("");
+      const shouldSendEmail = broadcast.channel === "email" || broadcast.channel === "both";
+      const shouldSendWhatsApp = broadcast.channel === "whatsapp" || broadcast.channel === "both";
 
-      const emailHtml = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #ffffff; border: 1px solid #e7e5e4; border-radius: 12px;">
-          <div style="margin-bottom: 24px; border-bottom: 2px solid #f5f5f4; padding-bottom: 16px;">
-            <h2 style="margin: 0; color: #1c1917; font-size: 20px;">${appSettings.studioName}</h2>
-            <p style="margin: 4px 0 0 0; color: #78716c; font-size: 13px;">Announcements &amp; Updates</p>
-          </div>
-          <div>${paragraphs}</div>
-          <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #f5f5f4; font-size: 12px; color: #a8a29e;">
-            <p style="margin: 0;">Sent with warmth by ${appSettings.instructorName} • ${appSettings.studioName}</p>
-          </div>
-        </div>
-      `;
+      let emailSentSuccess = false;
+      let emailSentFailed = false;
+      let whatsappSentSuccess = false;
+      let whatsappSentFailed = false;
 
-      // Dispatch using existing Resend transport
-      const sendResult = await sendTransactionalEmail({
-        to: recipient.email,
-        subject: resolvedSubject,
-        html: emailHtml,
-        text: cleanBody,
-        replyTo: appSettings.replyToEmail || undefined,
-      });
+      // 1. Email Dispatch
+      if (shouldSendEmail) {
+        if (!recipient.email || !recipient.email.trim()) {
+          emailSentFailed = true;
+          await adminClient.from("notification_logs").insert({
+            customer_id: recipient.customerId,
+            channel: "email",
+            message_type: "broadcast",
+            status: "failed",
+            error_message: "Customer has no registered email address.",
+            sent_at: new Date().toISOString(),
+          });
+        } else {
+          // Format HTML with paragraphs for clean email presentation
+          const paragraphs = cleanBody
+            .split("\n\n")
+            .map((p: string) => `<p style="margin: 0 0 16px 0; line-height: 1.6; color: #292524;">${p.replace(/\n/g, "<br/>")}</p>`)
+            .join("");
 
-      if (sendResult.success) {
+          const emailHtml = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #ffffff; border: 1px solid #e7e5e4; border-radius: 12px;">
+              <div style="margin-bottom: 24px; border-bottom: 2px solid #f5f5f4; padding-bottom: 16px;">
+                <h2 style="margin: 0; color: #1c1917; font-size: 20px;">${appSettings.studioName}</h2>
+                <p style="margin: 4px 0 0 0; color: #78716c; font-size: 13px;">Announcements &amp; Updates</p>
+              </div>
+              <div>${paragraphs}</div>
+              <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #f5f5f4; font-size: 12px; color: #a8a29e;">
+                <p style="margin: 0;">Sent with warmth by ${appSettings.instructorName} • ${appSettings.studioName}</p>
+              </div>
+            </div>
+          `;
+
+          const sendResult = await sendTransactionalEmail({
+            to: recipient.email,
+            subject: resolvedSubject,
+            html: emailHtml,
+            text: cleanBody,
+            replyTo: appSettings.replyToEmail || undefined,
+          });
+
+          if (sendResult.success) {
+            emailSentSuccess = true;
+            await adminClient.from("notification_logs").insert({
+              customer_id: recipient.customerId,
+              channel: "email",
+              message_type: "broadcast",
+              provider_message_id: sendResult.providerMessageId || null,
+              status: "sent",
+              sent_at: new Date().toISOString(),
+            });
+          } else {
+            emailSentFailed = true;
+            await adminClient.from("notification_logs").insert({
+              customer_id: recipient.customerId,
+              channel: "email",
+              message_type: "broadcast",
+              status: "failed",
+              error_message: sendResult.error || "Unknown delivery failure",
+              sent_at: new Date().toISOString(),
+            });
+          }
+        }
+      }
+
+      // 2. WhatsApp Dispatch
+      if (shouldSendWhatsApp) {
+        const phone = recipient.whatsappPhone || recipient.phone;
+        if (!phone || !phone.trim() || !isValidWhatsAppNumber(phone)) {
+          whatsappSentFailed = true;
+          await adminClient.from("notification_logs").insert({
+            customer_id: recipient.customerId,
+            channel: "whatsapp",
+            message_type: "broadcast",
+            status: "failed",
+            error_message: !phone ? "Customer has no registered WhatsApp phone number." : "Invalid WhatsApp phone number format.",
+            sent_at: new Date().toISOString(),
+          });
+        } else {
+          const whatsAppTransport = getWhatsAppTransport();
+          const sendResult = await whatsAppTransport.sendTextMessage({
+            to: phone,
+            body: cleanBody,
+          });
+
+          if (sendResult.success) {
+            whatsappSentSuccess = true;
+            await adminClient.from("notification_logs").insert({
+              customer_id: recipient.customerId,
+              channel: "whatsapp",
+              message_type: "broadcast",
+              provider_message_id: sendResult.providerMessageId || null,
+              status: "sent",
+              sent_at: new Date().toISOString(),
+            });
+          } else {
+            whatsappSentFailed = true;
+            await adminClient.from("notification_logs").insert({
+              customer_id: recipient.customerId,
+              channel: "whatsapp",
+              message_type: "broadcast",
+              status: "failed",
+              error_message: sendResult.error || "WhatsApp delivery failed",
+              sent_at: new Date().toISOString(),
+            });
+          }
+        }
+      }
+
+      if (emailSentSuccess || whatsappSentSuccess) {
         successfulSends++;
-        // Log in notification_logs
-        await adminClient.from("notification_logs").insert({
-          customer_id: recipient.customerId,
-          channel: "email",
-          message_type: "broadcast",
-          provider_message_id: sendResult.providerMessageId || null,
-          status: "sent",
-          sent_at: new Date().toISOString(),
-        });
-      } else {
+      } else if (emailSentFailed || whatsappSentFailed) {
         failedSends++;
-        await adminClient.from("notification_logs").insert({
-          customer_id: recipient.customerId,
-          channel: "email",
-          message_type: "broadcast",
-          status: "failed",
-          error_message: sendResult.error || "Unknown delivery failure",
-          sent_at: new Date().toISOString(),
-        });
       }
     } catch (err: any) {
       failedSends++;

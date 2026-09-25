@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NotificationQuery } from "@/lib/validations/notification";
 import { sendBookingConfirmationEmail } from "@/lib/notifications/service";
+import { sendBookingConfirmationWhatsApp } from "@/lib/whatsapp/service";
 
 export interface AdminNotificationRecipient {
   fullName: string | null;
@@ -370,10 +371,11 @@ export async function retryNotificationById(
         return { success: false, error: "Associated booking record not found.", statusCode: 404 };
       }
 
-      // Re-use Phase 12 sendBookingConfirmationEmail with forceRetry = true
-      const result = await sendBookingConfirmationEmail(booking.booking_reference, {
-        forceRetry: true,
-      });
+      // Re-use authoritative service with forceRetry = true according to log channel
+      const result =
+        log.channel === "whatsapp"
+          ? await sendBookingConfirmationWhatsApp(booking.booking_reference, { forceRetry: true })
+          : await sendBookingConfirmationEmail(booking.booking_reference, { forceRetry: true });
 
       if (!result.success) {
         return {

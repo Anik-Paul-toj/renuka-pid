@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth/admin";
 import { retryNotificationSchema } from "@/lib/validations/notification";
 import { sendBookingConfirmationEmail } from "@/lib/notifications/service";
+import { sendBookingConfirmationWhatsApp } from "@/lib/whatsapp/service";
 
 export const dynamic = "force-dynamic";
 
@@ -54,10 +55,16 @@ export async function POST(request: NextRequest) {
 
     // 3. Dispatch Notification with Idempotency or Force Retry
     // Note: Recipient is derived entirely server-side from the verified booking's customer record
-    const result = await sendBookingConfirmationEmail(
-      validationResult.data.bookingReference,
-      { forceRetry: validationResult.data.forceRetry }
-    );
+    const result =
+      validationResult.data.channel === "whatsapp"
+        ? await sendBookingConfirmationWhatsApp(
+            validationResult.data.bookingReference,
+            { forceRetry: validationResult.data.forceRetry }
+          )
+        : await sendBookingConfirmationEmail(
+            validationResult.data.bookingReference,
+            { forceRetry: validationResult.data.forceRetry }
+          );
 
     if (!result.success) {
       const statusCode =

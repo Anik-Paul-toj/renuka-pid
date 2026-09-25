@@ -155,6 +155,21 @@ export function BroadcastManager({
     }
   };
 
+  // Channel Selection
+  const [channel, setChannel] = useState<"email" | "whatsapp">("email");
+  const [whatsappStatus, setWhatsappStatus] = useState<{ isConfigured: boolean; message: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/whatsapp/status")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setWhatsappStatus(data.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // 2. Audience Selection
   const [audience, setAudience] = useState<AudienceType>("batch");
 
@@ -307,7 +322,7 @@ export function BroadcastManager({
       // 1. Create broadcast record first
       const payload = {
         title: messageName.trim() || "Broadcast Announcement",
-        channel: "email",
+        channel: channel,
         targetFilter,
         content: messageBody,
       };
@@ -382,6 +397,50 @@ export function BroadcastManager({
 
       {/* Main Broadcast Form Card */}
       <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 sm:p-8 space-y-6">
+        {/* CHANNEL SELECTOR */}
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
+            Channel
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setChannel("email")}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+                channel === "email"
+                  ? "bg-amber-50/80 border-amber-600 text-amber-900"
+                  : "bg-white border-stone-300 text-stone-700 hover:bg-stone-50"
+              }`}
+            >
+              Email
+            </button>
+            <button
+              type="button"
+              onClick={() => setChannel("whatsapp")}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+                channel === "whatsapp"
+                  ? "bg-emerald-50/80 border-emerald-600 text-emerald-900"
+                  : "bg-white border-stone-300 text-stone-700 hover:bg-stone-50"
+              }`}
+            >
+              WhatsApp
+            </button>
+          </div>
+        </div>
+
+        {/* WhatsApp Not Configured Notice */}
+        {channel === "whatsapp" && whatsappStatus && !whatsappStatus.isConfigured && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 text-xs text-amber-800">
+            <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-900">WhatsApp is not configured</p>
+              <p className="mt-0.5 text-amber-700">
+                Add the required server-side WhatsApp Business API configuration before sending.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* 1. MESSAGE SELECTOR */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
@@ -652,12 +711,42 @@ export function BroadcastManager({
             <h3 className="font-serif font-bold text-stone-900 text-lg">
               Confirm Broadcast Send
             </h3>
-            <p className="text-sm text-stone-600">
-              Send this message to{" "}
-              <strong className="text-stone-900">{recipientCount} students</strong>?
-            </p>
+
+            <div className="space-y-2.5 bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs text-stone-700">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-stone-500 uppercase tracking-wider">Template:</span>
+                <span className="font-medium text-stone-900 text-right">{messageName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-stone-500 uppercase tracking-wider">Audience:</span>
+                <span className="font-medium text-stone-900 text-right capitalize">
+                  {audience === "batch"
+                    ? `Selected Batch (${selectedBatch?.batch_name || "Batch"})`
+                    : audience === "course"
+                    ? `Selected Course (${selectedCourse?.title || "Course"})`
+                    : audience === "confirmed"
+                    ? "Confirmed Students"
+                    : "All Students"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-stone-500 uppercase tracking-wider">Recipients:</span>
+                <span className="font-bold text-stone-900">{recipientCount}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-stone-500 uppercase tracking-wider">Channel:</span>
+                <span className={`font-bold uppercase px-2 py-0.5 rounded text-[11px] ${
+                  channel === "whatsapp"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-amber-100 text-amber-800"
+                }`}>
+                  {channel}
+                </span>
+              </div>
+            </div>
+
             <p className="text-xs text-stone-400">
-              This action will deliver individual emails immediately and cannot be undone.
+              This action will dispatch individual {channel === "whatsapp" ? "WhatsApp messages" : "emails"} immediately and cannot be undone.
             </p>
             <div className="flex justify-end gap-3 pt-3 border-t border-stone-100">
               <button
