@@ -242,13 +242,19 @@ async function runTests() {
       fail("7. Webhook handling failed", webhookRes);
     }
 
-    // Allow asynchronous notification dispatch to complete
-    await new Promise((r) => setTimeout(r, 400));
-
-    const { data: webhookLogs } = await adminClient
-      .from("notification_logs")
-      .select("*")
-      .eq("booking_id", bookingWebhook.id);
+    // Allow asynchronous notification dispatch to complete (poll up to 3s for network call)
+    let webhookLogs: any[] | null = null;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      await new Promise((r) => setTimeout(r, 300));
+      const { data } = await adminClient
+        .from("notification_logs")
+        .select("*")
+        .eq("booking_id", bookingWebhook.id);
+      if (data && data.length > 0) {
+        webhookLogs = data;
+        break;
+      }
+    }
 
     if (webhookLogs && webhookLogs.length === 1 && webhookLogs[0].status === "sent") {
       testIdsToCleanup.notificationLogIds.push(webhookLogs[0].id);
