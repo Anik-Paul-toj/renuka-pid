@@ -13,10 +13,26 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
   const { brand: contextBrand } = useLandingContent();
   const brand = content || contextBrand;
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#464137]/10 bg-[#F7F4EC]/95 backdrop-blur-sm transition-all">
-      <div className="mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between px-6">
+    <header
+      className={`sticky top-0 z-40 transition-all duration-300 ${
+        isScrolled
+          ? "border-b border-[#464137]/10 bg-[#F7F4EC]/92 backdrop-blur-md shadow-xs"
+          : "border-b border-transparent bg-transparent"
+      }`}
+    >
+      <div className="mx-auto flex h-14 sm:h-16 max-w-7xl xl:max-w-[1400px] items-center justify-between px-6 sm:px-8 lg:px-12">
         {/* Brand Logo */}
         <a href="#" className="flex flex-col group">
           <span className="font-serif text-2xl tracking-tight text-[#292923] font-semibold">

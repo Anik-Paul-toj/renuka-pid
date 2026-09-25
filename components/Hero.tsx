@@ -18,7 +18,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
   const heroContent = content || contextHero;
 
   return (
-    <section className="relative overflow-hidden bg-[#F7F4EC] pt-4 pb-7 sm:pt-6 sm:pb-9 lg:pt-7 lg:pb-10 border-b border-[#464137]/10">
+    <section className="relative overflow-hidden bg-[#F7F4EC] -mt-14 sm:-mt-16 pt-[4.5rem] sm:pt-[5.5rem] lg:pt-[5.75rem] pb-8 sm:pb-10 lg:pb-12">
       {/* Botanical Watercolor Background Art */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <Image
@@ -26,8 +26,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
           alt=""
           fill
           priority
-          className="object-cover object-center opacity-30 mix-blend-multiply select-none"
+          className="object-cover object-top opacity-35 mix-blend-multiply select-none"
         />
+        {/* Seamless blend into the next section */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#F7F4EC] via-[#F7F4EC]/50 to-transparent" />
       </div>
 
       {/* Delicate watercolor washes in the background */}
