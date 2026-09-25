@@ -53,7 +53,7 @@ export const FAQ: React.FC = () => {
         </div>
 
         {/* 2-Column Accordion Grid in 1 Scroll */}
-        <div className="mx-auto mt-6 max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+        <div className="no-gsap mx-auto mt-6 max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             const contentId = `faq-answer-${index}`;
@@ -62,10 +62,10 @@ export const FAQ: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`group relative overflow-hidden rounded-xl border transition-all duration-300 ${
+                className={`no-gsap group relative overflow-hidden rounded-xl border transition-all duration-300 ${
                   isOpen
                     ? "border-[#68705A]/50 bg-[#FAF8F2] shadow-sm"
-                    : "border-[#68705A]/25 bg-[#FAF8F2]/90 hover:border-[#68705A]/45 shadow-2xs"
+                    : "border-[#68705A]/25 bg-[#FAF8F2] hover:border-[#68705A]/45 shadow-2xs"
                 }`}
               >
                 {/* Texture from forBox */}

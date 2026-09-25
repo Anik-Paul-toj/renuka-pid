@@ -38,8 +38,8 @@ export const GSAPProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       });
 
-      // 3. Staggered cards reveal for grid sections (excluding countdown timer)
-      gsap.utils.toArray<HTMLElement>(".grid:not(.no-gsap)").forEach((grid) => {
+      // 3. Staggered cards reveal for grid sections with opt-in class only
+      gsap.utils.toArray<HTMLElement>(".gsap-grid").forEach((grid) => {
         const cards = grid.children;
         if (cards.length > 0) {
           gsap.from(cards, {

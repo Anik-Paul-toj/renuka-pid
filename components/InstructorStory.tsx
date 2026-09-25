@@ -140,11 +140,11 @@ export const InstructorStory: React.FC = () => {
             </blockquote>
 
             {/* 4-Item Credential Badges with Individual forBox Textures */}
-            <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="no-gsap mt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {credentialBadges.map((badge, idx) => (
                 <div
                   key={idx}
-                  className="group relative overflow-hidden rounded-xl border border-[#68705A]/25 bg-[#FAF8F2]/90 p-2 sm:p-2.5 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300"
+                  className="no-gsap group relative overflow-hidden rounded-xl border border-[#68705A]/25 bg-[#FAF8F2] p-2 sm:p-2.5 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300"
                 >
                   <div className="pointer-events-none absolute inset-0 z-0">
                     <Image

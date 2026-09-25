@@ -103,14 +103,14 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
             </div>
 
             {/* List of Learning Outcomes in 2-Column Mini Grid */}
-            <ul className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+            <ul className="no-gsap mt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
               {videoSection.learningPoints.map((point, idx) => {
                 const boxImg = videoBoxImages[idx % videoBoxImages.length];
 
                 return (
                   <li
                     key={idx}
-                    className="group relative overflow-hidden flex items-start gap-2.5 rounded-lg bg-[#FAF8F2]/90 px-3 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-[0.78rem] leading-relaxed text-[#292923] border border-[#464137]/15 shadow-2xs hover:border-[#68705A]/40 transition-all duration-300"
+                    className="no-gsap group relative overflow-hidden flex items-start gap-2.5 rounded-lg bg-[#FAF8F2] px-3 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-[0.8rem] leading-relaxed text-[#292923] border border-[#464137]/20 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300"
                   >
                     {/* Box Watercolor Background */}
                     {boxImg && (
@@ -119,7 +119,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                           src={boxImg}
                           alt=""
                           fill
-                          className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
+                          className="object-cover object-center opacity-18 mix-blend-multiply group-hover:opacity-28 transition-opacity duration-300 select-none"
                         />
                         {/* Artful Inner Border Frame */}
                         <div className="absolute inset-0.5 rounded-[6px] border border-[#464137]/10 group-hover:border-[#68705A]/25 pointer-events-none transition-colors duration-300" />
@@ -139,7 +139,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
 
             {/* Biggest Takeaway Callout */}
             {videoSection.takeawayText && (
-              <div className="group relative overflow-hidden mt-3 rounded-xl border border-[#68705A]/25 bg-[#FAF8F2]/90 p-3 sm:p-3.5 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300">
+              <div className="no-gsap group relative overflow-hidden mt-3 rounded-xl border border-[#68705A]/30 bg-[#FAF8F2] p-3 sm:p-3.5 shadow-2xs hover:border-[#68705A]/50 transition-all duration-300">
                 {/* Takeaway Box Background */}
                 <div className="pointer-events-none absolute inset-0 z-0">
                   <Image
