@@ -57,7 +57,7 @@ export async function sendTransactionalEmail(
   try {
     const resend = new Resend(apiKey);
     const fromAddress =
-      process.env.EMAIL_FROM || "Art & Soul Studio <onboarding@resend.dev>";
+      process.env.EMAIL_FROM || "Renuka Art Studio <onboarding@resend.dev>";
 
     const { data, error } = await resend.emails.send({
       from: fromAddress,

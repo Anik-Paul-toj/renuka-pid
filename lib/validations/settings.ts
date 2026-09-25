@@ -19,7 +19,7 @@ export const settingsSchema = z.object({
   websiteUrl: z
     .string()
     .trim()
-    .url("Website must be a valid URL (e.g., https://artandsoulstudio.com)")
+    .url("Website must be a valid URL (e.g., https://renukaartstudio.com)")
     .or(z.literal("")),
   contactEmail: z
     .string()

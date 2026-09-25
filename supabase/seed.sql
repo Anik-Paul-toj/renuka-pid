@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Art & Soul Studio (webrenuka) - Phase 3 Content Seed Migration
+-- Renuka Art Studio (webrenuka) - Phase 3 Content Seed Migration
 -- ==============================================================================
 -- Seeds all existing landing page content, courses, batches, media, and templates
 -- from data/content.ts into Supabase without losing any text, arrays, or structure.
@@ -99,7 +99,7 @@ INSERT INTO public.media_assets (
   'instructor_hero.jpeg',
   'image/jpeg',
   92476,
-  'Renuka Aggarwal — Art Educator & Founder of Art & Soul Studio',
+  'Renuka Aggarwal — Art Educator & Founder of Renuka Art Studio',
   'instructor'
 ),
 (
@@ -139,7 +139,7 @@ VALUES (
   'brand',
   $json${
     "name": "Renuka Aggarwal",
-    "studioName": "ART & SOUL STUDIO",
+    "studioName": "RENUKA ART STUDIO",
     "tagline": "ART | MINDFULNESS | A BRIGHTER YOU",
     "subTagline": "Mindful Watercolor & Creative Well-Being"
   }$json$::jsonb,
@@ -171,7 +171,7 @@ VALUES (
     "guaranteeText": "Live intimate atelier broadcast • Limited to 200 interactive attendees.",
     "targetAudienceNote": "Designed warmly for beginners, working adults, and creative souls at every level.",
     "instructorName": "Renuka Aggarwal",
-    "instructorTitle": "Art Educator | Founder, Art & Soul Studio",
+    "instructorTitle": "Art Educator | Founder, Renuka Art Studio",
     "instructorImage": "/images/instructor_hero.jpeg"
   }$json$::jsonb,
   'published',
@@ -244,7 +244,7 @@ VALUES (
   $json${
     "eyebrow": "ABOUT THE ARTIST",
     "heading": "Meet Renuka Aggarwal",
-    "role": "Art Educator | Founder, Art & Soul Studio",
+    "role": "Art Educator | Founder, Renuka Art Studio",
     "introduction": "With over 15 years of experience in art education, Renuka Aggarwal is an experienced Art Educator dedicated to helping people discover their creativity, build artistic confidence, and reconnect with the joy of creating.",
     "bio": [
       "She is the Director and Co-Owner of Meraki Institute of Fine Art, an established art education institute where she has guided and mentored thousands of students across different age groups and skill levels.",
@@ -392,7 +392,7 @@ VALUES (
       "Abandoning unfinished paintings whenever a mistake occurs",
       "Feeling disconnected from the mindful, therapeutic pleasure of the process"
     ],
-    "afterTitle": "THE ART & SOUL WAY",
+    "afterTitle": "THE RENUKA ART STUDIO WAY",
     "afterPoints": [
       "Observing the soul and light of the subject with peaceful curiosity",
       "Anchoring one dominant light vector to organize values naturally",
@@ -556,11 +556,11 @@ VALUES (
     "overline": "ABOUT ME",
     "headline": "Hi, I'm ",
     "name": "Renuka Aggarwal",
-    "subtitle": "ART EDUCATOR | FOUNDER, ART & SOUL STUDIO",
+    "subtitle": "ART EDUCATOR | FOUNDER, RENUKA ART STUDIO",
     "paragraphs": [
       "With over 15 years of teaching experience, I help adults discover the joy of art through simple, mindful and well-structured watercolour courses. My goal is to make art accessible, meaningful and a part of your everyday life — no matter where you are in your journey.",
       "I believe everyone holds a natural, innate creative impulse that often gets buried under the busyness of adult life. In my studio, we step away from competition and rigid expectations. We return to the tactile pleasure of water, natural pigment, and mindful breathing.",
-      "Through Art & Soul Studio, I have had the privilege of guiding more than 1,000 students worldwide to rediscover their creative confidence, quiet their inner critic, and experience art as a kinder, restorative companion."
+      "Through Renuka Art Studio, I have had the privilege of guiding more than 1,000 students worldwide to rediscover their creative confidence, quiet their inner critic, and experience art as a kinder, restorative companion."
     ],
     "quote": "My art is always an invitation to slow down, breathe, and discover the quiet beauty hidden within everyday moments.",
     "quoteAuthor": "Renuka Aggarwal",
@@ -730,7 +730,7 @@ VALUES (
     },
     {
       "question": "Is registration genuinely free?",
-      "answer": "Yes, 100% complimentary. There is no credit card required. This is my gift to introduce you to our mindful art community at Art & Soul Studio."
+      "answer": "Yes, 100% complimentary. There is no credit card required. This is my gift to introduce you to our mindful art community at Renuka Art Studio."
     },
     {
       "question": "Will you try to sell something aggressively during the class?",
@@ -773,7 +773,7 @@ INSERT INTO public.landing_content (section_key, content_json, status, version, 
 VALUES (
   'footer',
   $json${
-    "brandDescription": "Renuka Aggarwal | Art & Soul Studio. Mindful watercolor courses, creative well-being, and artistic mentorship designed to nurture a calmer, brighter you.",
+    "brandDescription": "Renuka Aggarwal | Renuka Art Studio. Mindful watercolor courses, creative well-being, and artistic mentorship designed to nurture a calmer, brighter you.",
     "links": [
       { "label": "Home", "href": "#" },
       { "label": "About", "href": "#about" },
@@ -785,7 +785,7 @@ VALUES (
     ],
     "contactEmail": "hello@renukaartstudio.com",
     "copyrightYear": 2026,
-    "disclaimer": "Art & Soul Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
+    "disclaimer": "Renuka Art Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
     "handwrittenSignature": "Keep Creating ♡"
   }$json$::jsonb,
   'published',
@@ -816,7 +816,7 @@ INSERT INTO public.message_templates (
   'email',
   'Booking Confirmation Email',
   'Your seat is reserved for {{course_name}}! 🎨',
-  'Hi {{student_name}},\n\nYour seat for {{course_name}} ({{batch_name}}) is confirmed!\n\nDate: {{date}}\nTime: {{time}}\nBooking Reference: {{booking_reference}}\n\nPrivate Access Link: {{zoom_link}}\n\nWarmly,\nRenuka Aggarwal\nArt & Soul Studio',
+  'Hi {{student_name}},\n\nYour seat for {{course_name}} ({{batch_name}}) is confirmed!\n\nDate: {{date}}\nTime: {{time}}\nBooking Reference: {{booking_reference}}\n\nPrivate Access Link: {{zoom_link}}\n\nWarmly,\nRenuka Aggarwal\nRenuka Art Studio',
   ARRAY['student_name', 'course_name', 'batch_name', 'date', 'time', 'booking_reference', 'zoom_link'],
   true
 ),

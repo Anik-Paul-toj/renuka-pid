@@ -96,10 +96,10 @@ Private Access: ${zoomAccessText}
 
 Warmly,
 Renuka Aggarwal
-Art & Soul Studio`;
+Renuka Art Studio`;
   }
 
-  // 4. HTML Version with Art & Soul Studio visual styling
+  // 4. HTML Version with Renuka Art Studio visual styling
   const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -169,7 +169,7 @@ Art & Soul Studio`;
 
     <div class="footer">
       <p style="margin: 0; font-weight: 600; color: #292923;">Warmly,</p>
-      <p style="margin: 2px 0 0; color: #68705A;">Renuka Aggarwal &bull; Art & Soul Studio</p>
+      <p style="margin: 2px 0 0; color: #68705A;">Renuka Aggarwal &bull; Renuka Art Studio</p>
     </div>
   </div>
 </body>

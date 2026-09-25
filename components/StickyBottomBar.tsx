@@ -26,7 +26,7 @@ export const StickyBottomBar: React.FC<StickyBottomBarProps> = ({ onOpenModal })
 
         {/* Mobile Info */}
         <div className="flex sm:hidden flex-col">
-          <span className="text-[0.7rem] font-bold text-[#68705A] uppercase tracking-wider">Art Studio</span>
+          <span className="text-[0.7rem] font-bold text-[#68705A] uppercase tracking-wider">Renuka Art Studio</span>
           <span className="text-[0.65rem] text-[#6F6B61]">{hero.date}</span>
         </div>
 

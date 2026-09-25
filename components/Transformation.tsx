@@ -42,7 +42,7 @@ export const Transformation: React.FC = () => {
             </ul>
           </div>
 
-          {/* The Art & Soul Way Card */}
+          {/* The Renuka Art Studio Way Card */}
           <div className="paper-card p-6 sm:p-8 bg-[#FAF8F2] relative overflow-hidden border-[#68705A]/25">
             <div className="absolute top-0 right-0 h-1 w-full bg-[#68705A]" />
             <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#68705A] pb-4 border-b border-[#464137]/10">

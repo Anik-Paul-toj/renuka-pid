@@ -224,7 +224,7 @@ export const workshopData: WorkshopData = {
 export const masterclassData: MasterclassData = {
   brand: {
     name: "Renuka Aggarwal",
-    studioName: "ART STUDIO",
+    studioName: "RENUKA ART STUDIO",
     tagline: "ART | MINDFULNESS | A BRIGHTER YOU",
     subTagline: "Mindful Watercolor & Creative Well-Being",
   },
@@ -244,7 +244,7 @@ export const masterclassData: MasterclassData = {
     guaranteeText: "Live intimate atelier broadcast • Limited to 200 interactive attendees.",
     targetAudienceNote: "Designed warmly for beginners, working adults, and creative souls at every level.",
     instructorName: "Renuka Aggarwal",
-    instructorTitle: "Art Educator | Founder, Art Studio",
+    instructorTitle: "Art Educator | Founder, Renuka Art Studio",
     instructorImage: "/images/instructor_hero.jpeg",
   },
   stats: [
@@ -279,7 +279,7 @@ export const masterclassData: MasterclassData = {
   aboutArtist: {
     eyebrow: "ABOUT THE ARTIST",
     heading: "Meet Renuka Aggarwal",
-    role: "Art Educator | Founder, Art Studio",
+    role: "Art Educator | Founder, Renuka Art Studio",
     introduction:
       "With over 15 years of experience in art education, Renuka Aggarwal is an experienced Art Educator dedicated to helping people discover their creativity, build artistic confidence, and reconnect with the joy of creating.",
     bio: [
@@ -390,7 +390,7 @@ export const masterclassData: MasterclassData = {
       "Abandoning unfinished paintings whenever a mistake occurs",
       "Feeling disconnected from the mindful, therapeutic pleasure of the process",
     ],
-    afterTitle: "THE ART & SOUL WAY",
+    afterTitle: "THE RENUKA ART STUDIO WAY",
     afterPoints: [
       "Observing the soul and light of the subject with peaceful curiosity",
       "Anchoring one dominant light vector to organize values naturally",
@@ -511,11 +511,11 @@ export const masterclassData: MasterclassData = {
     overline: "ABOUT ME",
     headline: "Hi, I'm ",
     name: "Renuka Aggarwal",
-    subtitle: "ART EDUCATOR | FOUNDER, ART STUDIO",
+    subtitle: "ART EDUCATOR | FOUNDER, RENUKA ART STUDIO",
     paragraphs: [
       "With over 15 years of teaching experience, I help adults discover the joy of art through simple, mindful and well-structured watercolour courses. My goal is to make art accessible, meaningful and a part of your everyday life — no matter where you are in your journey.",
       "I believe everyone holds a natural, innate creative impulse that often gets buried under the busyness of adult life. In my studio, we step away from competition and rigid expectations. We return to the tactile pleasure of water, natural pigment, and mindful breathing.",
-      "Through Art & Soul Studio, I have had the privilege of guiding more than 1,000 students worldwide to rediscover their creative confidence, quiet their inner critic, and experience art as a kinder, restorative companion.",
+      "Through Renuka Art Studio, I have had the privilege of guiding more than 1,000 students worldwide to rediscover their creative confidence, quiet their inner critic, and experience art as a kinder, restorative companion.",
     ],
     quote: "My art is always an invitation to slow down, breathe, and discover the quiet beauty hidden within everyday moments.",
     quoteAuthor: "Renuka Aggarwal",
@@ -524,7 +524,7 @@ export const masterclassData: MasterclassData = {
   bonuses: {
     overline: "LIVE ATTENDEE GIFTS",
     headline: "Attend Live and Receive Three ",
-    headlineHighlight: "Art Studio Resources",
+    headlineHighlight: "Renuka Art Studio Resources",
     items: [
       {
         id: "bonus-1",
@@ -665,7 +665,7 @@ export const masterclassData: MasterclassData = {
   },
   footer: {
     brandDescription:
-      "Renuka Aggarwal | Art Studio. Mindful watercolor courses, creative well-being, and artistic mentorship designed to nurture a calmer, brighter you.",
+      "Renuka Aggarwal | Renuka Art Studio. Mindful watercolor courses, creative well-being, and artistic mentorship designed to nurture a calmer, brighter you.",
     links: [
       { label: "Home", href: "#" },
       { label: "About", href: "#about" },
@@ -678,7 +678,7 @@ export const masterclassData: MasterclassData = {
     contactEmail: "hello@renukaartstudio.com",
     copyrightYear: 2026,
     disclaimer:
-      "Art Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
+      "Renuka Art Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
     handwrittenSignature: "Keep Creating ♡",
   },
 };

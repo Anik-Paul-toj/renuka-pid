@@ -573,7 +573,7 @@ export function MessagesManager({
                 <div className="bg-stone-50 rounded-xl p-4 border border-stone-200/80 space-y-1.5 text-xs text-stone-600">
                   <div>
                     <span className="font-semibold text-stone-800">From: </span>
-                    Renuka Aggarwal &lt;artandsoul.studios@gmail.com&gt;
+                    Renuka Art Studio &lt;hello@renukaartstudio.com&gt;
                   </div>
                   <div>
                     <span className="font-semibold text-stone-800">To: </span>

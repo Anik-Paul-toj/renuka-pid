@@ -172,7 +172,7 @@ export function SettingsManager({
                   className={`w-full pl-9 pr-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                     fieldErrors.studioName ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                   } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                  placeholder="Art & Soul Studio"
+                  placeholder="Renuka Art Studio"
                 />
               </div>
               {fieldErrors.studioName && (
@@ -216,7 +216,7 @@ export function SettingsManager({
                   className={`w-full pl-9 pr-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                     fieldErrors.websiteUrl ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                   } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                  placeholder="https://artandsoulstudio.com"
+                  placeholder="https://renukaartstudio.com"
                 />
               </div>
               {fieldErrors.websiteUrl && (
@@ -248,7 +248,7 @@ export function SettingsManager({
                   className={`w-full pl-9 pr-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                     fieldErrors.contactEmail ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                   } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                  placeholder="contact@artandsoulstudio.com"
+                  placeholder="contact@renukaartstudio.com"
                 />
               </div>
               {fieldErrors.contactEmail && (
@@ -322,7 +322,7 @@ export function SettingsManager({
                 className={`w-full px-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                   fieldErrors.defaultSenderName ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                 } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                placeholder="Art & Soul Studio"
+                placeholder="Renuka Art Studio"
               />
               {fieldErrors.defaultSenderName && (
                 <p className="text-[0.7rem] text-red-600 mt-1">{fieldErrors.defaultSenderName[0]}</p>
@@ -341,7 +341,7 @@ export function SettingsManager({
                 className={`w-full px-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                   fieldErrors.replyToEmail ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                 } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                placeholder="contact@artandsoulstudio.com"
+                placeholder="contact@renukaartstudio.com"
               />
               {fieldErrors.replyToEmail && (
                 <p className="text-[0.7rem] text-red-600 mt-1">{fieldErrors.replyToEmail[0]}</p>

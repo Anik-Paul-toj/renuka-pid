@@ -177,7 +177,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         key: orderResult.data.keyId,
         amount: orderResult.data.amountPaise,
         currency: orderResult.data.currency,
-        name: "Art Studio",
+        name: "Renuka Art Studio",
         description: orderResult.data.courseTitle,
         order_id: orderResult.data.orderId,
         prefill: {

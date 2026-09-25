@@ -633,7 +633,7 @@ export async function getPaymentDetailsById(
       },
       course: {
         id: course?.id || "",
-        title: course?.title || "Art & Soul Masterclass",
+        title: course?.title || "Renuka Art Studio Masterclass",
         slug: course?.slug || "masterclass",
       },
       batch: {

@@ -26,14 +26,14 @@ export interface SystemStatusData {
 }
 
 export const DEFAULT_SETTINGS: SettingsData = {
-  studioName: "Art & Soul Studio",
+  studioName: "Renuka Art Studio",
   instructorName: "Renuka Aggarwal",
-  websiteUrl: "https://artandsoulstudio.com",
-  contactEmail: "contact@artandsoulstudio.com",
+  websiteUrl: "https://renukaartstudio.com",
+  contactEmail: "contact@renukaartstudio.com",
   contactPhone: "+91 98765 43210",
   supportWhatsapp: "+91 98765 43210",
-  defaultSenderName: "Art & Soul Studio",
-  replyToEmail: "contact@artandsoulstudio.com",
+  defaultSenderName: "Renuka Art Studio",
+  replyToEmail: "contact@renukaartstudio.com",
   updatedAt: "2026-09-25T12:00:00.000Z",
   updatedBy: "system",
 };

@@ -80,7 +80,7 @@ Join here: [Join Link]
 
 Warmly,
 Renuka Aggarwal
-Art & Soul Studio`,
+Renuka Art Studio`,
   },
   {
     id: "schedule-update",
@@ -99,12 +99,12 @@ Looking forward to seeing you.
 
 Warmly,
 Renuka Aggarwal
-Art & Soul Studio`,
+Renuka Art Studio`,
   },
   {
     id: "custom",
     name: "Custom Message",
-    subject: "Announcement from Art & Soul Studio",
+    subject: "Announcement from Renuka Art Studio",
     body: `Hi [Student Name],
 
 Type your custom announcement message here.
@@ -794,7 +794,7 @@ export function BroadcastManager({
               <div className="bg-stone-50 rounded-xl p-4 border border-stone-200/80 space-y-1 text-xs text-stone-600">
                 <div>
                   <span className="font-semibold text-stone-800">From: </span>
-                  Renuka Aggarwal &lt;artandsoul.studios@gmail.com&gt;
+                  Renuka Art Studio &lt;hello@renukaartstudio.com&gt;
                 </div>
                 <div>
                   <span className="font-semibold text-stone-800">To: </span>

@@ -75,7 +75,7 @@ export function AdminSidebar({
           </div>
           <div>
             <span className="block font-serif text-sm font-bold tracking-tight text-[#292923]">
-              Art Studio
+              Renuka Art Studio
             </span>
             <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[#68705A]">
               Admin Portal

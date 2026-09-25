@@ -83,11 +83,11 @@ async function runTestSuite() {
   // --- 2. ZOD VALIDATION RULES ---
   try {
     const invalidEmailResult = settingsSchema.safeParse({
-      studioName: "Art & Soul",
+      studioName: "Renuka Art Studio",
       instructorName: "Renuka",
       websiteUrl: "https://artandsoulstudio.com",
       contactEmail: "not-an-email",
-      defaultSenderName: "Art & Soul",
+      defaultSenderName: "Renuka Art Studio",
       replyToEmail: "valid@email.com",
     });
 
@@ -102,11 +102,11 @@ async function runTestSuite() {
 
   try {
     const invalidUrlResult = settingsSchema.safeParse({
-      studioName: "Art & Soul",
+      studioName: "Renuka Art Studio",
       instructorName: "Renuka",
       websiteUrl: "not-a-valid-url",
       contactEmail: "valid@email.com",
-      defaultSenderName: "Art & Soul",
+      defaultSenderName: "Renuka Art Studio",
       replyToEmail: "valid@email.com",
     });
 
@@ -125,7 +125,7 @@ async function runTestSuite() {
       instructorName: "Renuka",
       websiteUrl: "",
       contactEmail: "valid@email.com",
-      defaultSenderName: "Art & Soul",
+      defaultSenderName: "Renuka Art Studio",
       replyToEmail: "valid@email.com",
     });
 
@@ -143,13 +143,13 @@ async function runTestSuite() {
 
   try {
     const testInput = {
-      studioName: "Art & Soul Studio Test",
+      studioName: "Renuka Art Studio Test",
       instructorName: "Renuka Aggarwal Test",
       websiteUrl: "https://artandsoulstudio.com",
       contactEmail: "contact-test@artandsoulstudio.com",
       contactPhone: "+91 99999 88888",
       supportWhatsapp: "+91 99999 88888",
-      defaultSenderName: "Art & Soul Studio Test",
+      defaultSenderName: "Renuka Art Studio Test",
       replyToEmail: "support-test@artandsoulstudio.com",
     };
 
