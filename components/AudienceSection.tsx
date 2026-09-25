@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import Image from "next/image";
 import {
   User,
@@ -11,8 +11,6 @@ import {
   GraduationCap,
   Heart,
 } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -38,73 +36,10 @@ const boxImageMap: Record<string, string> = {
 export const AudienceSection: React.FC = () => {
   const { targetAudience } = useLandingContent();
 
-  const sectionRef = useRef<HTMLElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return;
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      // 1. Heading softly fades and slides upward
-      gsap.from(headingRef.current, {
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          toggleActions: "play none none none",
-        },
-        opacity: 0,
-        y: 20,
-        duration: 0.85,
-        ease: "power2.out",
-      });
-
-      // 2. Content blocks reveal sequentially as they enter the viewport
-      const cards = gridRef.current ? Array.from(gridRef.current.children) : [];
-      if (cards.length > 0) {
-        gsap.from(cards, {
-          scrollTrigger: {
-            trigger: gridRef.current,
-            start: "top 82%",
-            toggleActions: "play none none none",
-          },
-          opacity: 0,
-          y: 22,
-          duration: 0.8,
-          stagger: 0.09,
-          ease: "power2.out",
-        });
-
-        // 3. Icons softly fade and scale in
-        const icons = sectionRef.current?.querySelectorAll(".audience-icon-badge");
-        if (icons && icons.length > 0) {
-          gsap.from(icons, {
-            scrollTrigger: {
-              trigger: gridRef.current,
-              start: "top 82%",
-              toggleActions: "play none none none",
-            },
-            opacity: 0,
-            scale: 0.82,
-            duration: 0.75,
-            stagger: 0.09,
-            ease: "power2.out",
-          });
-        }
-      }
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
-      ref={sectionRef}
       id="who-this-is-for"
-      className="relative py-8 sm:py-10 lg:py-12 bg-[#F7F4EC] border-b border-[#464137]/10 overflow-hidden"
+      className="relative py-8 sm:py-10 lg:py-12 bg-[#F7F4EC] overflow-hidden"
     >
       {/* Botanical Wildflower Watercolor Background Art */}
       <div className="pointer-events-none absolute inset-0 z-0">
@@ -116,13 +51,14 @@ export const AudienceSection: React.FC = () => {
         />
         {/* Soft blend at top from hero section */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#F7F4EC] via-[#F7F4EC]/50 to-transparent" />
+        {/* Soft blend at bottom into video section */}
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#F7F4EC] via-[#F7F4EC]/50 to-transparent" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-8">
         {/* Section Heading with compact whitespace */}
         <div className="text-center max-w-2xl mx-auto mb-5 sm:mb-6">
           <h2
-            ref={headingRef}
             className="no-gsap font-serif text-2xl sm:text-3xl lg:text-[2.2rem] font-medium tracking-tight text-[#292923] leading-tight"
           >
             {targetAudience.heading}
@@ -132,7 +68,6 @@ export const AudienceSection: React.FC = () => {
 
         {/* Content Blocks: 3-Column Grid on Desktop, 2 on Tablet, 1 on Mobile */}
         <div
-          ref={gridRef}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5 lg:gap-4 no-gsap"
         >
           {targetAudience.items.map((item) => {
