@@ -25,6 +25,16 @@ const iconMap: Record<string, React.ReactNode> = {
   Heart: <Heart className="size-4.5 text-[#24425F]" strokeWidth={1.6} />,
 };
 
+const boxImageMap: Record<string, string> = {
+  beginners: "/images/forBox/e9bd27865085ef28358146d25a76b74d.jpg.jpeg",
+  "water-control": "/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg",
+  "flat-paintings": "/images/forBox/da347cc2855190acf6ba136578c7e31e.jpg.jpeg",
+  "hobby-artists": "/images/forBox/e19752bad2007ef6f8a72ec074cbafec.jpg.jpeg",
+  "youtube-tutorials": "/images/forBox/b765741cbefcab043925bc35973f3c45.jpg.jpeg",
+  "learn-professionally": "/images/forBox/052d678ca9d09b49c5a93e5d722998b7.jpg.jpeg",
+  conclusion: "/images/forBox/fcd4ca8ed064a6b93fcf45ff6860f24e.jpg.jpeg",
+};
+
 export const AudienceSection: React.FC = () => {
   const { targetAudience } = useLandingContent();
 
@@ -127,14 +137,29 @@ export const AudienceSection: React.FC = () => {
         >
           {targetAudience.items.map((item) => {
             const isConcluding = item.isConclusion;
+            const bgImage = boxImageMap[item.id];
 
             if (isConcluding) {
               return (
                 <div
                   key={item.id}
-                  className="sm:col-span-2 lg:col-span-3 rounded-xl border border-[#24425F]/20 bg-[#FDFCF9]/95 px-5 py-3 sm:px-6 sm:py-3.5 shadow-xs hover:border-[#24425F]/40 transition-colors duration-300"
+                  className="group relative overflow-hidden sm:col-span-2 lg:col-span-3 rounded-xl border border-[#24425F]/25 bg-[#FAF8F2]/90 px-5 py-3 sm:px-6 sm:py-3.5 shadow-xs hover:border-[#24425F]/45 transition-all duration-300"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                  {/* Subtle Box Watercolor Background */}
+                  {bgImage && (
+                    <div className="pointer-events-none absolute inset-0 z-0">
+                      <Image
+                        src={bgImage}
+                        alt=""
+                        fill
+                        className="object-cover object-center opacity-25 mix-blend-multiply group-hover:opacity-35 transition-opacity duration-300 select-none"
+                      />
+                      {/* Artful Inner Border */}
+                      <div className="absolute inset-1 rounded-lg border border-[#24425F]/15 pointer-events-none" />
+                    </div>
+                  )}
+
+                  <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
                     <div className="flex items-center gap-3">
                       <div className="audience-icon-badge flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-[#24425F]/10 border border-[#24425F]/20 text-[#24425F]">
                         {iconMap[item.icon] || <Heart className="size-4 text-[#24425F]" strokeWidth={1.6} />}
@@ -154,10 +179,24 @@ export const AudienceSection: React.FC = () => {
             return (
               <div
                 key={item.id}
-                className="group rounded-xl border border-[#464137]/10 bg-[#FDFCF9]/95 p-3.5 sm:p-4 hover:border-[#24425F]/30 transition-colors duration-300 flex flex-col justify-between shadow-xs"
+                className="group relative overflow-hidden rounded-xl border border-[#464137]/15 bg-[#FAF8F2]/85 p-3.5 sm:p-4 hover:border-[#24425F]/40 hover:shadow-xs transition-all duration-300 flex flex-col justify-between"
               >
-                <div className="flex items-start gap-3">
-                  <div className="audience-icon-badge flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-[#24425F]/06 border border-[#24425F]/10 text-[#24425F] transition-colors duration-300">
+                {/* Subtle Box Watercolor Background */}
+                {bgImage && (
+                  <div className="pointer-events-none absolute inset-0 z-0">
+                    <Image
+                      src={bgImage}
+                      alt=""
+                      fill
+                      className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
+                    />
+                    {/* Artful Inner Border Frame */}
+                    <div className="absolute inset-1 rounded-lg border border-[#464137]/10 group-hover:border-[#24425F]/25 transition-colors duration-300 pointer-events-none" />
+                  </div>
+                )}
+
+                <div className="relative z-10 flex items-start gap-3">
+                  <div className="audience-icon-badge flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-[#24425F]/08 border border-[#24425F]/15 text-[#24425F] transition-colors duration-300">
                     {iconMap[item.icon] || <Palette className="size-4 text-[#24425F]" strokeWidth={1.6} />}
                   </div>
                   <div className="flex-1 min-w-0">
