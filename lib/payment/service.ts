@@ -1,6 +1,5 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendBookingConfirmationEmail } from "@/lib/notifications/service";
 import crypto from "crypto";
 
 export interface PaymentServiceError {
@@ -28,17 +27,12 @@ function getRazorpayConfig() {
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
-  if (!keyId || !keySecret) {
-    throw new Error(
-      "Missing Razorpay credentials: RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be configured."
-    );
-  }
-
   return { keyId, keySecret, webhookSecret };
 }
 
 /**
  * Creates or retrieves an existing Razorpay order for a pending booking.
+ * The authoritative amount comes exclusively from the server-side database record.
  * If the booking amount is 0, auto-confirms the booking immediately.
  */
 export async function createOrderForBooking(
@@ -61,6 +55,17 @@ export async function createOrderForBooking(
 > {
   const adminClient = createAdminClient();
   const { keyId, keySecret } = getRazorpayConfig();
+
+  if (!keyId || !keySecret) {
+    return {
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Razorpay payment gateway credentials are not configured on the server.",
+        statusCode: 500,
+      },
+    };
+  }
 
   // 1. Authoritative Booking Lookup
   const { data: booking, error: bookingErr } = await adminClient
@@ -124,11 +129,40 @@ export async function createOrderForBooking(
     };
   }
 
+  // Validate authoritative amount
+  if (
+    typeof booking.amount_paise !== "number" ||
+    booking.amount_paise < 0 ||
+    isNaN(booking.amount_paise)
+  ) {
+    return {
+      success: false,
+      error: {
+        code: "INVALID_INPUT",
+        message: "Invalid booking amount registered for this course.",
+        statusCode: 400,
+      },
+    };
+  }
+
+  // Validate authoritative currency
+  const currency = (booking.currency || "INR").toUpperCase();
+  if (currency !== "INR") {
+    return {
+      success: false,
+      error: {
+        code: "INVALID_INPUT",
+        message: `Unsupported currency '${booking.currency}'. Only INR is supported for Razorpay payments.`,
+        statusCode: 400,
+      },
+    };
+  }
+
   const batch = (booking as any).cohort_batches;
   const courseTitle = batch?.courses?.title || "Masterclass";
   const customer = (booking as any).customers;
 
-  // 2. Zero-Amount Auto-Confirmation (Requirement 14)
+  // 2. Zero-Amount Auto-Confirmation (Free / Complimentary courses)
   if (booking.amount_paise === 0) {
     await adminClient
       .from("bookings")
@@ -138,16 +172,11 @@ export async function createOrderForBooking(
       })
       .eq("id", booking.id);
 
-    // Trigger transactional confirmation notification asynchronously
-    sendBookingConfirmationEmail(booking.id).catch((err) => {
-      console.error("Zero-amount: Confirmation notification error:", err);
-    });
-
     return {
       success: true,
       data: {
         amountPaise: 0,
-        currency: booking.currency,
+        currency,
         keyId,
         autoConfirmed: true,
         bookingStatus: "confirmed",
@@ -171,7 +200,11 @@ export async function createOrderForBooking(
     .limit(1)
     .maybeSingle();
 
-  if (existingPayment?.razorpay_order_id) {
+  if (
+    existingPayment?.razorpay_order_id &&
+    existingPayment.amount_paise === booking.amount_paise &&
+    existingPayment.currency?.toUpperCase() === currency
+  ) {
     return {
       success: true,
       data: {
@@ -191,11 +224,11 @@ export async function createOrderForBooking(
     };
   }
 
-  // 4. Create Order with Razorpay REST API
+  // 4. Create Order with Razorpay REST API using authoritative database amount
   const authHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`;
   const orderPayload = {
     amount: booking.amount_paise,
-    currency: booking.currency,
+    currency,
     receipt: booking.booking_reference,
     notes: {
       booking_reference: booking.booking_reference,
@@ -253,7 +286,7 @@ export async function createOrderForBooking(
         },
       },
     };
-  } catch (err: any) {
+  } catch {
     return {
       success: false,
       error: {
@@ -266,8 +299,9 @@ export async function createOrderForBooking(
 }
 
 /**
- * Cryptographically verifies Razorpay payment signature using HMAC-SHA256
- * and transitions both payment and booking to confirmed/captured.
+ * Cryptographically verifies Razorpay payment signature using HMAC-SHA256,
+ * verifies payment status with Razorpay REST API, and transitions both payment
+ * and booking to confirmed/captured.
  */
 export async function verifyPayment(input: {
   bookingReference: string;
@@ -285,7 +319,18 @@ export async function verifyPayment(input: {
   }>
 > {
   const adminClient = createAdminClient();
-  const { keySecret } = getRazorpayConfig();
+  const { keyId, keySecret } = getRazorpayConfig();
+
+  if (!keyId || !keySecret) {
+    return {
+      success: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "Razorpay payment gateway credentials are not configured on the server.",
+        statusCode: 500,
+      },
+    };
+  }
 
   // 1. Authoritative Booking & Payment Verification
   const { data: booking, error: bookingErr } = await adminClient
@@ -326,9 +371,6 @@ export async function verifyPayment(input: {
       (p: any) => p.razorpay_payment_id === input.razorpayPaymentId
     );
     if (existingPayment) {
-      // Idempotently trigger confirmation notification (deduplicated by notification service)
-      sendBookingConfirmationEmail(booking.id).catch(() => {});
-
       return {
         success: true,
         data: {
@@ -386,7 +428,6 @@ export async function verifyPayment(input: {
   }
 
   // 3. Razorpay Server-to-Server Payment Verification Check
-  const { keyId } = getRazorpayConfig();
   const authHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`;
 
   try {
@@ -405,13 +446,54 @@ export async function verifyPayment(input: {
       !pmtRes.ok ||
       !pmtData ||
       pmtData.order_id !== input.razorpayOrderId ||
-      (pmtData.status !== "captured" && pmtData.status !== "authorized")
+      pmtData.amount !== booking.amount_paise
     ) {
       return {
         success: false,
         error: {
           code: "PAYMENT_NOT_CAPTURED",
-          message: "Payment could not be verified with the payment gateway.",
+          message: "Payment details could not be verified with the payment gateway.",
+          statusCode: 400,
+        },
+      };
+    }
+
+    // If status is authorized and not yet captured, attempt capture
+    let finalPaymentData = pmtData;
+    if (pmtData.status === "authorized") {
+      try {
+        const captureRes = await fetch(
+          `https://api.razorpay.com/v1/payments/${input.razorpayPaymentId}/capture`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: authHeader,
+            },
+            body: JSON.stringify({
+              amount: booking.amount_paise,
+              currency: booking.currency || "INR",
+            }),
+          }
+        );
+        const captureData = await captureRes.json().catch(() => null);
+        if (captureRes.ok && captureData?.status === "captured") {
+          finalPaymentData = captureData;
+        }
+      } catch {
+        // Fall back to original verification data
+      }
+    }
+
+    if (
+      finalPaymentData.status !== "captured" &&
+      finalPaymentData.status !== "authorized"
+    ) {
+      return {
+        success: false,
+        error: {
+          code: "PAYMENT_NOT_CAPTURED",
+          message: "Payment is not in a captured state.",
           statusCode: 400,
         },
       };
@@ -426,7 +508,7 @@ export async function verifyPayment(input: {
         status: "captured",
         razorpay_payment_id: input.razorpayPaymentId,
         razorpay_signature: input.razorpaySignature,
-        payload_snapshot: pmtData,
+        payload_snapshot: finalPaymentData,
         updated_at: nowIso,
       })
       .eq("id", linkedPayment.id);
@@ -439,11 +521,6 @@ export async function verifyPayment(input: {
       })
       .eq("id", booking.id);
 
-    // Trigger transactional confirmation notification asynchronously
-    sendBookingConfirmationEmail(booking.id).catch((err) => {
-      console.error("Payment verification: Confirmation notification error:", err);
-    });
-
     return {
       success: true,
       data: {
@@ -455,7 +532,7 @@ export async function verifyPayment(input: {
         currency: booking.currency,
       },
     };
-  } catch (err: any) {
+  } catch {
     return {
       success: false,
       error: {
@@ -469,6 +546,8 @@ export async function verifyPayment(input: {
 
 /**
  * Handles incoming Razorpay Webhook events asynchronously with cryptographic verification.
+ * Supported events: payment.captured, order.paid, payment.failed
+ * Idempotently reconciles database state.
  */
 export async function handleWebhookEvent(
   rawBody: string,
@@ -480,7 +559,7 @@ export async function handleWebhookEvent(
     return { status: 500, message: "Webhook secret not configured on server.", handled: false };
   }
 
-  // 1. Verify Webhook Signature
+  // 1. Verify Webhook Signature using raw body and HMAC-SHA256
   const expectedSignature = crypto
     .createHmac("sha256", webhookSecret)
     .update(rawBody)
@@ -511,8 +590,9 @@ export async function handleWebhookEvent(
   // 3. Process Events Idempotently
   if (eventName === "payment.captured" || eventName === "order.paid") {
     const paymentEntity = event.payload?.payment?.entity;
-    const orderId = paymentEntity?.order_id;
-    const paymentId = paymentEntity?.id;
+    const orderEntity = event.payload?.order?.entity;
+    const orderId = paymentEntity?.order_id || orderEntity?.id;
+    const paymentId = paymentEntity?.id || null;
 
     if (!orderId) {
       return { status: 200, message: "No order ID in event payload.", handled: true };
@@ -520,7 +600,7 @@ export async function handleWebhookEvent(
 
     const { data: payment } = await adminClient
       .from("payments")
-      .select("id, booking_id, status")
+      .select("id, booking_id, status, razorpay_payment_id")
       .eq("razorpay_order_id", orderId)
       .maybeSingle();
 
@@ -534,8 +614,8 @@ export async function handleWebhookEvent(
         .from("payments")
         .update({
           status: "captured",
-          razorpay_payment_id: paymentId || null,
-          payload_snapshot: paymentEntity,
+          razorpay_payment_id: paymentId || payment.razorpay_payment_id || null,
+          payload_snapshot: paymentEntity || orderEntity || event.payload,
           updated_at: nowIso,
         })
         .eq("id", payment.id);
@@ -547,14 +627,11 @@ export async function handleWebhookEvent(
           updated_at: nowIso,
         })
         .eq("id", payment.booking_id);
+
+      return { status: 200, message: "Payment captured successfully.", handled: true };
     }
 
-    // Trigger transactional confirmation notification idempotently
-    sendBookingConfirmationEmail(payment.booking_id).catch((err) => {
-      console.error("Webhook: Confirmation notification error:", err);
-    });
-
-    return { status: 200, message: "Payment captured successfully.", handled: true };
+    return { status: 200, message: "Payment already captured (idempotent).", handled: true };
   }
 
   if (eventName === "payment.failed") {
@@ -573,7 +650,7 @@ export async function handleWebhookEvent(
         .eq("status", "created");
     }
 
-    // Note: Do NOT immediately release seat per Requirement 13; preserve 15-min pending window
+    // Do NOT release seat prematurely; preserve 15-min reservation window per business rules
     return { status: 200, message: "Payment marked failed; seat reserved until expiry.", handled: true };
   }
 

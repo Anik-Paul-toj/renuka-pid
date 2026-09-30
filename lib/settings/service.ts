@@ -102,7 +102,8 @@ export async function updateSettings(
  * CRITICAL GUARANTEE: Never exposes API keys, secrets, or sensitive tokens.
  */
 export function getSystemStatus(): SystemStatusData {
-  const razorpayKeyId = process.env.RAZORPAY_KEY_ID || "";
+  const razorpayKeyId =
+    process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "";
   const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || "";
   const hasRazorpay = !!(razorpayKeyId && razorpayKeySecret);
 
