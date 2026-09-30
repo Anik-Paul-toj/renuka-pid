@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Calendar, Clock, Globe, Hourglass, Video } from "lucide-react";
 import { workshopData, MasterclassData } from "@/data/content";
@@ -14,8 +14,34 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
   const [isExpired, setIsExpired] = useState(false);
+  const [coursePricing, setCoursePricing] = useState<{
+    originalPrice: number;
+    offerPrice: number;
+    duration?: string;
+  } | null>(null);
+
   const { hero: contextHero } = useLandingContent();
   const heroContent = content || contextHero;
+
+  useEffect(() => {
+    fetch("/api/cohort-batches/active")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.success && data?.batch?.course) {
+          const c = data.batch.course;
+          setCoursePricing({
+            originalPrice: c.originalPrice,
+            offerPrice: c.offerPrice,
+            duration: c.durationMinutes ? `${c.durationMinutes} mins` : undefined,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const displayOriginalPrice = coursePricing?.originalPrice ?? workshopData.originalPrice;
+  const displayOfferPrice = coursePricing?.offerPrice ?? workshopData.offerPrice;
+  const displayDuration = coursePricing?.duration ?? workshopData.duration;
 
   return (
     <section className="relative overflow-hidden bg-[#F7F4EC] -mt-14 sm:-mt-16 pt-[4.5rem] sm:pt-[5.5rem] lg:pt-[5.75rem] pb-8 sm:pb-10 lg:pb-12">
@@ -149,7 +175,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
                         Duration
                       </span>
                       <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] leading-tight block">
-                        {workshopData.duration}
+                        {displayDuration}
                       </span>
                     </div>
                   </div>
@@ -182,10 +208,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="line-through text-[#6F6B61] text-xs sm:text-sm font-semibold">
-                      ₹{workshopData.originalPrice}
+                      ₹{displayOriginalPrice}
                     </span>
                     <span className="font-serif text-2xl sm:text-[2rem] font-extrabold text-[#B93821] tracking-tight drop-shadow-2xs">
-                      ₹{workshopData.offerPrice}
+                      ₹{displayOfferPrice}
                     </span>
                     <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2.5 py-0.5 rounded-sm">
                       Special Offer

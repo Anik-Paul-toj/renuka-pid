@@ -29,6 +29,16 @@ export async function GET() {
     const batch = batches[0];
     const seatsRemaining = Math.max(0, batch.total_seats - batch.seats_booked);
 
+    let courseData: any = null;
+    if (batch.course_id) {
+      const { data: c } = await supabase
+        .from("courses")
+        .select("id, title, slug, description, original_price_paise, offer_price_paise, currency, duration_minutes, is_active")
+        .eq("id", batch.course_id)
+        .maybeSingle();
+      courseData = c;
+    }
+
     return NextResponse.json({
       success: true,
       batch: {
@@ -45,6 +55,19 @@ export async function GET() {
         seatsRemaining,
         isEnrollmentOpen: batch.is_enrollment_open,
         isSoldOut: seatsRemaining <= 0,
+        course: courseData
+          ? {
+              title: courseData.title,
+              slug: courseData.slug,
+              description: courseData.description,
+              originalPricePaise: courseData.original_price_paise,
+              offerPricePaise: courseData.offer_price_paise,
+              originalPrice: Math.round(courseData.original_price_paise / 100),
+              offerPrice: Math.round(courseData.offer_price_paise / 100),
+              currency: courseData.currency,
+              durationMinutes: courseData.duration_minutes,
+            }
+          : null,
       },
     });
   } catch (err: any) {

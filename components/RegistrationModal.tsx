@@ -18,6 +18,8 @@ interface ActiveBatchInfo {
   endTime: string;
   isEnrollmentOpen: boolean;
   isSoldOut: boolean;
+  offerPrice?: number;
+  offerPricePaise?: number;
 }
 
 interface ConfirmedBookingInfo {
@@ -77,6 +79,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           endTime: data.batch.endTime,
           isEnrollmentOpen: Boolean(data.batch.isEnrollmentOpen),
           isSoldOut: Boolean(data.batch.isSoldOut),
+          offerPrice: data.batch.course?.offerPrice,
+          offerPricePaise: data.batch.course?.offerPricePaise,
         };
         setActiveBatch(batchInfo);
         return batchInfo;
@@ -421,7 +425,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#444C38]">
                 <Sparkles className="size-3 text-[#444C38]" />
-                Complimentary Masterclass
+                {activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
+                  ? "Live Workshop Registration"
+                  : "Complimentary Masterclass"}
               </span>
             </div>
 
@@ -429,7 +435,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               id="modal-title"
               className="mt-3 font-serif text-2xl font-bold tracking-tight text-[#14120E] sm:text-3xl"
             >
-              Reserve Your Free Seat
+              {activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
+                ? "Reserve Your Seat"
+                : "Reserve Your Free Seat"}
             </h3>
 
             <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium">
@@ -525,6 +533,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 ) : paymentPending ? (
                   <>
                     <span>Retry Payment</span>
+                    <ArrowRight className="size-4" />
+                  </>
+                ) : activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0 ? (
+                  <>
+                    <span>Proceed to Payment • ₹{activeBatch.offerPrice}</span>
                     <ArrowRight className="size-4" />
                   </>
                 ) : (
