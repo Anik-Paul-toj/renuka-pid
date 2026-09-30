@@ -45,13 +45,13 @@ export const FAQ: React.FC = () => {
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
         {/* Header - Compact */}
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[0.68rem] sm:text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#68705A]">
+          <p className="text-[0.68rem] sm:text-[0.72rem] font-bold uppercase tracking-[0.24em] text-[#444C38]">
             QUESTIONS & ANSWERS
           </p>
-          <h2 className="mt-1 font-serif text-2xl sm:text-3xl lg:text-[2.2rem] font-medium tracking-tight text-[#292923]">
+          <h2 className="mt-1 font-serif text-2xl sm:text-3xl lg:text-[2.2rem] font-bold tracking-tight text-[#14120E]">
             Frequently Asked Questions
           </h2>
-          <div className="mx-auto mt-2 h-0.5 w-12 bg-[#68705A]/40" />
+          <div className="mx-auto mt-2 h-0.5 w-12 bg-[#444C38]/50" />
         </div>
 
         {/* 2-Column Accordion Grid in 1 Scroll */}
@@ -66,8 +66,8 @@ export const FAQ: React.FC = () => {
                 key={index}
                 className={`no-gsap group relative overflow-hidden rounded-xl border transition-all duration-300 ${
                   isOpen
-                    ? "border-[#68705A]/50 bg-[#FAF8F2] shadow-sm"
-                    : "border-[#68705A]/25 bg-[#FAF8F2] hover:border-[#68705A]/45 shadow-2xs"
+                    ? "border-[#444C38]/55 bg-[#FAF8F2] shadow-sm"
+                    : "border-[#444C38]/30 bg-[#FAF8F2] hover:border-[#444C38]/50 shadow-2xs"
                 }`}
               >
                 {/* Texture from forBox */}
@@ -78,7 +78,7 @@ export const FAQ: React.FC = () => {
                     fill
                     className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
                   />
-                  <div className="absolute inset-1 rounded-lg border border-[#68705A]/15 pointer-events-none" />
+                  <div className="absolute inset-1 rounded-lg border border-[#444C38]/15 pointer-events-none" />
                 </div>
 
                 <div className="relative z-10 p-3 sm:p-3.5">
@@ -89,12 +89,12 @@ export const FAQ: React.FC = () => {
                       aria-expanded={isOpen}
                       aria-controls={contentId}
                       onClick={() => toggleFAQ(index)}
-                      className="flex w-full items-center justify-between text-left font-serif text-[0.84rem] sm:text-[0.92rem] font-bold text-[#292923] group-hover:text-[#68705A] cursor-pointer transition-colors"
+                      className="flex w-full items-center justify-between text-left font-serif text-[0.84rem] sm:text-[0.92rem] font-bold text-[#14120E] group-hover:text-[#444C38] cursor-pointer transition-colors"
                     >
                       <span className="pr-3 leading-snug font-bold">{faq.question}</span>
                       <span
-                        className={`grid size-6 shrink-0 place-items-center rounded-full bg-[#FAF8F2] border border-[#68705A]/25 transition-transform duration-300 ${
-                          isOpen ? "rotate-180 text-[#68705A] border-[#68705A]/45" : "text-[#6F6B61]"
+                        className={`grid size-6 shrink-0 place-items-center rounded-full bg-[#FAF8F2] border border-[#444C38]/25 transition-transform duration-300 ${
+                          isOpen ? "rotate-180 text-[#444C38] border-[#444C38]/50" : "text-[#3E3A32]"
                         }`}
                       >
                         <ChevronDown className="size-3.5" />
@@ -110,7 +110,7 @@ export const FAQ: React.FC = () => {
                       isOpen ? "max-h-72 opacity-100 pt-2 pb-0.5" : "max-h-0 opacity-0"
                     }`}
                   >
-                    <p className="text-xs sm:text-[0.8rem] leading-relaxed text-[#6F6B61] border-t border-[#68705A]/15 pt-2">
+                    <p className="text-xs sm:text-[0.84rem] leading-relaxed text-[#2C2A24] font-medium border-t border-[#444C38]/20 pt-2.5">
                       {faq.answer}
                     </p>
                   </div>

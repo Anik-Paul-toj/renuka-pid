@@ -35,29 +35,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
       <div className="mx-auto flex h-14 sm:h-16 max-w-7xl xl:max-w-[1400px] items-center justify-between px-6 sm:px-8 lg:px-12">
         {/* Brand Logo */}
         <a href="#" className="flex flex-col group">
-          <span className="font-serif text-2xl tracking-tight text-[#292923] font-semibold">
+          <span className="font-serif text-2xl tracking-tight text-[#14120E] font-bold">
             {brand.name}
           </span>
-          <span className="text-[0.68rem] tracking-[0.22em] text-[#6F6B61] uppercase font-medium">
+          <span className="text-[0.68rem] tracking-[0.22em] text-[#3E3A32] uppercase font-bold">
             {brand.studioName}
           </span>
         </a>
 
         {/* Navigation Links (Desktop) */}
-        <nav className="hidden md:flex items-center gap-7 text-xs font-medium tracking-wider text-[#6F6B61] uppercase">
-          <a href="#" className="text-[#292923] border-b border-[#68705A] pb-0.5">
+        <nav className="hidden md:flex items-center gap-7 text-xs font-semibold tracking-wider text-[#3E3A32] uppercase">
+          <a href="#" className="text-[#14120E] font-bold border-b-2 border-[#444C38] pb-0.5">
             Home
           </a>
-          <a href="#about" className="hover:text-[#292923] transition-colors">
+          <a href="#about" className="hover:text-[#14120E] transition-colors">
             About
           </a>
-          <a href="#courses" className="hover:text-[#292923] transition-colors">
+          <a href="#courses" className="hover:text-[#14120E] transition-colors">
             Courses
           </a>
-          <a href="#testimonials" className="hover:text-[#292923] transition-colors">
+          <a href="#testimonials" className="hover:text-[#14120E] transition-colors">
             Testimonials
           </a>
-          <a href="#contact" className="hover:text-[#292923] transition-colors">
+          <a href="#contact" className="hover:text-[#14120E] transition-colors">
             Contact
           </a>
         </nav>

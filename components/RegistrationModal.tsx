@@ -419,50 +419,50 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         {!isSubmitted ? (
           <div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/35 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#68705A]">
-                <Sparkles className="size-3 text-[#68705A]" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#444C38]">
+                <Sparkles className="size-3 text-[#444C38]" />
                 Complimentary Masterclass
               </span>
             </div>
 
             <h3
               id="modal-title"
-              className="mt-3 font-serif text-2xl font-bold tracking-tight text-[#292923] sm:text-3xl"
+              className="mt-3 font-serif text-2xl font-bold tracking-tight text-[#14120E] sm:text-3xl"
             >
               Reserve Your Free Seat
             </h3>
 
-            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
+            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium">
               Enter your details below to receive your private stream link, calendar invitation, and complimentary preparation guides.
             </p>
 
             {/* Quick Session Details */}
-            <div className="mt-4 rounded-md bg-[#F7F4EC] p-3.5 border border-[#464137]/10 text-xs text-[#292923] flex flex-col gap-1.5">
-              <div className="flex items-center gap-2 font-medium">
-                <Calendar className="size-3.5 text-[#68705A] shrink-0" />
+            <div className="mt-4 rounded-md bg-[#F7F4EC] p-3.5 border border-[#464137]/15 text-xs text-[#14120E] flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 font-semibold">
+                <Calendar className="size-3.5 text-[#444C38] shrink-0" />
                 <span>{activeBatch?.startDate ? `${activeBatch.batchName} (${activeBatch.startDate})` : hero.date}</span>
               </div>
-              <div className="flex items-center gap-2 font-medium">
-                <Clock className="size-3.5 text-[#68705A] shrink-0" />
+              <div className="flex items-center gap-2 font-semibold">
+                <Clock className="size-3.5 text-[#444C38] shrink-0" />
                 <span>{activeBatch?.startTime ? `${activeBatch.startTime} – ${activeBatch.endTime} IST` : `${hero.time} (${hero.duration})`}</span>
               </div>
             </div>
 
             {/* Payment Pending Alert */}
             {paymentPending && (
-              <div className="mt-4 flex items-start gap-2.5 rounded-md border border-amber-300 bg-amber-50/90 p-3 text-xs text-amber-900">
-                <AlertCircle className="size-4 shrink-0 text-amber-600 mt-0.5" />
+              <div className="mt-4 flex items-start gap-2.5 rounded-md border border-amber-400 bg-amber-50/95 p-3 text-xs text-amber-950">
+                <AlertCircle className="size-4 shrink-0 text-amber-700 mt-0.5" />
                 <div className="space-y-0.5">
-                  <p className="font-semibold">Payment Pending</p>
-                  <p>Your seat reservation is locked for 15 minutes. Click below to complete payment.</p>
+                  <p className="font-bold">Payment Pending</p>
+                  <p className="font-medium">Your seat reservation is locked for 15 minutes. Click below to complete payment.</p>
                 </div>
               </div>
             )}
 
             {/* Error Message Alert */}
             {errorMessage && (
-              <div className="mt-4 flex items-start gap-2.5 rounded-md border border-rose-300 bg-rose-50/80 p-3 text-xs text-rose-800">
-                <AlertCircle className="size-4 shrink-0 text-rose-600 mt-0.5" />
+              <div className="mt-4 flex items-start gap-2.5 rounded-md border border-rose-300 bg-rose-50/90 p-3 text-xs text-rose-900 font-medium">
+                <AlertCircle className="size-4 shrink-0 text-rose-700 mt-0.5" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -470,7 +470,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             {/* Form */}
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#68705A] mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1.5">
                   Full Name *
                 </label>
                 <input
@@ -480,12 +480,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   value={name}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-md border border-[#464137]/15 bg-[#F7F4EC] px-4 py-3 text-sm text-[#292923] outline-none transition-all placeholder:text-[#6F6B61]/50 focus:border-[#68705A] focus:ring-1 focus:ring-[#68705A]"
+                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-4 py-3 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#68705A] mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1.5">
                   Email Address *
                 </label>
                 <input
@@ -495,12 +495,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   value={email}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-md border border-[#464137]/15 bg-[#F7F4EC] px-4 py-3 text-sm text-[#292923] outline-none transition-all placeholder:text-[#6F6B61]/50 focus:border-[#68705A] focus:ring-1 focus:ring-[#68705A]"
+                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-4 py-3 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#68705A] mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1.5">
                   WhatsApp Number (Optional for gentle reminders)
                 </label>
                 <input
@@ -509,14 +509,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   value={phone}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-md border border-[#464137]/15 bg-[#F7F4EC] px-4 py-3 text-sm text-[#292923] outline-none transition-all placeholder:text-[#6F6B61]/50 focus:border-[#68705A] focus:ring-1 focus:ring-[#68705A]"
+                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-4 py-3 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading || (isPaymentLocked && !paymentPending) || activeBatch?.isSoldOut}
-                className="btn-studio w-full py-3.5 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-studio w-full py-3.5 mt-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <span>Processing...</span>
@@ -535,49 +535,49 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 )}
               </button>
 
-              <p className="text-center text-[0.72rem] text-[#6F6B61] mt-3">
+              <p className="text-center text-[0.72rem] text-[#3E3A32] font-medium mt-3">
                 🔒 We respect your privacy. No spam ever. One-click unsubscribe at any time.
               </p>
             </form>
           </div>
         ) : (
           <div className="py-6 text-center">
-            <div className="mx-auto grid size-14 place-items-center rounded-full bg-[#C8D1C7]/40 text-[#68705A]">
+            <div className="mx-auto grid size-14 place-items-center rounded-full bg-[#C8D1C7]/50 text-[#444C38]">
               <CheckCircle2 className="size-8" />
             </div>
 
-            <h3 className="mt-4 font-serif text-2xl font-bold text-[#292923]">
+            <h3 className="mt-4 font-serif text-2xl font-bold text-[#14120E]">
               Your Seat Is Confirmed, {name}!
             </h3>
 
             {bookingInfo?.bookingReference && (
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                <span className="rounded-md bg-[#EEE9DE] px-3.5 py-1.5 border border-[#464137]/10 text-xs font-mono font-bold text-[#292923]">
+                <span className="rounded-md bg-[#EEE9DE] px-3.5 py-1.5 border border-[#464137]/15 text-xs font-mono font-bold text-[#14120E]">
                   Ref: {bookingInfo.bookingReference}
                 </span>
                 {bookingInfo.paymentId && (
-                  <span className="rounded-md bg-[#C8D1C7]/30 px-3.5 py-1.5 border border-[#68705A]/20 text-xs font-mono font-semibold text-[#68705A]">
+                  <span className="rounded-md bg-[#C8D1C7]/40 px-3.5 py-1.5 border border-[#444C38]/25 text-xs font-mono font-bold text-[#444C38]">
                     Payment: {bookingInfo.paymentId}
                   </span>
                 )}
               </div>
             )}
 
-            <p className="mt-3 text-xs sm:text-sm leading-relaxed text-[#6F6B61]">
+            <p className="mt-3 text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium">
               We have sent the private access link and calendar invitations to:
             </p>
-            <p className="mt-1 font-semibold text-[#68705A]">{email}</p>
+            <p className="mt-1 font-bold text-[#444C38]">{email}</p>
 
-            <div className="mt-6 rounded-md bg-[#F7F4EC] p-4 text-left border border-[#464137]/10 text-xs space-y-2">
-              <p className="font-semibold text-[#68705A]">Important Next Steps:</p>
-              <p className="text-[#6F6B61]">
+            <div className="mt-6 rounded-md bg-[#F7F4EC] p-4 text-left border border-[#464137]/15 text-xs space-y-2">
+              <p className="font-bold text-[#444C38]">Important Next Steps:</p>
+              <p className="text-[#2C2A24] font-medium">
                 1. Check your inbox for the calendar invite so you don&apos;t miss the live stream.
               </p>
-              <p className="text-[#6F6B61]">
+              <p className="text-[#2C2A24] font-medium">
                 2. Live attendee bonuses (Guides & demo access) unlock during the broadcast.
               </p>
-              <p className="text-[#6F6B61]">
-                3. Your booking is registered under reference <span className="font-mono font-medium">{bookingInfo?.bookingReference}</span>.
+              <p className="text-[#2C2A24] font-medium">
+                3. Your booking is registered under reference <span className="font-mono font-bold text-[#14120E]">{bookingInfo?.bookingReference}</span>.
               </p>
             </div>
 

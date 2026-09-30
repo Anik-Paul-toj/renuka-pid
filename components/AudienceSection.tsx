@@ -80,11 +80,11 @@ export const AudienceSection: React.FC = () => {
         {/* Section Heading with compact whitespace */}
         <div className="text-center max-w-2xl mx-auto mb-5 sm:mb-6">
           <h2
-            className="no-gsap font-serif text-2xl sm:text-3xl lg:text-[2.2rem] font-medium tracking-tight text-[#292923] leading-tight"
+            className="no-gsap font-serif text-2xl sm:text-3xl lg:text-[2.2rem] font-bold tracking-tight text-[#14120E] leading-tight"
           >
             {targetAudience.heading}
           </h2>
-          <div className="mt-2 h-0.5 w-12 bg-[#68705A]/40 mx-auto" />
+          <div className="mt-2 h-0.5 w-12 bg-[#444C38]/50 mx-auto" />
         </div>
 
         {/* Content Blocks: 4-Column Grid on Desktop (2 rows of 4), 2 on Tablet, 1 on Mobile */}
@@ -99,7 +99,7 @@ export const AudienceSection: React.FC = () => {
               return (
                 <div
                   key={item.id}
-                  className="group relative overflow-hidden sm:col-span-2 lg:col-span-4 rounded-xl border border-[#24425F]/25 bg-[#FAF8F2]/90 px-5 py-3 sm:px-6 sm:py-3.5 shadow-xs hover:border-[#24425F]/45 transition-all duration-300"
+                  className="group relative overflow-hidden sm:col-span-2 lg:col-span-4 rounded-xl border border-[#24425F]/35 bg-[#FAF8F2]/95 px-5 py-3 sm:px-6 sm:py-3.5 shadow-xs hover:border-[#24425F]/55 transition-all duration-300"
                 >
                   {/* Subtle Box Watercolor Background */}
                   {bgImage && (
@@ -111,20 +111,20 @@ export const AudienceSection: React.FC = () => {
                         className="object-cover object-center opacity-25 mix-blend-multiply group-hover:opacity-35 transition-opacity duration-300 select-none"
                       />
                       {/* Artful Inner Border */}
-                      <div className="absolute inset-1 rounded-lg border border-[#24425F]/15 pointer-events-none" />
+                      <div className="absolute inset-1 rounded-lg border border-[#24425F]/20 pointer-events-none" />
                     </div>
                   )}
 
                   <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="audience-icon-badge flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-[#24425F]/10 border border-[#24425F]/20 text-[#24425F]">
-                        {iconMap[item.icon] || <Heart className="size-4 text-[#24425F]" strokeWidth={1.6} />}
+                      <div className="audience-icon-badge flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-[#24425F]/15 border border-[#24425F]/25 text-[#132A45]">
+                        {iconMap[item.icon] || <Heart className="size-4 text-[#132A45]" strokeWidth={1.6} />}
                       </div>
-                      <h3 className="text-xs sm:text-[0.8rem] font-bold uppercase tracking-[0.14em] text-[#24425F]">
+                      <h3 className="text-xs sm:text-[0.8rem] font-bold uppercase tracking-[0.14em] text-[#132A45]">
                         {item.title}
                       </h3>
                     </div>
-                    <p className="text-xs sm:text-sm text-[#292923] font-medium sm:text-right">
+                    <p className="text-xs sm:text-sm text-[#14120E] font-semibold sm:text-right">
                       {item.description}
                     </p>
                   </div>
@@ -135,7 +135,7 @@ export const AudienceSection: React.FC = () => {
             return (
               <div
                 key={item.id}
-                className="group relative overflow-hidden rounded-xl border border-[#464137]/15 bg-[#FAF8F2]/85 p-3.5 sm:p-4 hover:border-[#24425F]/40 hover:shadow-xs transition-all duration-300 flex flex-col justify-between"
+                className="group relative overflow-hidden rounded-xl border border-[#464137]/20 bg-[#FAF8F2]/92 p-3.5 sm:p-4 hover:border-[#24425F]/45 hover:shadow-xs transition-all duration-300 flex flex-col justify-between"
               >
                 {/* Subtle Box Watercolor Background */}
                 {bgImage && (
@@ -147,23 +147,23 @@ export const AudienceSection: React.FC = () => {
                       className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
                     />
                     {/* Artful Inner Border Frame */}
-                    <div className="absolute inset-1 rounded-lg border border-[#464137]/10 group-hover:border-[#24425F]/25 transition-colors duration-300 pointer-events-none" />
+                    <div className="absolute inset-1 rounded-lg border border-[#464137]/15 group-hover:border-[#24425F]/30 transition-colors duration-300 pointer-events-none" />
                   </div>
                 )}
 
                 <div className="relative z-10 flex items-start gap-3">
-                  <div className="audience-icon-badge flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-[#24425F]/08 border border-[#24425F]/15 text-[#24425F] transition-colors duration-300">
-                    {iconMap[item.icon] || <Palette className="size-4 text-[#24425F]" strokeWidth={1.6} />}
+                  <div className="audience-icon-badge flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-[#24425F]/12 border border-[#24425F]/20 text-[#132A45] transition-colors duration-300">
+                    {iconMap[item.icon] || <Palette className="size-4 text-[#132A45]" strokeWidth={1.6} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[0.74rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[#24425F] leading-snug">
+                    <h3 className="text-[0.74rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[#132A45] leading-snug">
                       {item.title}
                     </h3>
-                    <p className="mt-1 leading-relaxed text-[#5A564D] text-xs">
+                    <p className="mt-1 leading-relaxed text-[#2C2A24] text-xs font-medium">
                       {item.description}
                     </p>
                     {item.quote && (
-                      <p className="mt-1 text-xs font-serif italic text-[#292923]">
+                      <p className="mt-1 text-xs font-serif italic text-[#14120E] font-medium">
                         {item.quote}
                       </p>
                     )}

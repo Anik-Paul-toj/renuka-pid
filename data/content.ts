@@ -380,7 +380,7 @@ export const masterclassData: MasterclassData = {
     takeawayHeading: "And the biggest takeaway:",
     takeawayText:
       "You’ll stop wondering, “Why doesn’t my painting look like the reference?” — and start understanding exactly what to do differently.",
-    ctaText: "EXPLORE THE MASTERCLASS →",
+    ctaText: "EXPLORE THE MASTERCLASS",
     handwrittenNote: "Small Steps, Creative Big Changes",
   },
   transformation: {
@@ -675,7 +675,7 @@ export const masterclassData: MasterclassData = {
     description:
       "Join a supportive community and experience the transformative, calming power of art. Give yourself 120 mindful minutes to pause, breathe, and paint.",
     handwrittenPhrase: "Create. Pause. Breathe. Heal.",
-    ctaText: "EXPLORE COURSES →",
+    ctaText: "EXPLORE COURSES",
     dateInfo: "Live on Saturday, 28 October 2026 at 6:30 PM IST",
     subNote: "100% Free Registration • Instant Email Confirmation • Suitable for all levels",
   },

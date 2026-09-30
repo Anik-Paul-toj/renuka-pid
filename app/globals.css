@@ -6,11 +6,11 @@
   --background-secondary: #EEE9DE;
   --background-card: #FAF8F2;
 
-  --foreground: #292923;
-  --foreground-muted: #6F6B61;
+  --foreground: #14120E;
+  --foreground-muted: #38352E;
 
-  --sage: #68705A;
-  --sage-hover: #565D4A;
+  --sage: #444C38;
+  --sage-hover: #2F3526;
   --sage-light: #C8D1C7;
   --sage-wash: rgba(200, 209, 199, 0.35);
 
@@ -21,8 +21,8 @@
   --paper: #E8DED0;
   --gold: #B7A16B;
 
-  --border: rgba(70, 65, 55, 0.12);
-  --border-light: rgba(70, 65, 55, 0.07);
+  --border: rgba(70, 65, 55, 0.15);
+  --border-light: rgba(70, 65, 55, 0.09);
 
   /* Legacy variable bridges for seamless integration */
   --surface: var(--background-secondary);
@@ -32,7 +32,7 @@
   --icon: var(--sage);
   --subheading: var(--foreground-muted);
   --cta: var(--sage);
-  --cta-foreground: #F7F4EC;
+  --cta-foreground: #FFFFFF;
   --muted: var(--paper);
   --muted-foreground: var(--foreground-muted);
   --destructive: #A24B4B;
@@ -89,10 +89,10 @@ body {
 /* Elegant Art Studio Button */
 .btn-studio {
   background-color: var(--sage);
-  color: #F7F4EC;
+  color: #FFFFFF;
   border-radius: 6px;
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   transition: all 0.25s ease;

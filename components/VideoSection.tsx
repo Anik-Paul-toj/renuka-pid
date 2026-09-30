@@ -88,15 +88,15 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
           {/* Right Column: Learning Outcomes */}
           <div>
             <div>
-              <p className="text-[0.68rem] sm:text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-[#68705A]">
+              <p className="text-[0.68rem] sm:text-[0.72rem] font-bold uppercase tracking-[0.2em] text-[#444C38]">
                 {videoSection.overline}
               </p>
-              <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-medium tracking-tight text-[#292923]">
+              <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#14120E]">
                 {videoSection.headline}
               </h2>
-              <div className="mt-2 h-0.5 w-12 bg-[#68705A]/40" />
+              <div className="mt-2 h-0.5 w-12 bg-[#444C38]/50" />
               {videoSection.description && (
-                <p className="mt-2 text-xs text-[#6F6B61] leading-relaxed">
+                <p className="mt-2 text-xs sm:text-[0.82rem] text-[#2C2A24] font-medium leading-relaxed">
                   {videoSection.description}
                 </p>
               )}
@@ -110,7 +110,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                 return (
                   <li
                     key={idx}
-                    className="no-gsap group relative overflow-hidden flex items-start gap-2.5 rounded-lg bg-[#FAF8F2] px-3 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-[0.8rem] leading-relaxed text-[#292923] border border-[#464137]/20 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300"
+                    className="no-gsap group relative overflow-hidden flex items-start gap-2.5 rounded-lg bg-[#FAF8F2] px-3 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-[0.8rem] leading-relaxed text-[#14120E] border border-[#464137]/20 shadow-2xs hover:border-[#444C38]/45 transition-all duration-300"
                   >
                     {/* Box Watercolor Background */}
                     {boxImg && (
@@ -122,15 +122,15 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                           className="object-cover object-center opacity-18 mix-blend-multiply group-hover:opacity-28 transition-opacity duration-300 select-none"
                         />
                         {/* Artful Inner Border Frame */}
-                        <div className="absolute inset-0.5 rounded-[6px] border border-[#464137]/10 group-hover:border-[#68705A]/25 pointer-events-none transition-colors duration-300" />
+                        <div className="absolute inset-0.5 rounded-[6px] border border-[#464137]/10 group-hover:border-[#444C38]/25 pointer-events-none transition-colors duration-300" />
                       </div>
                     )}
 
                     <div className="relative z-10 flex items-start gap-2">
-                      <div className="mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full bg-[#68705A]/15 text-[#68705A]">
+                      <div className="mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full bg-[#444C38]/15 text-[#444C38]">
                         <Check className="size-3 stroke-[2.4]" />
                       </div>
-                      <span className="font-medium text-[#292923]">{point}</span>
+                      <span className="font-semibold text-[#14120E]">{point}</span>
                     </div>
                   </li>
                 );
@@ -139,7 +139,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
 
             {/* Biggest Takeaway Callout */}
             {videoSection.takeawayText && (
-              <div className="no-gsap group relative overflow-hidden mt-3 rounded-xl border border-[#68705A]/30 bg-[#FAF8F2] p-3 sm:p-3.5 shadow-2xs hover:border-[#68705A]/50 transition-all duration-300">
+              <div className="no-gsap group relative overflow-hidden mt-3 rounded-xl border border-[#444C38]/35 bg-[#FAF8F2] p-3 sm:p-3.5 shadow-2xs hover:border-[#444C38]/55 transition-all duration-300">
                 {/* Takeaway Box Background */}
                 <div className="pointer-events-none absolute inset-0 z-0">
                   <Image
@@ -148,14 +148,14 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                     fill
                     className="object-cover object-center opacity-25 mix-blend-multiply group-hover:opacity-35 transition-opacity duration-300 select-none"
                   />
-                  <div className="absolute inset-1 rounded-lg border border-[#68705A]/15 pointer-events-none" />
+                  <div className="absolute inset-1 rounded-lg border border-[#444C38]/15 pointer-events-none" />
                 </div>
 
                 <div className="relative z-10">
-                  <p className="text-[0.66rem] sm:text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[#68705A]">
+                  <p className="text-[0.66rem] sm:text-[0.7rem] font-bold uppercase tracking-[0.16em] text-[#444C38]">
                     {videoSection.takeawayHeading || "And the biggest takeaway:"}
                   </p>
-                  <p className="mt-0.5 font-serif italic text-xs sm:text-[0.85rem] leading-relaxed text-[#292923]">
+                  <p className="mt-0.5 font-serif italic text-xs sm:text-[0.85rem] leading-relaxed text-[#14120E] font-medium">
                     {videoSection.takeawayText}
                   </p>
                 </div>
@@ -166,13 +166,13 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
             <div className="mt-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3.5">
               <button
                 onClick={onOpenModal}
-                className="btn-studio px-6 py-2.5 text-xs sm:text-sm tracking-wider"
+                className="btn-studio px-6 py-2.5 text-xs sm:text-sm tracking-wider font-bold"
               >
-                <span>{videoSection.ctaText}</span>
+                <span>{videoSection.ctaText?.replace(/\s*→\s*$/, "")}</span>
                 <ArrowRight className="size-3.5" />
               </button>
 
-              <span className="font-script text-xl sm:text-2xl text-[#68705A] select-none">
+              <span className="font-script text-xl sm:text-2xl text-[#444C38] select-none font-bold">
                 {videoSection.handwrittenNote}
               </span>
             </div>

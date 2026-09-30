@@ -26,37 +26,37 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
           />
 
           <div className="relative mx-auto max-w-3xl">
-            <span className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#68705A]">
+            <span className="text-[0.72rem] font-bold uppercase tracking-[0.24em] text-[#444C38]">
               {finalCta.overline}
             </span>
 
-            <h2 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-[#292923] sm:text-4xl lg:text-[2.8rem]">
+            <h2 className="mt-3 font-serif text-3xl font-bold leading-tight tracking-tight text-[#14120E] sm:text-4xl lg:text-[2.8rem]">
               {finalCta.headline}
             </h2>
 
-            <p className="mt-4 text-xs sm:text-base leading-relaxed text-[#6F6B61] max-w-2xl mx-auto">
+            <p className="mt-4 text-xs sm:text-base leading-relaxed text-[#2C2A24] font-medium max-w-2xl mx-auto">
               {finalCta.description}
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-4">
               <button
                 onClick={onOpenModal}
-                className="btn-studio px-10 py-4 text-xs sm:text-sm tracking-widest"
+                className="btn-studio px-10 py-4 text-xs sm:text-sm tracking-widest font-bold"
               >
-                <span>{finalCta.ctaText}</span>
+                <span>{finalCta.ctaText?.replace(/\s*→\s*$/, "")}</span>
                 <ArrowRight className="size-4" />
               </button>
 
               {/* Handwritten artistic annotation */}
-              <p className="font-script text-3xl text-[#68705A] mt-2 select-none">
+              <p className="font-script text-3xl text-[#444C38] mt-2 select-none font-bold">
                 {finalCta.handwrittenPhrase}
               </p>
 
-              <p className="text-xs font-semibold text-[#68705A] tracking-wider uppercase">
+              <p className="text-xs font-bold text-[#444C38] tracking-wider uppercase">
                 {finalCta.dateInfo}
               </p>
 
-              <p className="text-xs text-[#6F6B61]">
+              <p className="text-xs text-[#3E3A32] font-semibold">
                 {finalCta.subNote}
               </p>
             </div>

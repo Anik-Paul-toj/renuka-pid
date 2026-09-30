@@ -76,8 +76,8 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center gap-2 mb-1.5">
-        <span className="size-2 rounded-full bg-[#68705A] animate-pulse" />
-        <p className="text-[0.68rem] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#6F6B61]">
+        <span className="size-2 rounded-full bg-[#444C38] animate-pulse" />
+        <p className="text-[0.68rem] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#3E3A32]">
           {timeRemaining.isExpired ? "REGISTRATION STATUS" : "REGISTRATION CLOSES IN"}
         </p>
       </div>
@@ -91,53 +91,53 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
       ) : (
         <div className="grid grid-cols-4 no-gsap gap-2 sm:gap-3 max-w-[280px] sm:max-w-[340px]">
           {/* Days */}
-          <div className="paper-card flex flex-col items-center justify-center py-1.5 px-1.5 sm:py-2 sm:px-2.5 bg-[#FAF8F2] border border-[#464137]/15 rounded-md shadow-xs min-w-[54px] sm:min-w-[64px]">
+          <div className="paper-card flex flex-col items-center justify-center py-1.5 px-1.5 sm:py-2 sm:px-2.5 bg-[#FAF8F2] border border-[#464137]/20 rounded-md shadow-xs min-w-[54px] sm:min-w-[64px]">
             <span
               suppressHydrationWarning
-              className="font-serif text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-[#292923] leading-none"
+              className="font-serif text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-[#14120E] leading-none"
             >
               {mounted ? timeRemaining.days : "00"}
             </span>
-            <span className="text-[0.58rem] sm:text-[0.64rem] font-semibold uppercase tracking-wider text-[#68705A] mt-1 leading-none">
+            <span className="text-[0.58rem] sm:text-[0.64rem] font-bold uppercase tracking-wider text-[#444C38] mt-1 leading-none">
               DAYS
             </span>
           </div>
 
           {/* Hours */}
-          <div className="paper-card flex flex-col items-center justify-center py-1.5 px-1.5 sm:py-2 sm:px-2.5 bg-[#FAF8F2] border border-[#464137]/15 rounded-md shadow-xs min-w-[54px] sm:min-w-[64px]">
+          <div className="paper-card flex flex-col items-center justify-center py-1.5 px-1.5 sm:py-2 sm:px-2.5 bg-[#FAF8F2] border border-[#464137]/20 rounded-md shadow-xs min-w-[54px] sm:min-w-[64px]">
             <span
               suppressHydrationWarning
-              className="font-serif text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-[#292923] leading-none"
+              className="font-serif text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-[#14120E] leading-none"
             >
               {mounted ? timeRemaining.hours : "00"}
             </span>
-            <span className="text-[0.58rem] sm:text-[0.64rem] font-semibold uppercase tracking-wider text-[#68705A] mt-1 leading-none">
+            <span className="text-[0.58rem] sm:text-[0.64rem] font-bold uppercase tracking-wider text-[#444C38] mt-1 leading-none">
               HRS
             </span>
           </div>
 
           {/* Minutes */}
-          <div className="paper-card flex flex-col items-center justify-center py-1.5 px-1.5 sm:py-2 sm:px-2.5 bg-[#FAF8F2] border border-[#464137]/15 rounded-md shadow-xs min-w-[54px] sm:min-w-[64px]">
+          <div className="paper-card flex flex-col items-center justify-center py-1.5 px-1.5 sm:py-2 sm:px-2.5 bg-[#FAF8F2] border border-[#464137]/20 rounded-md shadow-xs min-w-[54px] sm:min-w-[64px]">
             <span
               suppressHydrationWarning
-              className="font-serif text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-[#292923] leading-none"
+              className="font-serif text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-[#14120E] leading-none"
             >
               {mounted ? timeRemaining.minutes : "00"}
             </span>
-            <span className="text-[0.58rem] sm:text-[0.64rem] font-semibold uppercase tracking-wider text-[#68705A] mt-1 leading-none">
+            <span className="text-[0.58rem] sm:text-[0.64rem] font-bold uppercase tracking-wider text-[#444C38] mt-1 leading-none">
               MIN
             </span>
           </div>
 
           {/* Seconds */}
-          <div className="paper-card flex flex-col items-center justify-center py-1.5 px-1.5 sm:py-2 sm:px-2.5 bg-[#FAF8F2] border border-[#464137]/15 rounded-md shadow-xs min-w-[54px] sm:min-w-[64px]">
+          <div className="paper-card flex flex-col items-center justify-center py-1.5 px-1.5 sm:py-2 sm:px-2.5 bg-[#FAF8F2] border border-[#464137]/20 rounded-md shadow-xs min-w-[54px] sm:min-w-[64px]">
             <span
               suppressHydrationWarning
-              className="font-serif text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-[#292923] leading-none"
+              className="font-serif text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-[#14120E] leading-none"
             >
               {mounted ? timeRemaining.seconds : "00"}
             </span>
-            <span className="text-[0.58rem] sm:text-[0.64rem] font-semibold uppercase tracking-wider text-[#68705A] mt-1 leading-none">
+            <span className="text-[0.58rem] sm:text-[0.64rem] font-bold uppercase tracking-wider text-[#444C38] mt-1 leading-none">
               SEC
             </span>
           </div>
