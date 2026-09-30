@@ -26,6 +26,27 @@ const credentialBadges = [
   },
 ];
 
+function formatBioParagraph(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*.*?\*\*|Meraki Institute of Fine Art)/gi);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} className="font-semibold text-[#292923]">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.toLowerCase() === "meraki institute of fine art") {
+      return (
+        <strong key={i} className="font-semibold text-[#292923]">
+          {part}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 export const InstructorStory: React.FC = () => {
   const { instructorStory } = useLandingContent();
 
@@ -111,7 +132,7 @@ export const InstructorStory: React.FC = () => {
             {/* Paragraphs - Compact & Balanced */}
             <div className="mt-3.5 space-y-2 text-xs sm:text-[0.82rem] leading-relaxed text-[#6F6B61]">
               {instructorStory.paragraphs.map((p, idx) => (
-                <p key={idx}>{p}</p>
+                <p key={idx}>{formatBioParagraph(p)}</p>
               ))}
             </div>
 
