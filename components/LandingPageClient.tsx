@@ -36,19 +36,19 @@ export function LandingPageClient({
             {/* Section 01: Hero & Stats */}
             <Hero onOpenModal={handleOpenModal} />
 
-            {/* Section 02: Who This Is For (Target Audience) */}
-            <AudienceSection />
-
-            {/* Section 03: Video Preview */}
-            <VideoSection onOpenModal={handleOpenModal} />
-
-            {/* Section 04: Instructor Story & Philosophy */}
+            {/* Section 02: About Renuka (Instructor Story & Credentials) */}
             <InstructorStory />
 
-            {/* Section 06: Frequently Asked Questions */}
+            {/* Section 03: Who This Is For (Target Audience) */}
+            <AudienceSection />
+
+            {/* Section 04: Video Preview */}
+            <VideoSection onOpenModal={handleOpenModal} />
+
+            {/* Section 05: Frequently Asked Questions */}
             <FAQ />
 
-            {/* Section 07: Final Conversion Call to Action */}
+            {/* Section 06: Final Conversion Call to Action */}
             <FinalCTA onOpenModal={handleOpenModal} />
           </main>
 

@@ -51,143 +51,108 @@ export const InstructorStory: React.FC = () => {
   const { instructorStory } = useLandingContent();
 
   return (
-    <section id="about" className="relative overflow-hidden py-8 sm:py-12 bg-[#F7F4EC]">
+    <section id="about" className="relative overflow-hidden py-12 sm:py-16 lg:py-20 bg-[#F7F4EC]">
       {/* Unique Watercolor Background Artwork */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <Image
           src="/images/background/ChatGPT Image Sep 25, 2026, 07_09_39 PM.png"
           alt=""
           fill
-          className="object-cover object-center opacity-22 mix-blend-multiply select-none"
+          className="object-cover object-center opacity-20 mix-blend-multiply select-none"
           priority
         />
         {/* Soft Blending Masks */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#F7F4EC] via-transparent to-[#F7F4EC]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F4EC]/60 via-transparent to-[#F7F4EC]/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F4EC]/70 via-transparent to-[#F7F4EC]/70" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid gap-6 lg:gap-10 lg:grid-cols-[0.9fr_1.3fr] lg:items-center">
-          {/* Left Column: Portrait Card with Double-Border Framing */}
-          <div className="relative mx-auto w-full max-w-[340px] sm:max-w-[380px] lg:max-w-none">
-            {/* Soft watercolor atmosphere glow */}
-            <div
-              aria-hidden="true"
-              className="absolute -top-4 -left-4 size-40 rounded-full bg-[#C8D1C7]/35 blur-2xl pointer-events-none"
+      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 text-center">
+        {/* Eyebrow */}
+        <div className="inline-flex items-center justify-center gap-2">
+          <span className="h-px w-6 bg-[#4A533D]/40" />
+          <p className="text-[0.72rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.26em] text-[#4A533D]">
+            {instructorStory.overline || "ABOUT RENUKA"}
+          </p>
+          <span className="h-px w-6 bg-[#4A533D]/40" />
+        </div>
+
+        {/* Heading */}
+        <h2 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-[2.75rem] font-medium tracking-tight text-[#1A1814] leading-tight">
+          <span>{instructorStory.headline}</span>
+          <span className="font-semibold text-[#1A1814]">{instructorStory.name}</span>
+        </h2>
+
+        {/* Role */}
+        <p className="mt-2 text-xs sm:text-sm tracking-[0.2em] uppercase font-bold text-[#505942]">
+          {instructorStory.subtitle}
+        </p>
+
+        {/* Decorative Divider */}
+        <div className="mx-auto mt-4 mb-6 flex items-center justify-center gap-2">
+          <div className="h-px w-10 sm:w-16 bg-[#4A533D]/30" />
+          <span className="size-1.5 rounded-full bg-[#4A533D]/60" />
+          <div className="h-px w-10 sm:w-16 bg-[#4A533D]/30" />
+        </div>
+
+        {/* Description Paragraphs */}
+        <div className="mx-auto max-w-2xl sm:max-w-3xl space-y-4 text-center text-sm sm:text-base lg:text-[1.03rem] leading-relaxed text-[#2C2A24]">
+          {instructorStory.paragraphs.map((p, idx) => (
+            <p key={idx}>{formatBioParagraph(p)}</p>
+          ))}
+        </div>
+
+        {/* Quote Block */}
+        <blockquote className="group relative mx-auto mt-8 sm:mt-10 max-w-2xl sm:max-w-3xl overflow-hidden rounded-2xl border border-[#4A533D]/25 bg-[#FAF8F2]/95 p-5 sm:p-7 shadow-xs hover:border-[#4A533D]/45 transition-all duration-300">
+          <div className="pointer-events-none absolute inset-0 z-0">
+            <Image
+              src="/images/forBox/fc390f6a7a95ef0822740a490dd4d369.jpg.jpeg"
+              alt=""
+              fill
+              className="object-cover object-center opacity-25 mix-blend-multiply select-none"
             />
-            <div
-              aria-hidden="true"
-              className="absolute -bottom-4 -right-4 size-40 rounded-full bg-[#D9BDB2]/25 blur-2xl pointer-events-none"
-            />
-
-            <div className="group relative overflow-hidden rounded-2xl border border-[#68705A]/30 bg-[#FAF8F2]/90 p-2.5 sm:p-3 shadow-md hover:border-[#68705A]/50 transition-all duration-300">
-              {/* Card Texture from forBox */}
-              <div className="pointer-events-none absolute inset-0 z-0">
-                <Image
-                  src="/images/forBox/fcd4ca8ed064a6b93fcf45ff6860f24e.jpg.jpeg"
-                  alt=""
-                  fill
-                  className="object-cover object-center opacity-20 mix-blend-multiply select-none"
-                />
-                <div className="absolute inset-1.5 rounded-xl border border-[#68705A]/15 pointer-events-none" />
-              </div>
-
-              {/* Portrait Image */}
-              <div className="relative z-10 aspect-[3/3.6] w-full overflow-hidden rounded-xl border border-[#68705A]/20 shadow-2xs">
-                <Image
-                  src={instructorStory.image}
-                  alt={`Renuka Aggarwal in her art studio`}
-                  fill
-                  className="object-cover object-center transition-transform duration-700 group-hover:scale-103"
-                  sizes="(max-width: 768px) 100vw, 420px"
-                />
-              </div>
-
-              {/* Handwritten artistic overlay badge */}
-              <div className="relative z-10 mt-2 px-2 py-1 text-center">
-                <p className="font-script text-xl sm:text-2xl text-[#68705A] leading-snug">
-                  &ldquo;Creativity is a kinder way to be in the world.&rdquo;
-                </p>
-              </div>
-            </div>
+            <div className="absolute inset-1.5 rounded-xl border border-[#4A533D]/15 pointer-events-none" />
           </div>
 
-          {/* Right Column: Editorial Bio, Quote & Credentials in 1 Scroll */}
-          <div>
-            <p className="text-[0.68rem] sm:text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#68705A]">
-              {instructorStory.overline}
+          <div className="relative z-10 text-center">
+            <p className="font-serif text-base sm:text-lg lg:text-[1.15rem] italic leading-relaxed text-[#1A1814]">
+              &ldquo;{instructorStory.quote}&rdquo;
             </p>
+            <footer className="mt-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-[#4A533D]">
+              — {instructorStory.quoteAuthor?.toUpperCase()}
+            </footer>
+          </div>
+        </blockquote>
 
-            <h2 className="mt-1 font-serif text-2xl sm:text-3xl lg:text-[2.2rem] font-medium tracking-tight text-[#292923] leading-tight">
-              <span>{instructorStory.headline}</span>
-              <span className="font-semibold text-[#292923]">{instructorStory.name}</span>
-            </h2>
-
-            <p className="mt-0.5 text-[0.68rem] tracking-[0.18em] uppercase font-semibold text-[#6F6B61]">
-              {instructorStory.subtitle}
-            </p>
-
-            <div className="mt-2.5 h-0.5 w-12 bg-[#68705A]/40" />
-
-            {/* Paragraphs - Compact & Balanced */}
-            <div className="mt-3.5 space-y-2 text-xs sm:text-[0.82rem] leading-relaxed text-[#6F6B61]">
-              {instructorStory.paragraphs.map((p, idx) => (
-                <p key={idx}>{formatBioParagraph(p)}</p>
-              ))}
-            </div>
-
-            {/* Editorial Quote Treatment with forBox Texture */}
-            <blockquote className="group relative overflow-hidden mt-3.5 rounded-xl border border-[#68705A]/25 bg-[#FAF8F2]/90 p-3 sm:p-3.5 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300">
+        {/* Credentials Cards: 3 columns on desktop, 1 on mobile */}
+        <div className="no-gsap mx-auto mt-8 sm:mt-10 max-w-3xl sm:max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-5 text-left">
+          {credentialBadges.map((badge, idx) => (
+            <div
+              key={idx}
+              className="no-gsap group relative overflow-hidden rounded-2xl border border-[#4A533D]/25 bg-[#FAF8F2] p-4 sm:p-5 shadow-xs hover:border-[#4A533D]/50 hover:shadow-sm transition-all duration-300"
+            >
               <div className="pointer-events-none absolute inset-0 z-0">
                 <Image
-                  src="/images/forBox/fc390f6a7a95ef0822740a490dd4d369.jpg.jpeg"
+                  src={badge.boxImage}
                   alt=""
                   fill
-                  className="object-cover object-center opacity-25 mix-blend-multiply select-none"
+                  className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
                 />
-                <div className="absolute inset-1 rounded-lg border border-[#68705A]/15 pointer-events-none" />
+                <div className="absolute inset-1 rounded-xl border border-[#4A533D]/15 pointer-events-none" />
               </div>
 
-              <div className="relative z-10">
-                <p className="font-serif text-xs sm:text-[0.86rem] italic leading-relaxed text-[#292923]">
-                  “{instructorStory.quote}”
-                </p>
-                <footer className="mt-1 text-[0.66rem] font-semibold uppercase tracking-wider text-[#68705A]">
-                  — {instructorStory.quoteAuthor}
-                </footer>
-              </div>
-            </blockquote>
-
-            {/* 3-Item Credential Badges with Individual forBox Textures */}
-            <div className="no-gsap mt-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {credentialBadges.map((badge, idx) => (
-                <div
-                  key={idx}
-                  className="no-gsap group relative overflow-hidden rounded-xl border border-[#68705A]/25 bg-[#FAF8F2] p-2.5 sm:p-3 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300"
-                >
-                  <div className="pointer-events-none absolute inset-0 z-0">
-                    <Image
-                      src={badge.boxImage}
-                      alt=""
-                      fill
-                      className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
-                    />
-                    <div className="absolute inset-1 rounded-lg border border-[#68705A]/15 pointer-events-none" />
-                  </div>
-
-                  <div className="relative z-10 flex flex-col items-center sm:items-start text-center sm:text-left">
-                    <badge.icon className="size-4 text-[#68705A] mb-1" strokeWidth={1.5} />
-                    <span className="text-[0.72rem] sm:text-[0.76rem] font-bold text-[#292923] leading-snug">
-                      {badge.label}
-                    </span>
-                    <span className="mt-0.5 text-[0.66rem] text-[#6F6B61] leading-tight">
-                      {badge.detail}
-                    </span>
-                  </div>
+              <div className="relative z-10 flex flex-col items-center sm:items-start text-center sm:text-left">
+                <div className="mb-2.5 flex size-9 items-center justify-center rounded-xl bg-[#EBE7DC] border border-[#4A533D]/20 text-[#3D4431]">
+                  <badge.icon className="size-4.5 text-[#3D4431]" strokeWidth={1.75} />
                 </div>
-              ))}
+                <span className="text-sm sm:text-[0.92rem] font-bold text-[#1A1814] leading-snug">
+                  {badge.label}
+                </span>
+                <span className="mt-1 text-xs sm:text-[0.78rem] font-medium text-[#423F36] leading-relaxed">
+                  {badge.detail}
+                </span>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
