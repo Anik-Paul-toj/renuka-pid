@@ -220,35 +220,50 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
             </div>
           </div>
 
-          {/* Artist Studio Artwork & Photograph Container: Appears on right on desktop, below content on mobile */}
-          <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[430px] xl:max-w-[460px] mt-6 lg:mt-0">
-            {/* Subtle organic watercolor wash backdrop */}
+          {/* Instructor Portrait: Naturally emerging from watercolor artwork without hard edges */}
+          <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[430px] xl:max-w-[460px] mt-6 lg:mt-0 flex flex-col items-center">
+            {/* Soft atmospheric watercolor backlight glow */}
             <div
               aria-hidden="true"
-              className="absolute -inset-3 rounded-[16px] bg-gradient-to-tr from-[#D9BDB2]/35 via-[#C8D1C7]/40 to-transparent blur-md"
+              className="pointer-events-none absolute -inset-4 sm:-inset-6 rounded-full bg-gradient-to-tr from-[#D9BDB2]/25 via-[#C8D1C7]/30 to-[#F7F4EC]/10 blur-2xl select-none"
             />
 
-            <div className="paper-card relative overflow-hidden p-2 shadow-[0_12px_32px_rgba(50,45,35,0.07)]">
-              <div className="relative aspect-[4/4.5] w-full overflow-hidden rounded-md">
+            {/* Seamless Feathered Portrait */}
+            <div className="relative w-full aspect-[4/4.6] overflow-visible">
+              <div
+                className="relative size-full"
+                style={{
+                  WebkitMaskImage:
+                    "radial-gradient(ellipse 78% 76% at 50% 46%, black 42%, rgba(0,0,0,0.85) 62%, rgba(0,0,0,0.35) 82%, transparent 100%)",
+                  maskImage:
+                    "radial-gradient(ellipse 78% 76% at 50% 46%, black 42%, rgba(0,0,0,0.85) 62%, rgba(0,0,0,0.35) 82%, transparent 100%)",
+                }}
+              >
                 <Image
                   src={heroContent.instructorImage}
                   alt={`${heroContent.instructorName} in her sunny art studio`}
                   fill
                   priority
-                  className="object-cover object-center transition-transform duration-700 hover:scale-105"
+                  className="object-cover object-center select-none"
                   sizes="(max-width: 1024px) 380px, 460px"
                 />
-              </div>
 
-              {/* Studio Descriptor Tag */}
-              <div className="mt-1.5 px-2 py-0.5 text-center">
-                <p className="font-serif text-sm font-semibold text-[#292923]">
-                  {heroContent.instructorName}
-                </p>
-                <p className="text-[0.64rem] tracking-wider uppercase text-[#6F6B61]">
-                  {heroContent.instructorTitle}
-                </p>
+                {/* Soft watercolor peripheral edge-dissolve overlays matching #F7F4EC */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#F7F4EC]/85 via-[#F7F4EC]/30 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#F7F4EC] via-[#F7F4EC]/40 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-14 bg-gradient-to-r from-[#F7F4EC]/85 via-[#F7F4EC]/30 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-14 bg-gradient-to-l from-[#F7F4EC]/85 via-[#F7F4EC]/30 to-transparent" />
               </div>
+            </div>
+
+            {/* Studio Descriptor Tag: Naturally flowing below the portrait */}
+            <div className="relative z-10 -mt-2 text-center">
+              <p className="font-serif text-base sm:text-lg font-bold text-[#292923] tracking-tight">
+                {heroContent.instructorName}
+              </p>
+              <p className="mt-0.5 text-[0.66rem] sm:text-[0.7rem] tracking-[0.18em] uppercase font-semibold text-[#68705A]">
+                {heroContent.instructorTitle}
+              </p>
             </div>
           </div>
         </div>
