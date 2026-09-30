@@ -194,7 +194,7 @@ VALUES (
       "icon": "Sparkles"
     },
     {
-      "number": "1,000+ Students",
+      "number": "5,000+ Students",
       "label": "guided to experience the gentle joy of watercolor",
       "icon": "Users"
     },
@@ -553,14 +553,13 @@ INSERT INTO public.landing_content (section_key, content_json, status, version, 
 VALUES (
   'instructorStory',
   $json${
-    "overline": "ABOUT ME",
-    "headline": "Hi, I'm ",
+    "overline": "ABOUT RENUKA",
+    "headline": "Meet ",
     "name": "Renuka Aggarwal",
     "subtitle": "ART EDUCATOR | FOUNDER, RENUKA ART STUDIO",
     "paragraphs": [
-      "With over 15 years of teaching experience, I help adults discover the joy of art through simple, mindful and well-structured watercolour courses. My goal is to make art accessible, meaningful and a part of your everyday life — no matter where you are in your journey.",
-      "I believe everyone holds a natural, innate creative impulse that often gets buried under the busyness of adult life. In my studio, we step away from competition and rigid expectations. We return to the tactile pleasure of water, natural pigment, and mindful breathing.",
-      "Through Renuka Art Studio, I have had the privilege of guiding more than 1,000 students worldwide to rediscover their creative confidence, quiet their inner critic, and experience art as a kinder, restorative companion."
+      "She is the Director and Co-Owner of Meraki Institute of Fine Art, an established art education institute in Delhi where she has guided and mentored thousands of students across different age groups and skill levels.",
+      "Her teaching philosophy goes beyond simply learning techniques. Renuka believes that art is a way of seeing, expressing and connecting with ourselves."
     ],
     "quote": "My art is always an invitation to slow down, breathe, and discover the quiet beauty hidden within everyday moments.",
     "quoteAuthor": "Renuka Aggarwal",

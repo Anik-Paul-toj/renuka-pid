@@ -7,24 +7,22 @@ import { useLandingContent } from "@/components/LandingContentProvider";
 
 const credentialBadges = [
   {
-    icon: GraduationCap,
-    label: "Fine Arts Graduate",
-    boxImage: "/images/forBox/052d678ca9d09b49c5a93e5d722998b7.jpg.jpeg",
-  },
-  {
     icon: BookOpen,
     label: "15+ Years Experience",
+    detail: "15+ years of teaching experience",
     boxImage: "/images/forBox/3f3cf5f03a81fdc837ba23ea44e7199e.jpg.jpeg",
   },
   {
     icon: Users,
-    label: "1,000+ Students",
+    label: "5,000+ Students Taught",
+    detail: "Across diverse age groups & skill levels",
     boxImage: "/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg",
   },
   {
-    icon: Heart,
-    label: "Art for Well-being",
-    boxImage: "/images/forBox/8fc925150eae143e15c0f95c41c39cb4.jpg.jpeg",
+    icon: GraduationCap,
+    label: "Qualified Art Educator",
+    detail: "Trained at top reputed art institutions",
+    boxImage: "/images/forBox/052d678ca9d09b49c5a93e5d722998b7.jpg.jpeg",
   },
 ];
 
@@ -139,12 +137,12 @@ export const InstructorStory: React.FC = () => {
               </div>
             </blockquote>
 
-            {/* 4-Item Credential Badges with Individual forBox Textures */}
-            <div className="no-gsap mt-3.5 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {/* 3-Item Credential Badges with Individual forBox Textures */}
+            <div className="no-gsap mt-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {credentialBadges.map((badge, idx) => (
                 <div
                   key={idx}
-                  className="no-gsap group relative overflow-hidden rounded-xl border border-[#68705A]/25 bg-[#FAF8F2] p-2 sm:p-2.5 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300"
+                  className="no-gsap group relative overflow-hidden rounded-xl border border-[#68705A]/25 bg-[#FAF8F2] p-2.5 sm:p-3 shadow-2xs hover:border-[#68705A]/45 transition-all duration-300"
                 >
                   <div className="pointer-events-none absolute inset-0 z-0">
                     <Image
@@ -158,8 +156,11 @@ export const InstructorStory: React.FC = () => {
 
                   <div className="relative z-10 flex flex-col items-center sm:items-start text-center sm:text-left">
                     <badge.icon className="size-4 text-[#68705A] mb-1" strokeWidth={1.5} />
-                    <span className="text-[0.68rem] sm:text-[0.72rem] font-medium text-[#292923] leading-snug">
+                    <span className="text-[0.72rem] sm:text-[0.76rem] font-bold text-[#292923] leading-snug">
                       {badge.label}
+                    </span>
+                    <span className="mt-0.5 text-[0.66rem] text-[#6F6B61] leading-tight">
+                      {badge.detail}
                     </span>
                   </div>
                 </div>
