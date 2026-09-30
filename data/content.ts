@@ -205,7 +205,7 @@ export interface WorkshopData {
 export const workshopData: WorkshopData = {
   type: "LIVE WORKSHOP",
   title: "The WATERCOLOUR Roadmap:",
-  transformation: "“I Can’t Paint” → “I Painted This Myself.”",
+  transformation: "“I Can’t Paint” to “I Painted This Myself.”",
   transformationBefore: "“I Can’t Paint”",
   transformationAfter: "“I Painted This Myself.”",
   format: "One-Day Masterclass",

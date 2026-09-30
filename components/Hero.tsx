@@ -59,18 +59,12 @@ export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
               <span className="italic font-normal">Roadmap:</span>
             </h1>
 
-            {/* 3. Transformation Statement */}
-            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs sm:text-sm lg:text-base">
-              <span className="font-serif italic text-[#6F6B61]">
-                {workshopData.transformationBefore}
-              </span>
-              <span className="text-[#68705A] font-sans font-medium px-1 text-xs sm:text-sm">
-                →
-              </span>
-              <span className="font-serif font-bold text-[#292923]">
-                {workshopData.transformationAfter}
-              </span>
-            </div>
+            {/* 3. Transformation Tagline — One Single Line with Both Highlighted */}
+            <p className="mt-2 sm:mt-2.5 font-serif text-[1.05rem] sm:text-[1.28rem] lg:text-[1.5rem] font-bold text-[#292923] tracking-tight leading-snug">
+              <span>{workshopData.transformationBefore}</span>
+              <span className="font-normal italic text-[#68705A] text-[0.88em] mx-1.5 sm:mx-2">to</span>
+              <span>{workshopData.transformationAfter}</span>
+            </p>
 
             {/* 4. Masterclass Description */}
             <div className="mt-1 flex items-center gap-2">
