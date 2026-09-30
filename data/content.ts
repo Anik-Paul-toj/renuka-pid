@@ -195,6 +195,7 @@ export interface WorkshopData {
   time: string;
   language: string;
   duration: string;
+  platform?: string;
   originalPrice: number;
   offerPrice: number;
   registrationDeadline: string;
@@ -214,8 +215,9 @@ export const workshopData: WorkshopData = {
   time: "6:30 PM – 8:30 PM IST",
   language: "HINGLISH",
   duration: "120 Minutes",
+  platform: "Zoom",
   originalPrice: 599,
-  offerPrice: 199,
+  offerPrice: 99,
   registrationDeadline: "2026-10-28T18:30:00+05:30",
   cta: "REGISTER NOW",
   handwrittenPhrase: "Art heals. Always.",

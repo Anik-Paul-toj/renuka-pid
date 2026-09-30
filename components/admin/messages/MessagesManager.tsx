@@ -298,7 +298,7 @@ export function MessagesManager({
       .replace(/\[Time\]|\{\{time\}\}/gi, formattedTimeRange)
       .replace(/\[Join Link\]|\[Zoom Link\]|\{\{zoom_link\}\}/gi, joinLink)
       .replace(/\[Booking Reference\]|\{\{booking_reference\}\}/gi, "REF-ABC123")
-      .replace(/\[Amount Paid\]|\{\{amount_paid\}\}/gi, "₹199")
+      .replace(/\[Amount Paid\]|\{\{amount_paid\}\}/gi, "₹99")
       .replace(/\[Payment Reference\]|\{\{payment_reference\}\}/gi, "pay_TEST123");
   }, [body, selectedCourse, selectedBatch, dateValue, formattedTimeRange, joinLink]);
 

@@ -33,7 +33,7 @@ export default async function AdminCoursesPage() {
           </div>
           <div className="text-right sm:text-left">
             <span className="block text-xs font-semibold text-[#6F6B61]">Pricing</span>
-            <span className="text-sm font-bold text-[#292923]">₹199 <span className="line-through text-xs text-[#6F6B61]">₹599</span></span>
+            <span className="text-sm font-bold text-[#292923]">₹99 <span className="line-through text-xs text-[#6F6B61]">₹599</span></span>
           </div>
         </div>
 

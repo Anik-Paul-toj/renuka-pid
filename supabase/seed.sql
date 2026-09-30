@@ -22,7 +22,7 @@ INSERT INTO public.courses (
   'The WATERCOLOUR Roadmap: One-Day Masterclass',
   'Begin your creative journey with mindful, step-by-step watercolour courses designed for adults 25+ — no prior experience needed.',
   59900,
-  19900,
+  9900,
   'INR',
   120,
   true
