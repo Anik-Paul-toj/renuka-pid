@@ -287,48 +287,52 @@ VALUES (
     "heading": "This Workshop Is Ideal For:",
     "items": [
       {
-        "id": "beginners",
-        "title": "COMPLETE BEGINNERS",
-        "description": "Who want to start watercolour but don’t know how.",
+        "id": "adults-20",
+        "title": "ADULTS AGED 20+",
+        "description": "Who want to learn watercolour painting from the basics.",
         "icon": "User"
       },
       {
-        "id": "water-control",
-        "title": "PEOPLE WHO STRUGGLE TO CONTROL WATER AND COLOURS",
-        "description": "Who find it difficult to control water and colours while painting.",
-        "icon": "Droplets"
+        "id": "working-professionals",
+        "title": "WORKING PROFESSIONALS",
+        "description": "Looking for a creative and relaxing activity beyond their daily routine.",
+        "icon": "Sparkles"
       },
       {
-        "id": "flat-paintings",
-        "title": "PEOPLE WHOSE PAINTINGS LOOK FLAT, MUDDY OR LIFELESS",
-        "description": "Anyone whose paintings look flat, muddy or lifeless despite knowing the basics.",
+        "id": "homemakers",
+        "title": "HOMEMAKERS",
+        "description": "Who want to explore their artistic side and make time for themselves.",
+        "icon": "Heart"
+      },
+      {
+        "id": "complete-beginners",
+        "title": "COMPLETE BEGINNERS",
+        "description": "With little or no prior painting experience.",
         "icon": "Palette"
       },
       {
         "id": "hobby-artists",
         "title": "HOBBY ARTISTS",
-        "description": "Who want to understand how to create depth, light and realistic effects in watercolour.",
+        "description": "Who want to strengthen their watercolour skills and techniques.",
         "icon": "Brush"
       },
       {
         "id": "youtube-tutorials",
         "title": "PEOPLE WHO HAVE TRIED YOUTUBE TUTORIALS",
-        "description": "Who still feel:",
-        "quote": "“I can copy, but I can’t paint on my own.”",
+        "description": "But still struggle to paint confidently on their own.",
         "icon": "BookOpen"
       },
       {
-        "id": "learn-professionally",
-        "title": "ANYONE CURIOUS TO LEARN PROFESSIONALLY",
-        "description": "Anyone curious to experience a structured, professional way of learning watercolour before joining a complete course.",
+        "id": "aspiring-artists",
+        "title": "ASPIRING ARTISTS",
+        "description": "Who want to build a strong foundation in watercolour painting.",
         "icon": "GraduationCap"
       },
       {
-        "id": "conclusion",
-        "title": "THIS WORKSHOP IS FOR YOU IF...",
-        "description": "You love watercolour but struggle to get the results you imagine.",
-        "icon": "Heart",
-        "isConclusion": true
+        "id": "water-colour-control",
+        "title": "ANYONE WHO STRUGGLES WITH WATER & COLOUR CONTROL",
+        "description": "And wants a structured, guided approach.",
+        "icon": "Droplets"
       }
     ]
   }$json$::jsonb,
@@ -352,13 +356,14 @@ VALUES (
     "videoThumbnail": "/images/video_preview.jpg",
     "youtubeId": "I0q9IDdAFCs",
     "learningPoints": [
-      "Why your watercolours look flat or muddy — and how to avoid the most common mistakes.",
-      "The secret of water control — understand exactly how much water to use for better results.",
-      "3 essential brush techniques that instantly improve your painting.",
-      "How to mix clean, beautiful colours without creating muddy shades.",
-      "How to create depth, light & realistic details without overworking your painting.",
-      "Follow along with a complete painting from start to finish.",
-      "A simple step-by-step approach you can repeat on your own after the class."
+      "Understand the secrets behind beautiful watercolour paintings.",
+      "Learn how to begin your watercolour journey with minimal drawing skills.",
+      "Master water and colour control for better, more predictable results.",
+      "Learn the basics of colour mixing and create harmonious colour combinations.",
+      "Discover how to maintain freshness and transparency in your paintings.",
+      "Create a beginner-friendly watercolour work using simple techniques.",
+      "Learn how to approach and start a painting with confidence.",
+      "Understand the essential watercolour materials and how to use them effectively."
     ],
     "takeawayHeading": "And the biggest takeaway:",
     "takeawayText": "You’ll stop wondering, “Why doesn’t my painting look like the reference?” — and start understanding exactly what to do differently.",
@@ -704,36 +709,44 @@ VALUES (
   'faqs',
   $json$[
     {
-      "question": "Is this masterclass truly suitable for complete beginners?",
-      "answer": "Yes, with all my heart. My teaching is designed specifically for adults who have never held a watercolor brush or haven't painted since childhood. We strip away intimidation and focus on simple, reassuring steps that anyone can follow with delight."
+      "question": "Is this Masterclass suitable for complete beginners?",
+      "answer": "Yes! It is specially designed for complete beginners. You don’t need any previous experience with watercolours—just bring your interest and curiosity."
     },
     {
-      "question": "I have tried watercolor before and made a muddy mess. Can I really learn?",
-      "answer": "Muddy watercolor is never a lack of talent—it is simply a misunderstanding of water-to-pigment balance and timing. In this masterclass, I will show you the exact moment to let paper dry and how to keep colors radiant, fresh, and singing."
+      "question": "What supplies do I need to attend the Masterclass?",
+      "answer": "You can use whatever watercolour supplies you already have at home. Colours, paper, brushes and a palette are enough. You can also simply keep a notebook and pen for taking notes."
     },
     {
-      "question": "What supplies do I need to attend the live masterclass?",
-      "answer": "You do not need any supplies to attend and enjoy the live session! I recommend bringing a warm cup of tea and a notebook to absorb the ideas without pressure. You can apply the techniques later with whatever materials you have at home."
+      "question": "Will there be a replay if I cannot attend the live session?",
+      "answer": "No. This is a live, interactive Masterclass designed to give you a hands-on learning experience. If you miss the live session, the experience cannot be replicated through a replay."
     },
     {
-      "question": "How long is the session and when will it take place?",
-      "answer": "The masterclass runs for 120 minutes on Saturday, 28 October 2026 at 6:30 PM IST (9:00 AM EDT). It includes 80 minutes of structured demonstration followed by 40 minutes of live, personal Q&A."
+      "question": "Who is this Masterclass for?",
+      "answer": "This Masterclass is specially designed for beginners aged 20+, including working professionals, homemakers and anyone who wants to start painting from scratch."
     },
     {
-      "question": "Will there be a replay if I cannot make it live?",
-      "answer": "A limited 48-hour replay link will be shared with registered attendees who join the live broadcast. The gifts and bonus studio guides are exclusive to live participants."
+      "question": "What will I learn in 1 hour?",
+      "answer": "You’ll learn the basics of water control, colour mixing, brush handling and simple watercolour techniques, and create a painting along with the instructor."
     },
     {
       "question": "What language will the class be conducted in?",
-      "answer": "The masterclass is taught in clear, warm, and gentle English, with close-up overhead camera angles so every brushstroke and paint mixture is clearly visible."
+      "answer": "The Masterclass will be conducted in a comfortable combination of Hindi and English, so that the concepts are easy to understand and follow."
     },
     {
-      "question": "Is registration genuinely free?",
-      "answer": "Yes, 100% complimentary. There is no credit card required. This is my gift to introduce you to our mindful art community at Renuka Art Studio."
+      "question": "Will you try to sell something during the class?",
+      "answer": "Not at all. The Masterclass is focused on giving you a genuine learning experience. At the end, if you wish to continue your watercolour journey, I’ll share details about my complete Watercolour Course and how you can take your learning further."
     },
     {
-      "question": "Will you try to sell something aggressively during the class?",
-      "answer": "Not at all. Aggressive sales have no place in a peaceful art studio. At the very end of the masterclass, for those who want to continue their journey with me, I will gently share details about my comprehensive courses. The masterclass itself is a complete, enriching experience."
+      "question": "Is this a recorded class or a live class?",
+      "answer": "It is a live, interactive Masterclass where you can paint along with the instructor and experience the process in real time."
+    },
+    {
+      "question": "Do I need to know drawing before joining?",
+      "answer": "Absolutely not! This Masterclass is created for beginners, so you don’t need to be good at drawing or have any previous art background."
+    },
+    {
+      "question": "What if I’m not able to complete the painting during the session?",
+      "answer": "That’s completely okay. The goal is to understand the process, techniques and approach—not to create a perfect painting. You can always complete your artwork afterwards using what you learn."
     }
   ]$json$::jsonb,
   'published',

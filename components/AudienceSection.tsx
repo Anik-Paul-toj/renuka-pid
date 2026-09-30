@@ -10,6 +10,7 @@ import {
   BookOpen,
   GraduationCap,
   Heart,
+  Sparkles,
 } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
@@ -21,14 +22,34 @@ const iconMap: Record<string, React.ReactNode> = {
   BookOpen: <BookOpen className="size-4.5 text-[#24425F]" strokeWidth={1.6} />,
   GraduationCap: <GraduationCap className="size-4.5 text-[#24425F]" strokeWidth={1.6} />,
   Heart: <Heart className="size-4.5 text-[#24425F]" strokeWidth={1.6} />,
+  Sparkles: <Sparkles className="size-4.5 text-[#24425F]" strokeWidth={1.6} />,
 };
 
+const boxTextures = [
+  "/images/forBox/3f3cf5f03a81fdc837ba23ea44e7199e.jpg.jpeg",
+  "/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg",
+  "/images/forBox/8fc925150eae143e15c0f95c41c39cb4.jpg.jpeg",
+  "/images/forBox/e9bd27865085ef28358146d25a76b74d.jpg.jpeg",
+  "/images/forBox/e19752bad2007ef6f8a72ec074cbafec.jpg.jpeg",
+  "/images/forBox/b765741cbefcab043925bc35973f3c45.jpg.jpeg",
+  "/images/forBox/052d678ca9d09b49c5a93e5d722998b7.jpg.jpeg",
+  "/images/forBox/da347cc2855190acf6ba136578c7e31e.jpg.jpeg",
+  "/images/forBox/fcd4ca8ed064a6b93fcf45ff6860f24e.jpg.jpeg",
+  "/images/forBox/aba3a3b6536ec35ee7bf460df3f8593c.jpg.jpeg",
+];
+
 const boxImageMap: Record<string, string> = {
+  "adults-20": "/images/forBox/3f3cf5f03a81fdc837ba23ea44e7199e.jpg.jpeg",
+  "working-professionals": "/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg",
+  "homemakers": "/images/forBox/8fc925150eae143e15c0f95c41c39cb4.jpg.jpeg",
+  "complete-beginners": "/images/forBox/e9bd27865085ef28358146d25a76b74d.jpg.jpeg",
+  "hobby-artists": "/images/forBox/e19752bad2007ef6f8a72ec074cbafec.jpg.jpeg",
+  "youtube-tutorials": "/images/forBox/b765741cbefcab043925bc35973f3c45.jpg.jpeg",
+  "aspiring-artists": "/images/forBox/052d678ca9d09b49c5a93e5d722998b7.jpg.jpeg",
+  "water-colour-control": "/images/forBox/da347cc2855190acf6ba136578c7e31e.jpg.jpeg",
   beginners: "/images/forBox/e9bd27865085ef28358146d25a76b74d.jpg.jpeg",
   "water-control": "/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg",
   "flat-paintings": "/images/forBox/da347cc2855190acf6ba136578c7e31e.jpg.jpeg",
-  "hobby-artists": "/images/forBox/e19752bad2007ef6f8a72ec074cbafec.jpg.jpeg",
-  "youtube-tutorials": "/images/forBox/b765741cbefcab043925bc35973f3c45.jpg.jpeg",
   "learn-professionally": "/images/forBox/052d678ca9d09b49c5a93e5d722998b7.jpg.jpeg",
   conclusion: "/images/forBox/fcd4ca8ed064a6b93fcf45ff6860f24e.jpg.jpeg",
 };
@@ -66,19 +87,19 @@ export const AudienceSection: React.FC = () => {
           <div className="mt-2 h-0.5 w-12 bg-[#68705A]/40 mx-auto" />
         </div>
 
-        {/* Content Blocks: 3-Column Grid on Desktop, 2 on Tablet, 1 on Mobile */}
+        {/* Content Blocks: 4-Column Grid on Desktop (2 rows of 4), 2 on Tablet, 1 on Mobile */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5 lg:gap-4 no-gsap"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5 lg:gap-4 no-gsap"
         >
-          {targetAudience.items.map((item) => {
+          {targetAudience.items.map((item, idx) => {
             const isConcluding = item.isConclusion;
-            const bgImage = boxImageMap[item.id];
+            const bgImage = boxImageMap[item.id] || boxTextures[idx % boxTextures.length];
 
             if (isConcluding) {
               return (
                 <div
                   key={item.id}
-                  className="group relative overflow-hidden sm:col-span-2 lg:col-span-3 rounded-xl border border-[#24425F]/25 bg-[#FAF8F2]/90 px-5 py-3 sm:px-6 sm:py-3.5 shadow-xs hover:border-[#24425F]/45 transition-all duration-300"
+                  className="group relative overflow-hidden sm:col-span-2 lg:col-span-4 rounded-xl border border-[#24425F]/25 bg-[#FAF8F2]/90 px-5 py-3 sm:px-6 sm:py-3.5 shadow-xs hover:border-[#24425F]/45 transition-all duration-300"
                 >
                   {/* Subtle Box Watercolor Background */}
                   {bgImage && (
@@ -135,7 +156,7 @@ export const AudienceSection: React.FC = () => {
                     {iconMap[item.icon] || <Palette className="size-4 text-[#24425F]" strokeWidth={1.6} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[0.72rem] sm:text-[0.76rem] font-semibold uppercase tracking-[0.12em] text-[#24425F] leading-snug">
+                    <h3 className="text-[0.74rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.1em] text-[#24425F] leading-snug">
                       {item.title}
                     </h3>
                     <p className="mt-1 leading-relaxed text-[#5A564D] text-xs">

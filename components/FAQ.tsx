@@ -14,6 +14,8 @@ const faqBoxTextures = [
   "/images/forBox/e9bd27865085ef28358146d25a76b74d.jpg.jpeg",
   "/images/forBox/49a18e49a484c5138a3faf7db0388c60.jpg.jpeg",
   "/images/forBox/4fedb8a8c5e7b12b013d7ebda7f5ad23.jpg.jpeg",
+  "/images/forBox/3f3cf5f03a81fdc837ba23ea44e7199e.jpg.jpeg",
+  "/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg",
 ];
 
 export const FAQ: React.FC = () => {
@@ -87,9 +89,9 @@ export const FAQ: React.FC = () => {
                       aria-expanded={isOpen}
                       aria-controls={contentId}
                       onClick={() => toggleFAQ(index)}
-                      className="flex w-full items-center justify-between text-left font-serif text-[0.84rem] sm:text-[0.92rem] font-medium text-[#292923] group-hover:text-[#68705A] cursor-pointer transition-colors"
+                      className="flex w-full items-center justify-between text-left font-serif text-[0.84rem] sm:text-[0.92rem] font-bold text-[#292923] group-hover:text-[#68705A] cursor-pointer transition-colors"
                     >
-                      <span className="pr-3 leading-snug">{faq.question}</span>
+                      <span className="pr-3 leading-snug font-bold">{faq.question}</span>
                       <span
                         className={`grid size-6 shrink-0 place-items-center rounded-full bg-[#FAF8F2] border border-[#68705A]/25 transition-transform duration-300 ${
                           isOpen ? "rotate-180 text-[#68705A] border-[#68705A]/45" : "text-[#6F6B61]"
