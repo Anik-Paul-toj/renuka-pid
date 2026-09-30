@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
@@ -12,9 +13,27 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
   const { finalCta } = useLandingContent();
 
   return (
-    <section className="py-16 sm:py-24 bg-[#EEE9DE] border-b border-[#464137]/10">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="paper-card relative overflow-hidden rounded-xl bg-[#FAF8F2] px-6 py-14 sm:py-20 text-center border border-[#464137]/10 shadow-[0_12px_40px_rgba(50,45,35,0.06)]">
+    <section className="relative overflow-hidden py-16 sm:py-24 bg-[#F7F4EC] border-b border-[#464137]/10">
+      {/* Botanical Watercolor Section Background Artwork */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <Image
+          src="/images/background/image.png"
+          alt=""
+          fill
+          className="object-cover object-center opacity-30 mix-blend-multiply select-none"
+          priority
+        />
+        {/* Soft Blending Masks */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F7F4EC] via-transparent to-[#F7F4EC]" />
+        {/* Deep feathered fade from FAQ section above to completely dissolve the intersection */}
+        <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#F7F4EC] via-[#F7F4EC]/85 to-transparent" />
+        {/* Soft blend into Footer below */}
+        <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#F7F4EC] via-[#F7F4EC]/85 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F4EC]/60 via-transparent to-[#F7F4EC]/60" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
+        <div className="paper-card relative overflow-hidden rounded-xl bg-[#FAF8F2]/92 backdrop-blur-xs px-6 py-14 sm:py-20 text-center border border-[#464137]/15 shadow-[0_12px_40px_rgba(50,45,35,0.06)]">
           {/* Delicate watercolor washes */}
           <div
             aria-hidden="true"
@@ -25,7 +44,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
             className="pointer-events-none absolute -left-16 -bottom-16 size-72 rounded-full bg-[#D9BDB2]/25 blur-3xl"
           />
 
-          <div className="relative mx-auto max-w-3xl">
+          <div className="relative z-10 mx-auto max-w-3xl">
             <span className="text-[0.72rem] font-bold uppercase tracking-[0.24em] text-[#444C38]">
               {finalCta.overline}
             </span>

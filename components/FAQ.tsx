@@ -37,8 +37,9 @@ export const FAQ: React.FC = () => {
           className="object-cover object-center opacity-22 mix-blend-multiply select-none"
           priority
         />
-        {/* Soft Blending Masks (transitioning seamlessly from #F7F4EC to #EEE9DE) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#F7F4EC] via-transparent to-[#EEE9DE]" />
+        {/* Soft Blending Masks */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F7F4EC] via-transparent to-[#F7F4EC]" />
+        <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#F7F4EC] via-[#F7F4EC]/75 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#F7F4EC]/60 via-transparent to-[#F7F4EC]/60" />
       </div>
 
