@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
 export const Footer: React.FC = () => {
@@ -26,15 +27,20 @@ export const Footer: React.FC = () => {
           {/* Links */}
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-xs uppercase tracking-wider text-[#3E3A32] font-semibold">
             {footer.links.map((link, idx) => {
-              const href = link.label.toLowerCase() === "courses" ? "/course" : link.href;
+              const l = link.label.toLowerCase();
+              let href = link.href;
+              if (l === "home") href = "/";
+              else if (l === "courses") href = "/course";
+              else if (href.startsWith("#")) href = `/${href}`;
+
               return (
-                <a
+                <Link
                   key={idx}
                   href={href}
                   className="hover:text-[#14120E] transition-colors"
                 >
                   {link.label}
-                </a>
+                </Link>
               );
             })}
           </nav>

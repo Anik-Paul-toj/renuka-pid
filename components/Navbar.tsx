@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { MasterclassData } from "@/data/content";
 import { useLandingContent } from "@/components/LandingContentProvider";
@@ -15,6 +16,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
   const { brand: contextBrand } = useLandingContent();
   const brand = content || contextBrand;
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const pathname = usePathname();
+
+  const isHome = pathname === "/";
+  const isCourse = pathname?.startsWith("/course");
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -34,33 +39,56 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
       }`}
     >
       <div className="mx-auto flex h-14 sm:h-16 max-w-7xl xl:max-w-[1400px] items-center justify-between px-6 sm:px-8 lg:px-12">
-        {/* Brand Logo */}
-        <a href="#" className="flex flex-col group">
+        {/* Brand Logo - Navigates directly to Home (/) */}
+        <Link href="/" className="flex flex-col group">
           <span className="font-serif text-2xl tracking-tight text-[#14120E] font-bold">
             {brand.name}
           </span>
           <span className="text-[0.68rem] tracking-[0.22em] text-[#3E3A32] uppercase font-bold">
             {brand.studioName}
           </span>
-        </a>
+        </Link>
 
         {/* Navigation Links (Desktop) */}
         <nav className="hidden md:flex items-center gap-7 text-xs font-semibold tracking-wider text-[#3E3A32] uppercase">
-          <a href="#" className="text-[#14120E] font-bold border-b-2 border-[#444C38] pb-0.5">
+          <Link
+            href="/"
+            className={`transition-colors pb-0.5 ${
+              isHome
+                ? "text-[#14120E] font-bold border-b-2 border-[#444C38]"
+                : "hover:text-[#14120E]"
+            }`}
+          >
             Home
-          </a>
-          <a href="#about" className="hover:text-[#14120E] transition-colors">
+          </Link>
+          <Link
+            href="/#about"
+            className="hover:text-[#14120E] transition-colors"
+          >
             About
-          </a>
-          <Link href="/course" className="hover:text-[#14120E] transition-colors">
+          </Link>
+          <Link
+            href="/course"
+            className={`transition-colors pb-0.5 ${
+              isCourse
+                ? "text-[#14120E] font-bold border-b-2 border-[#444C38]"
+                : "hover:text-[#14120E]"
+            }`}
+          >
             Courses
           </Link>
-          <a href="#testimonials" className="hover:text-[#14120E] transition-colors">
+          <Link
+            href="/#testimonials"
+            className="hover:text-[#14120E] transition-colors"
+          >
             Testimonials
-          </a>
-          <a href="#contact" className="hover:text-[#14120E] transition-colors">
+          </Link>
+          <Link
+            href="/#contact"
+            className="hover:text-[#14120E] transition-colors"
+          >
             Contact
-          </a>
+          </Link>
         </nav>
 
         {/* CTA Button */}
