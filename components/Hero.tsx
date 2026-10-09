@@ -273,15 +273,15 @@ export const Hero: React.FC<HeroProps> = ({
               className="pointer-events-none absolute -inset-4 sm:-inset-6 rounded-full bg-gradient-to-tr from-[#D9BDB2]/25 via-[#C8D1C7]/30 to-[#F7F4EC]/10 blur-2xl select-none"
             />
 
-            {/* Seamless Feathered Portrait */}
+            {/* Seamless Feathered Portrait: Blurred on LEFT and RIGHT only; UPPER and LOWER unblurred */}
             <div className="relative w-full aspect-[4/4.6] overflow-visible">
               <div
                 className="relative size-full"
                 style={{
                   WebkitMaskImage:
-                    "radial-gradient(ellipse 78% 76% at 50% 46%, black 42%, rgba(0,0,0,0.85) 62%, rgba(0,0,0,0.35) 82%, transparent 100%)",
+                    "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.2) 3%, rgba(0,0,0,0.85) 10%, black 18%, black 82%, rgba(0,0,0,0.85) 90%, rgba(0,0,0,0.2) 97%, transparent 100%)",
                   maskImage:
-                    "radial-gradient(ellipse 78% 76% at 50% 46%, black 42%, rgba(0,0,0,0.85) 62%, rgba(0,0,0,0.35) 82%, transparent 100%)",
+                    "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.2) 3%, rgba(0,0,0,0.85) 10%, black 18%, black 82%, rgba(0,0,0,0.85) 90%, rgba(0,0,0,0.2) 97%, transparent 100%)",
                 }}
               >
                 <Image
@@ -293,16 +293,14 @@ export const Hero: React.FC<HeroProps> = ({
                   sizes="(max-width: 1024px) 380px, 460px"
                 />
 
-                {/* Soft watercolor peripheral edge-dissolve overlays matching #F7F4EC */}
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#F7F4EC]/85 via-[#F7F4EC]/30 to-transparent" />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#F7F4EC] via-[#F7F4EC]/40 to-transparent" />
-                <div className="pointer-events-none absolute inset-y-0 left-0 w-14 bg-gradient-to-r from-[#F7F4EC]/85 via-[#F7F4EC]/30 to-transparent" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-14 bg-gradient-to-l from-[#F7F4EC]/85 via-[#F7F4EC]/30 to-transparent" />
+                {/* Soft watercolor peripheral edge-dissolve overlays on LEFT and RIGHT ONLY */}
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#F7F4EC]/90 via-[#F7F4EC]/35 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#F7F4EC]/90 via-[#F7F4EC]/35 to-transparent" />
               </div>
             </div>
 
             {/* Studio Descriptor Tag: Naturally flowing below the portrait */}
-            <div className="relative z-10 -mt-2 text-center max-w-[360px] sm:max-w-[440px] mx-auto px-2">
+            <div className="relative z-10 mt-3.5 sm:mt-4 text-center max-w-[360px] sm:max-w-[440px] mx-auto px-2">
               <p className="font-serif text-base sm:text-lg font-bold text-[#14120E] tracking-tight">
                 {heroContent.instructorName}
               </p>
