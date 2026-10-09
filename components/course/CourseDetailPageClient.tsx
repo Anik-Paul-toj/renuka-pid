@@ -45,11 +45,38 @@ export function CourseDetailPageClient({
   const details = course.details;
 
   return (
-    <div className="min-h-screen bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between selection:bg-[#444C38]/20">
-      {/* Top Navbar */}
-      <Navbar onOpenModal={() => setIsModalOpen(true)} />
+    <div className="relative min-h-screen overflow-hidden bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between selection:bg-[#444C38]/20">
+      {/* Botanical Watercolor Background Art from Public Assets */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <Image
+          src="/images/background/ChatGPT Image Sep 25, 2026, 07_08_15 PM.png"
+          alt=""
+          fill
+          sizes="100vw"
+          priority
+          className="object-cover object-top opacity-28 mix-blend-multiply select-none"
+        />
+        {/* Soft Blending Masks */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F7F4EC]/40 via-transparent to-[#F7F4EC]/75" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F4EC]/35 via-transparent to-[#F7F4EC]/35" />
+      </div>
 
-      <main className="flex-1 py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
+      {/* Delicate watercolor ambient washes */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-20 right-[-5%] size-[36rem] rounded-full bg-[#C8D1C7]/20 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/3 left-[-10%] size-[30rem] rounded-full bg-[#D9BDB2]/15 blur-3xl"
+      />
+
+      {/* Top Navbar */}
+      <div className="relative z-10">
+        <Navbar onOpenModal={() => setIsModalOpen(true)} />
+      </div>
+
+      <main className="relative z-10 flex-1 py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
         {/* Navigation Breadcrumb */}
         <div className="mx-auto max-w-4xl mb-4 sm:mb-6">
           <Link
@@ -301,7 +328,9 @@ export function CourseDetailPageClient({
         </div>
       </main>
 
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
 
       {/* Registration & Razorpay Booking Modal */}
       <RegistrationModal
