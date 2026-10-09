@@ -121,207 +121,279 @@ export function CourseDetailPageClient({
             </div>
           </div>
 
-          {/* Card Body - All Course Details in One Single Unified Container */}
-          <div className="p-6 sm:p-8 lg:p-10 space-y-8">
-            {/* 1. Quick Info Spec Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl bg-[#F7F4EC] p-4 border border-[#464137]/15">
-              <div className="flex items-start gap-2.5">
-                <div className="size-8 rounded-lg bg-[#EBE7DC] flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
-                  <Clock className="size-4" />
-                </div>
-                <div>
-                  <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
-                    Sessions
-                  </span>
-                  <span className="font-bold text-xs sm:text-[0.82rem] text-[#14120E] mt-1 block">
-                    {details.sessionCountText || (isFoundation ? "2 Live Interactive Sessions" : "24 Live Interactive Classes")}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5">
-                <div className="size-8 rounded-lg bg-[#EBE7DC] flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
-                  <Calendar className="size-4" />
-                </div>
-                <div>
-                  <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
-                    Duration
-                  </span>
-                  <span className="font-bold text-xs sm:text-[0.82rem] text-[#14120E] mt-1 block">
-                    {details.sessionDurationText || (isFoundation ? "90 Minutes Each" : "3 Months (90 Min Sessions)")}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 col-span-2 sm:col-span-1">
-                <div className="size-8 rounded-lg bg-[#EBE7DC] flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
-                  <Video className="size-4" />
-                </div>
-                <div>
-                  <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
-                    Platform
-                  </span>
-                  <span className="font-bold text-xs sm:text-[0.82rem] text-[#14120E] mt-1 block">
-                    Live Zoom Atelier
-                  </span>
-                </div>
-              </div>
+          {/* Card Body - All Course Details in One Single Unified Container with Shaded Watercolor Texture */}
+          <div className="relative p-6 sm:p-8 lg:p-10 space-y-8 overflow-hidden bg-[#FAF8F2]/95 backdrop-blur-md">
+            {/* Custom Botanical Watercolor Texture Overlay */}
+            <div className="pointer-events-none absolute inset-0 z-0">
+              <Image
+                src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 100vw, 900px"
+                className="object-cover object-center opacity-25 mix-blend-multiply select-none"
+              />
+              <div className="absolute inset-2 rounded-xl border border-[#444C38]/20 pointer-events-none" />
             </div>
 
-            {/* 2. Course Description */}
-            {details.fullDescription && (
-              <div className="space-y-2">
-                <span className="text-[0.7rem] uppercase tracking-widest font-bold text-[#444C38] block">
-                  Course Overview
-                </span>
-                <p className="text-xs sm:text-sm md:text-[0.95rem] text-[#2C2A24] font-medium leading-relaxed whitespace-pre-line">
-                  {details.fullDescription}
-                </p>
-              </div>
-            )}
-
-            {/* 3. What You'll Learn (Curriculum Checklist) */}
-            {details.learningOutcomes && details.learningOutcomes.length > 0 && (
-              <div className="space-y-4 pt-2">
-                <div className="border-b border-[#464137]/15 pb-2 flex items-center justify-between">
-                  <div>
-                    <span className="text-[0.7rem] uppercase tracking-widest font-bold text-[#444C38] block">
-                      Curriculum
-                    </span>
-                    <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#14120E] mt-0.5">
-                      {details.learningOutcomesHeading || "What You’ll Learn"}
-                    </h2>
-                  </div>
-                  {details.learningOutcomesSubheading && (
-                    <span className="hidden sm:inline-block text-xs font-semibold text-[#444C38] bg-[#EBE7DC] px-2.5 py-1 rounded-md">
-                      {details.learningOutcomesSubheading}
-                    </span>
-                  )}
+            <div className="relative z-10 space-y-8">
+              {/* 1. Quick Info Spec Grid — Exact Hero Workshop Box Shading & Hairline Border */}
+              <div className="group relative overflow-hidden rounded-xl bg-[#FAF8F2]/92 backdrop-blur-md p-4 sm:p-5 border border-[#444C38]/40 shadow-sm transition-all duration-300">
+                <div className="pointer-events-none absolute inset-0 z-0">
+                  <Image
+                    src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                    alt=""
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 850px"
+                    className="object-cover object-center opacity-30 mix-blend-multiply select-none"
+                  />
+                  <div className="absolute inset-1 rounded-lg border border-[#444C38]/20 pointer-events-none" />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  {details.learningOutcomes.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start gap-3 rounded-lg bg-[#F7F4EC] p-3 sm:p-3.5 border border-[#464137]/15"
-                    >
-                      <div className="size-5 rounded-md bg-[#444C38]/15 flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
-                        <CheckCircle2 className="size-3.5" strokeWidth={2.4} />
-                      </div>
-                      <span className="text-xs sm:text-sm font-semibold text-[#14120E] leading-snug">
-                        {item}
+                <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4">
+                  <div className="flex items-start gap-2.5">
+                    <div className="size-8 rounded-lg bg-[#444C38]/15 border border-[#444C38]/25 flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
+                      <Clock className="size-4" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <span className="text-[0.64rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none mb-1">
+                        Sessions
+                      </span>
+                      <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] block">
+                        {details.sessionCountText || (isFoundation ? "2 Live Interactive Sessions" : "24 Live Interactive Classes")}
                       </span>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="flex items-start gap-2.5">
+                    <div className="size-8 rounded-lg bg-[#444C38]/15 border border-[#444C38]/25 flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
+                      <Calendar className="size-4" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <span className="text-[0.64rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none mb-1">
+                        Duration
+                      </span>
+                      <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] block">
+                        {details.sessionDurationText || (isFoundation ? "90 Minutes Each" : "3 Months (90 Min Sessions)")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 col-span-2 sm:col-span-1">
+                    <div className="size-8 rounded-lg bg-[#1E3A5F]/15 border border-[#1E3A5F]/25 flex items-center justify-center text-[#132A45] shrink-0 mt-0.5">
+                      <Video className="size-4" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <span className="text-[0.64rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none mb-1">
+                        Platform
+                      </span>
+                      <span className="inline-flex items-center font-bold text-[#132A45] bg-[#1E3A5F]/15 border border-[#1E3A5F]/30 px-2 py-0.5 rounded text-[0.78rem] leading-none">
+                        Zoom Atelier
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* 4. Schedule Breakdown (if applicable) */}
-            {details.scheduleItems && details.scheduleItems.length > 0 && (
-              <div className="space-y-4 pt-2">
-                <div className="border-b border-[#464137]/15 pb-2">
+              {/* 2. Course Description */}
+              {details.fullDescription && (
+                <div className="space-y-2">
                   <span className="text-[0.7rem] uppercase tracking-widest font-bold text-[#444C38] block">
-                    Class Structure
+                    Course Overview
                   </span>
-                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#14120E] mt-0.5">
-                    {details.scheduleHeading || "Schedule Breakdown"}
-                  </h2>
+                  <p className="text-xs sm:text-sm md:text-[0.95rem] text-[#2C2A24] font-medium leading-relaxed whitespace-pre-line">
+                    {details.fullDescription}
+                  </p>
                 </div>
+              )}
 
-                <div className="space-y-2.5">
-                  {details.scheduleItems.map((sched, idx) => (
-                    <div
-                      key={idx}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 rounded-lg bg-[#F7F4EC] p-3.5 border border-[#464137]/15"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="size-6 rounded-md bg-[#EBE7DC] flex items-center justify-center text-xs font-bold text-[#444C38] shrink-0">
-                          {idx + 1}
+              {/* 3. What You'll Learn (Curriculum Checklist) */}
+              {details.learningOutcomes && details.learningOutcomes.length > 0 && (
+                <div className="space-y-4 pt-2">
+                  <div className="border-b border-[#464137]/15 pb-2 flex items-center justify-between">
+                    <div>
+                      <span className="text-[0.7rem] uppercase tracking-widest font-bold text-[#444C38] block">
+                        Curriculum
+                      </span>
+                      <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#14120E] mt-0.5">
+                        {details.learningOutcomesHeading || "What You’ll Learn"}
+                      </h2>
+                    </div>
+                    {details.learningOutcomesSubheading && (
+                      <span className="hidden sm:inline-block text-xs font-semibold text-[#444C38] bg-[#EBE7DC] px-2.5 py-1 rounded-md">
+                        {details.learningOutcomesSubheading}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {details.learningOutcomes.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="group/item relative overflow-hidden flex items-start gap-3 rounded-lg bg-[#FAF8F2]/90 backdrop-blur-xs p-3 sm:p-3.5 border border-[#444C38]/25 shadow-2xs"
+                      >
+                        <div className="pointer-events-none absolute inset-0 z-0">
+                          <Image
+                            src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                            alt=""
+                            fill
+                            sizes="400px"
+                            className="object-cover object-center opacity-15 mix-blend-multiply select-none"
+                          />
+                        </div>
+                        <div className="relative z-10 flex items-start gap-3 w-full">
+                          <div className="size-5 rounded-md bg-[#444C38]/15 border border-[#444C38]/20 flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
+                            <CheckCircle2 className="size-3.5" strokeWidth={2.4} />
+                          </div>
+                          <span className="text-xs sm:text-sm font-semibold text-[#14120E] leading-snug">
+                            {item}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. Schedule Breakdown (if applicable) */}
+              {details.scheduleItems && details.scheduleItems.length > 0 && (
+                <div className="space-y-4 pt-2">
+                  <div className="border-b border-[#464137]/15 pb-2">
+                    <span className="text-[0.7rem] uppercase tracking-widest font-bold text-[#444C38] block">
+                      Class Structure
+                    </span>
+                    <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#14120E] mt-0.5">
+                      {details.scheduleHeading || "Schedule Breakdown"}
+                    </h2>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {details.scheduleItems.map((sched, idx) => (
+                      <div
+                        key={idx}
+                        className="group/item relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 rounded-lg bg-[#FAF8F2]/90 backdrop-blur-xs p-3.5 border border-[#444C38]/25 shadow-2xs"
+                      >
+                        <div className="pointer-events-none absolute inset-0 z-0">
+                          <Image
+                            src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                            alt=""
+                            fill
+                            sizes="800px"
+                            className="object-cover object-center opacity-15 mix-blend-multiply select-none"
+                          />
+                        </div>
+                        <div className="relative z-10 flex items-center gap-2.5">
+                          <span className="size-6 rounded-md bg-[#444C38]/15 border border-[#444C38]/20 flex items-center justify-center text-xs font-bold text-[#444C38] shrink-0">
+                            {idx + 1}
+                          </span>
+                          <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#14120E]">
+                            {sched.label}
+                          </span>
+                        </div>
+                        {sched.detail && (
+                          <span className="relative z-10 text-xs sm:text-sm text-[#2C2A24] font-medium sm:text-right">
+                            {sched.detail}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {details.scheduleNote && (
+                    <p className="text-xs text-[#444C38] font-semibold bg-[#EBE7DC]/60 p-3 rounded-lg border border-[#444C38]/20">
+                      ℹ️ {details.scheduleNote}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* 5. Why This Course Section */}
+              {(details.whyDescription || details.whyCallout) && (
+                <div className="space-y-3 pt-2">
+                  <div className="border-b border-[#464137]/15 pb-2">
+                    <span className="text-[0.7rem] uppercase tracking-widest font-bold text-[#444C38] block">
+                      Guidance
+                    </span>
+                    <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#14120E] mt-0.5">
+                      {details.whyHeading || "Why This Course?"}
+                    </h2>
+                  </div>
+
+                  {details.whyDescription && (
+                    <p className="text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium whitespace-pre-line">
+                      {details.whyDescription}
+                    </p>
+                  )}
+
+                  {details.whyCallout && (
+                    <div className="group/callout relative overflow-hidden rounded-lg bg-[#FAF8F2]/90 backdrop-blur-xs p-4 border border-[#444C38]/35 shadow-2xs">
+                      <div className="pointer-events-none absolute inset-0 z-0">
+                        <Image
+                          src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                          alt=""
+                          fill
+                          sizes="800px"
+                          className="object-cover object-center opacity-20 mix-blend-multiply select-none"
+                        />
+                        <div className="absolute inset-0.5 rounded-md border border-[#444C38]/15 pointer-events-none" />
+                      </div>
+                      <p className="relative z-10 font-serif text-sm sm:text-base font-bold text-[#14120E] italic text-center">
+                        &ldquo;{details.whyCallout}&rdquo;
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 6. Pricing & Enrolment Section inside the Card — Exact Hero Workshop Box Shading */}
+              <div className="pt-4 border-t border-[#464137]/20">
+                <div className="group relative overflow-hidden rounded-xl bg-[#FAF8F2]/95 backdrop-blur-md p-5 sm:p-6 border border-[#444C38]/40 shadow-md transition-all duration-300 hover:border-[#444C38]/55">
+                  {/* Custom Botanical Watercolor Texture Overlay */}
+                  <div className="pointer-events-none absolute inset-0 z-0">
+                    <Image
+                      src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                      alt=""
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 850px"
+                      className="object-cover object-center opacity-30 mix-blend-multiply select-none"
+                    />
+                    {/* Refined Inner Hairline Border Framing */}
+                    <div className="absolute inset-1 rounded-lg border border-[#444C38]/20 pointer-events-none" />
+                  </div>
+
+                  <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#3E3A32] block leading-none">
+                        {details.cardPriceLabel || (isFoundation ? "Course Fee" : "Course Fee: ₹9,990/-")}
+                      </span>
+                      <div className="flex items-baseline gap-2.5 mt-1.5">
+                        <span className="font-serif text-3xl sm:text-4xl font-extrabold text-[#B93821] tracking-tight drop-shadow-2xs">
+                          ₹{course.offerPrice.toLocaleString()}/-
                         </span>
-                        <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#14120E]">
-                          {sched.label}
+                        {course.originalPrice > course.offerPrice && (
+                          <span className="line-through text-sm font-semibold text-[#6F6B61]">
+                            ₹{course.originalPrice.toLocaleString()}/-
+                          </span>
+                        )}
+                        <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2.5 py-0.5 rounded-sm">
+                          Special Offer
                         </span>
                       </div>
-                      {sched.detail && (
-                        <span className="text-xs sm:text-sm text-[#2C2A24] font-medium sm:text-right">
-                          {sched.detail}
+                      {activeBatch && (
+                        <span className="text-[0.72rem] text-[#353D2A] font-bold block mt-2">
+                          ✓ {activeBatch.batchName} ({activeBatch.startDate}) • {activeBatch.seatsRemaining ? `${activeBatch.seatsRemaining} seats left` : "Seats available"}
                         </span>
                       )}
                     </div>
-                  ))}
-                </div>
 
-                {details.scheduleNote && (
-                  <p className="text-xs text-[#444C38] font-semibold bg-[#EBE7DC]/60 p-3 rounded-lg border border-[#444C38]/20">
-                    ℹ️ {details.scheduleNote}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* 5. Why This Course Section */}
-            {(details.whyDescription || details.whyCallout) && (
-              <div className="space-y-3 pt-2">
-                <div className="border-b border-[#464137]/15 pb-2">
-                  <span className="text-[0.7rem] uppercase tracking-widest font-bold text-[#444C38] block">
-                    Guidance
-                  </span>
-                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#14120E] mt-0.5">
-                    {details.whyHeading || "Why This Course?"}
-                  </h2>
-                </div>
-
-                {details.whyDescription && (
-                  <p className="text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium whitespace-pre-line">
-                    {details.whyDescription}
-                  </p>
-                )}
-
-                {details.whyCallout && (
-                  <div className="rounded-lg bg-[#F7F4EC] p-4 border border-[#444C38]/30">
-                    <p className="font-serif text-sm sm:text-base font-bold text-[#14120E] italic text-center">
-                      &ldquo;{details.whyCallout}&rdquo;
-                    </p>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="btn-studio px-8 py-4 text-xs sm:text-sm tracking-wider font-bold shadow-md inline-flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                    >
+                      <span>{details.ctaText || (isFoundation ? "Enrol in Foundation Course" : "Enrol in Artistry Course")}</span>
+                      <ArrowRight className="size-4" />
+                    </button>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* 6. Pricing & Enrolment Section inside the Card */}
-            <div className="pt-4 border-t border-[#464137]/20">
-              <div className="rounded-xl bg-[#F7F4EC] p-5 sm:p-6 border border-[#444C38]/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <span className="text-[0.68rem] uppercase tracking-widest font-bold text-[#6F6B61] block">
-                    {details.cardPriceLabel || (isFoundation ? "Course Fee" : "Course Fee: ₹9,990/-")}
-                  </span>
-                  <div className="flex items-baseline gap-2.5 mt-0.5">
-                    <span className="font-serif text-3xl sm:text-4xl font-extrabold text-[#B93821] tracking-tight">
-                      ₹{course.offerPrice.toLocaleString()}/-
-                    </span>
-                    {course.originalPrice > course.offerPrice && (
-                      <span className="line-through text-sm font-semibold text-[#6F6B61]">
-                        ₹{course.originalPrice.toLocaleString()}/-
-                      </span>
-                    )}
-                    <span className="text-[0.68rem] uppercase tracking-wider font-bold text-[#444C38] bg-[#EBE7DC] px-2.5 py-0.5 rounded-sm">
-                      Direct Atelier Access
-                    </span>
-                  </div>
-                  {activeBatch && (
-                    <span className="text-[0.72rem] text-[#444C38] font-bold block mt-1.5">
-                      ✓ {activeBatch.batchName} ({activeBatch.startDate}) • {activeBatch.seatsRemaining ? `${activeBatch.seatsRemaining} seats left` : "Seats available"}
-                    </span>
-                  )}
                 </div>
-
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="btn-studio px-8 py-4 text-xs sm:text-sm tracking-wider font-bold shadow-md inline-flex items-center justify-center gap-2 cursor-pointer shrink-0"
-                >
-                  <span>{details.ctaText || (isFoundation ? "Enrol in Foundation Course" : "Enrol in Artistry Course")}</span>
-                  <ArrowRight className="size-4" />
-                </button>
               </div>
             </div>
           </div>

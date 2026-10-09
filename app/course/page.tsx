@@ -81,7 +81,7 @@ export default async function CourseCatalogPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
             {/* CARD 1: WATERCOLOUR FOUNDATION */}
             {foundationCourse && (
-              <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#FAF8F2] border border-[#464137]/20 shadow-[0_4px_24px_rgba(40,36,28,0.05)] hover:border-[#444C38]/50 hover:shadow-[0_12px_36px_rgba(40,36,28,0.09)] transition-all duration-300">
+              <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#FAF8F2]/95 backdrop-blur-md border border-[#444C38]/35 shadow-[0_4px_24px_rgba(40,36,28,0.06)] hover:border-[#444C38]/55 hover:shadow-[0_12px_36px_rgba(40,36,28,0.1)] transition-all duration-300">
                 {/* Course Image Container */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#EBE7DC]">
                   <Image
@@ -112,9 +112,21 @@ export default async function CourseCatalogPage() {
                   </div>
                 </div>
 
-                {/* Card Content Body */}
-                <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-6">
-                  <div className="space-y-4">
+                {/* Card Content Body with Botanical Watercolor Shading Overlay */}
+                <div className="relative p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-6 overflow-hidden">
+                  {/* Custom Botanical Watercolor Texture Overlay */}
+                  <div className="pointer-events-none absolute inset-0 z-0">
+                    <Image
+                      src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                      alt=""
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 600px"
+                      className="object-cover object-center opacity-30 mix-blend-multiply group-hover:opacity-38 transition-opacity duration-300 select-none"
+                    />
+                    <div className="absolute inset-1.5 rounded-xl border border-[#444C38]/20 pointer-events-none" />
+                  </div>
+
+                  <div className="relative z-10 space-y-4">
                     {/* Summary Headline */}
                     <div>
                       <h3 className="font-serif text-lg font-bold text-[#14120E] leading-snug">
@@ -128,15 +140,27 @@ export default async function CourseCatalogPage() {
                       )}
                     </div>
 
-                    {/* Topics / Materials pill */}
-                    <div className="rounded-lg bg-[#F7F4EC] p-3 border border-[#464137]/15">
-                      <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#444C38] block mb-1">
-                        Core Syllabus Focus:
-                      </span>
-                      <p className="text-xs font-semibold text-[#14120E] leading-relaxed">
-                        {foundationCourse.details?.subjects ||
-                          "Materials • Techniques • Colour Mixing • Wash"}
-                      </p>
+                    {/* Topics / Materials pill with shaded wash */}
+                    <div className="group/sub relative overflow-hidden rounded-lg bg-[#FAF8F2]/90 p-3 border border-[#444C38]/25 shadow-2xs">
+                      <div className="pointer-events-none absolute inset-0 z-0">
+                        <Image
+                          src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                          alt=""
+                          fill
+                          sizes="500px"
+                          className="object-cover object-center opacity-20 mix-blend-multiply select-none"
+                        />
+                        <div className="absolute inset-0.5 rounded-md border border-[#444C38]/15 pointer-events-none" />
+                      </div>
+                      <div className="relative z-10">
+                        <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#444C38] block mb-1">
+                          Core Syllabus Focus:
+                        </span>
+                        <p className="text-xs font-semibold text-[#14120E] leading-relaxed">
+                          {foundationCourse.details?.subjects ||
+                            "Materials • Techniques • Colour Mixing • Wash"}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Quick Features List */}
@@ -157,27 +181,30 @@ export default async function CourseCatalogPage() {
                   </div>
 
                   {/* Card Footer: Price & CTA */}
-                  <div className="pt-4 border-t border-[#464137]/15 flex items-center justify-between gap-4">
+                  <div className="relative z-10 pt-4 border-t border-[#464137]/20 flex items-center justify-between gap-4">
                     <div>
-                      <span className="text-[0.68rem] uppercase tracking-wider font-bold text-[#6F6B61] block">
+                      <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
                         Course Fee
                       </span>
-                      <div className="flex items-baseline gap-2">
+                      <div className="flex items-baseline gap-2 mt-1">
                         <span className="font-serif text-2xl sm:text-3xl font-extrabold text-[#B93821] tracking-tight">
                           ₹{foundationCourse.offerPrice}/-
                         </span>
                         {foundationCourse.originalPrice >
                           foundationCourse.offerPrice && (
-                          <span className="line-through text-xs font-medium text-[#6F6B61]">
+                          <span className="line-through text-xs font-semibold text-[#6F6B61]">
                             ₹{foundationCourse.originalPrice}/-
                           </span>
                         )}
+                        <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2 py-0.5 rounded-sm">
+                          Special Offer
+                        </span>
                       </div>
                     </div>
 
                     <Link
                       href={`/course/${foundationCourse.slug}`}
-                      className="btn-studio px-5 sm:px-6 py-3 text-xs tracking-wider font-bold inline-flex items-center gap-2"
+                      className="btn-studio px-5 sm:px-6 py-3 text-xs tracking-wider font-bold inline-flex items-center gap-2 shadow-sm"
                     >
                       <span>Learn More</span>
                       <ArrowRight className="size-3.5" />
@@ -189,7 +216,7 @@ export default async function CourseCatalogPage() {
 
             {/* CARD 2: WATERCOLOUR ARTISTRY + FOUNDATION COURSE */}
             {artistryCourse && (
-              <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#FAF8F2] border border-[#464137]/20 shadow-[0_4px_24px_rgba(40,36,28,0.05)] hover:border-[#444C38]/50 hover:shadow-[0_12px_36px_rgba(40,36,28,0.09)] transition-all duration-300">
+              <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#FAF8F2]/95 backdrop-blur-md border border-[#444C38]/35 shadow-[0_4px_24px_rgba(40,36,28,0.06)] hover:border-[#444C38]/55 hover:shadow-[0_12px_36px_rgba(40,36,28,0.1)] transition-all duration-300">
                 {/* Course Image Container */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#EBE7DC]">
                   <Image
@@ -220,9 +247,21 @@ export default async function CourseCatalogPage() {
                   </div>
                 </div>
 
-                {/* Card Content Body */}
-                <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-6">
-                  <div className="space-y-4">
+                {/* Card Content Body with Botanical Watercolor Shading Overlay */}
+                <div className="relative p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-6 overflow-hidden">
+                  {/* Custom Botanical Watercolor Texture Overlay */}
+                  <div className="pointer-events-none absolute inset-0 z-0">
+                    <Image
+                      src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                      alt=""
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 600px"
+                      className="object-cover object-center opacity-30 mix-blend-multiply group-hover:opacity-38 transition-opacity duration-300 select-none"
+                    />
+                    <div className="absolute inset-1.5 rounded-xl border border-[#444C38]/20 pointer-events-none" />
+                  </div>
+
+                  <div className="relative z-10 space-y-4">
                     {/* Summary Headline */}
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -242,15 +281,27 @@ export default async function CourseCatalogPage() {
                       )}
                     </div>
 
-                    {/* Topics / Subjects Pill */}
-                    <div className="rounded-lg bg-[#F7F4EC] p-3 border border-[#464137]/15">
-                      <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#444C38] block mb-1">
-                        3 Master Subjects:
-                      </span>
-                      <p className="text-xs font-semibold text-[#14120E] leading-relaxed">
-                        {artistryCourse.details?.subjects ||
-                          "Landscape • Floral • Still Life"}
-                      </p>
+                    {/* Topics / Subjects Pill with shaded wash */}
+                    <div className="group/sub relative overflow-hidden rounded-lg bg-[#FAF8F2]/90 p-3 border border-[#444C38]/25 shadow-2xs">
+                      <div className="pointer-events-none absolute inset-0 z-0">
+                        <Image
+                          src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                          alt=""
+                          fill
+                          sizes="500px"
+                          className="object-cover object-center opacity-20 mix-blend-multiply select-none"
+                        />
+                        <div className="absolute inset-0.5 rounded-md border border-[#444C38]/15 pointer-events-none" />
+                      </div>
+                      <div className="relative z-10">
+                        <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#444C38] block mb-1">
+                          3 Master Subjects:
+                        </span>
+                        <p className="text-xs font-semibold text-[#14120E] leading-relaxed">
+                          {artistryCourse.details?.subjects ||
+                            "Landscape • Floral • Still Life"}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Quick Features List */}
@@ -271,27 +322,30 @@ export default async function CourseCatalogPage() {
                   </div>
 
                   {/* Card Footer: Price & CTA */}
-                  <div className="pt-4 border-t border-[#464137]/15 flex items-center justify-between gap-4">
+                  <div className="relative z-10 pt-4 border-t border-[#464137]/20 flex items-center justify-between gap-4">
                     <div>
-                      <span className="text-[0.68rem] uppercase tracking-wider font-bold text-[#6F6B61] block">
+                      <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
                         Course Fee
                       </span>
-                      <div className="flex items-baseline gap-2">
+                      <div className="flex items-baseline gap-2 mt-1">
                         <span className="font-serif text-2xl sm:text-3xl font-extrabold text-[#B93821] tracking-tight">
                           ₹{artistryCourse.offerPrice.toLocaleString()}/-
                         </span>
                         {artistryCourse.originalPrice >
                           artistryCourse.offerPrice && (
-                          <span className="line-through text-xs font-medium text-[#6F6B61]">
+                          <span className="line-through text-xs font-semibold text-[#6F6B61]">
                             ₹{artistryCourse.originalPrice.toLocaleString()}/-
                           </span>
                         )}
+                        <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2 py-0.5 rounded-sm">
+                          Special Offer
+                        </span>
                       </div>
                     </div>
 
                     <Link
                       href={`/course/${artistryCourse.slug}`}
-                      className="btn-studio px-5 sm:px-6 py-3 text-xs tracking-wider font-bold inline-flex items-center gap-2"
+                      className="btn-studio px-5 sm:px-6 py-3 text-xs tracking-wider font-bold inline-flex items-center gap-2 shadow-sm"
                     >
                       <span>Learn More</span>
                       <ArrowRight className="size-3.5" />
