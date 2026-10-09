@@ -359,28 +359,6 @@ export default async function AdminDashboardPage() {
           </p>
         </Link>
       </div>
-
-      {/* Production Architecture & Security Certification Card */}
-      <div className="p-6 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-4">
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#68705A] uppercase tracking-wider">
-          <ShieldCheck className="size-4" />
-          <span>Production Security &amp; Data Integrity</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-[#6F6B61]">
-          <div className="p-3.5 rounded-lg bg-[#F7F4EC] border border-[#464137]/10">
-            <span className="block font-semibold text-[#292923] mb-1">Encapsulated Secrets</span>
-            <span>Razorpay secrets, Resend API keys, and Supabase service tokens remain strictly server-side.</span>
-          </div>
-          <div className="p-3.5 rounded-lg bg-[#F7F4EC] border border-[#464137]/10">
-            <span className="block font-semibold text-[#292923] mb-1">Row-Level Security</span>
-            <span>All administrative tables enforce authenticated Supabase RLS policies with active session guards.</span>
-          </div>
-          <div className="p-3.5 rounded-lg bg-[#F7F4EC] border border-[#464137]/10">
-            <span className="block font-semibold text-[#292923] mb-1">Concurrency &amp; Idempotency</span>
-            <span>Atomic seat locking prevents over-enrollment; webhooks and notifications guarantee idempotent execution.</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
