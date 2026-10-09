@@ -94,6 +94,9 @@ export default async function CourseCatalogPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#14120E]/70 via-transparent to-transparent" />
 
+                  {/* Seamless Watercolor Blend into Card Body */}
+                  <div className="absolute inset-x-0 -bottom-px h-10 sm:h-12 bg-gradient-to-b from-transparent via-[#FAF8F2]/70 to-[#FAF8F2] pointer-events-none" />
+
                   {/* Badges on Image */}
                   <div className="absolute top-4 left-4">
                     <span className="rounded-md bg-[#FAF8F2]/95 backdrop-blur-xs px-3 py-1 text-[0.68rem] font-bold uppercase tracking-widest text-[#444C38] border border-[#444C38]/20 shadow-xs">
@@ -101,7 +104,7 @@ export default async function CourseCatalogPage() {
                     </span>
                   </div>
 
-                  <div className="absolute bottom-4 left-4 right-4 text-[#FAF8F2]">
+                  <div className="absolute bottom-5 left-4 right-4 text-[#FAF8F2] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                     <span className="text-[0.72rem] font-bold uppercase tracking-wider text-[#FAF8F2]/90 block">
                       {foundationCourse.details?.cardSubtitle ||
                         "2 Live Sessions • 90 Minutes Each"}
@@ -114,7 +117,7 @@ export default async function CourseCatalogPage() {
 
                 {/* Card Content Body with Botanical Watercolor Shading Overlay */}
                 <div className="relative p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-6 overflow-hidden">
-                  {/* Custom Botanical Watercolor Texture Overlay */}
+                  {/* Custom Botanical Watercolor Texture Overlay with Soft Feathered Blend */}
                   <div className="pointer-events-none absolute inset-0 z-0">
                     <Image
                       src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
@@ -123,7 +126,9 @@ export default async function CourseCatalogPage() {
                       sizes="(max-width: 1024px) 100vw, 600px"
                       className="object-cover object-center opacity-30 mix-blend-multiply group-hover:opacity-38 transition-opacity duration-300 select-none"
                     />
-                    <div className="absolute inset-1.5 rounded-xl border border-[#444C38]/20 pointer-events-none" />
+                    {/* Soft Blending Masks - Feathered Edges */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F2] via-transparent to-[#FAF8F2]/80" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F2]/60 via-transparent to-[#FAF8F2]/60" />
                   </div>
 
                   <div className="relative z-10 space-y-4">
@@ -150,7 +155,6 @@ export default async function CourseCatalogPage() {
                           sizes="500px"
                           className="object-cover object-center opacity-20 mix-blend-multiply select-none"
                         />
-                        <div className="absolute inset-0.5 rounded-md border border-[#444C38]/15 pointer-events-none" />
                       </div>
                       <div className="relative z-10">
                         <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#444C38] block mb-1">
@@ -229,6 +233,9 @@ export default async function CourseCatalogPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#14120E]/70 via-transparent to-transparent" />
 
+                  {/* Seamless Watercolor Blend into Card Body */}
+                  <div className="absolute inset-x-0 -bottom-px h-10 sm:h-12 bg-gradient-to-b from-transparent via-[#FAF8F2]/70 to-[#FAF8F2] pointer-events-none" />
+
                   {/* Badges on Image */}
                   <div className="absolute top-4 left-4">
                     <span className="rounded-md bg-[#444C38] text-[#FAF8F2] px-3 py-1 text-[0.68rem] font-bold uppercase tracking-widest shadow-xs">
@@ -236,7 +243,7 @@ export default async function CourseCatalogPage() {
                     </span>
                   </div>
 
-                  <div className="absolute bottom-4 left-4 right-4 text-[#FAF8F2]">
+                  <div className="absolute bottom-5 left-4 right-4 text-[#FAF8F2] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                     <span className="text-[0.72rem] font-bold uppercase tracking-wider text-[#FAF8F2]/90 block">
                       {artistryCourse.details?.subjects ||
                         "Landscape • Floral • Still Life"}
@@ -249,7 +256,7 @@ export default async function CourseCatalogPage() {
 
                 {/* Card Content Body with Botanical Watercolor Shading Overlay */}
                 <div className="relative p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-6 overflow-hidden">
-                  {/* Custom Botanical Watercolor Texture Overlay */}
+                  {/* Custom Botanical Watercolor Texture Overlay with Soft Feathered Blend */}
                   <div className="pointer-events-none absolute inset-0 z-0">
                     <Image
                       src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
@@ -258,7 +265,9 @@ export default async function CourseCatalogPage() {
                       sizes="(max-width: 1024px) 100vw, 600px"
                       className="object-cover object-center opacity-30 mix-blend-multiply group-hover:opacity-38 transition-opacity duration-300 select-none"
                     />
-                    <div className="absolute inset-1.5 rounded-xl border border-[#444C38]/20 pointer-events-none" />
+                    {/* Soft Blending Masks - Feathered Edges */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F2] via-transparent to-[#FAF8F2]/80" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F2]/60 via-transparent to-[#FAF8F2]/60" />
                   </div>
 
                   <div className="relative z-10 space-y-4">
@@ -291,7 +300,6 @@ export default async function CourseCatalogPage() {
                           sizes="500px"
                           className="object-cover object-center opacity-20 mix-blend-multiply select-none"
                         />
-                        <div className="absolute inset-0.5 rounded-md border border-[#444C38]/15 pointer-events-none" />
                       </div>
                       <div className="relative z-10">
                         <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#444C38] block mb-1">

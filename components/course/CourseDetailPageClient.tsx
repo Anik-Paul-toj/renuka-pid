@@ -103,6 +103,9 @@ export function CourseDetailPageClient({
             {/* Subtle Atelier Dark Gradient for Text Contrast */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#14120E]/85 via-[#14120E]/30 to-transparent" />
 
+            {/* Seamless Watercolor Blend into Card Body - Feathers photo into cream canvas */}
+            <div className="absolute inset-x-0 -bottom-px h-12 sm:h-14 bg-gradient-to-b from-transparent via-[#FAF8F2]/70 to-[#FAF8F2] pointer-events-none" />
+
             {/* Top Badges */}
             <div className="absolute top-4 left-4 flex items-center gap-2">
               <span className="rounded-md bg-[#FAF8F2]/95 backdrop-blur-xs px-3 py-1 text-[0.68rem] font-bold uppercase tracking-widest text-[#444C38] border border-[#444C38]/20 shadow-xs">
@@ -111,7 +114,7 @@ export function CourseDetailPageClient({
             </div>
 
             {/* Bottom Title on Image Banner */}
-            <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 text-[#FAF8F2]">
+            <div className="absolute bottom-5 left-4 right-4 sm:bottom-7 sm:left-6 sm:right-6 text-[#FAF8F2] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
               <span className="text-[0.72rem] font-bold uppercase tracking-wider text-[#FAF8F2]/90 block mb-1">
                 {details.subjects || (isFoundation ? "Materials • Techniques • Colour Mixing • Wash" : "Landscape • Floral • Still Life")}
               </span>
@@ -123,7 +126,7 @@ export function CourseDetailPageClient({
 
           {/* Card Body - All Course Details in One Single Unified Container with Shaded Watercolor Texture */}
           <div className="relative p-6 sm:p-8 lg:p-10 space-y-8 overflow-hidden bg-[#FAF8F2]/95 backdrop-blur-md">
-            {/* Custom Botanical Watercolor Texture Overlay */}
+            {/* Custom Botanical Watercolor Texture Overlay with Soft Feathered Blend */}
             <div className="pointer-events-none absolute inset-0 z-0">
               <Image
                 src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
@@ -132,11 +135,13 @@ export function CourseDetailPageClient({
                 sizes="(max-width: 1024px) 100vw, 900px"
                 className="object-cover object-center opacity-25 mix-blend-multiply select-none"
               />
-              <div className="absolute inset-2 rounded-xl border border-[#444C38]/20 pointer-events-none" />
+              {/* Soft Blending Masks - Naturally Feathered Edges, No Box Borders */}
+              <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F2] via-transparent to-[#FAF8F2]/80" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F2]/60 via-transparent to-[#FAF8F2]/60" />
             </div>
 
             <div className="relative z-10 space-y-8">
-              {/* 1. Quick Info Spec Grid — Exact Hero Workshop Box Shading & Hairline Border */}
+              {/* 1. Quick Info Spec Grid — Exact Hero Workshop Box Shading */}
               <div className="group relative overflow-hidden rounded-xl bg-[#FAF8F2]/92 backdrop-blur-md p-4 sm:p-5 border border-[#444C38]/40 shadow-sm transition-all duration-300">
                 <div className="pointer-events-none absolute inset-0 z-0">
                   <Image
@@ -146,7 +151,6 @@ export function CourseDetailPageClient({
                     sizes="(max-width: 1024px) 100vw, 850px"
                     className="object-cover object-center opacity-30 mix-blend-multiply select-none"
                   />
-                  <div className="absolute inset-1 rounded-lg border border-[#444C38]/20 pointer-events-none" />
                 </div>
 
                 <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4">
@@ -334,7 +338,6 @@ export function CourseDetailPageClient({
                           sizes="800px"
                           className="object-cover object-center opacity-20 mix-blend-multiply select-none"
                         />
-                        <div className="absolute inset-0.5 rounded-md border border-[#444C38]/15 pointer-events-none" />
                       </div>
                       <p className="relative z-10 font-serif text-sm sm:text-base font-bold text-[#14120E] italic text-center">
                         &ldquo;{details.whyCallout}&rdquo;
@@ -356,8 +359,6 @@ export function CourseDetailPageClient({
                       sizes="(max-width: 1024px) 100vw, 850px"
                       className="object-cover object-center opacity-30 mix-blend-multiply select-none"
                     />
-                    {/* Refined Inner Hairline Border Framing */}
-                    <div className="absolute inset-1 rounded-lg border border-[#444C38]/20 pointer-events-none" />
                   </div>
 
                   <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
