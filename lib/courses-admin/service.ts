@@ -131,6 +131,30 @@ export const DEFAULT_ARTISTRY_DETAILS: CourseContentDetails = {
   ctaText: "Enrol in Artistry + Foundation Course",
 };
 
+export const DEFAULT_WORKSHOP_DETAILS: CourseContentDetails = {
+  cardSubtitle: "One-Day Masterclass",
+  cardSummary: "Interactive Live Masterclass on Zoom",
+  cardDescription: "Live Masterclass designed to fix basics and get you painting.",
+  subjects: "Watercolour Essentials • Live Demonstration",
+  cardPriceLabel: "Complete Live Atelier Access",
+  sessionCountText: "1 Live Session",
+  sessionDurationText: "130 mins",
+  durationMonthsText: "1 Day",
+  fullDescription:
+    "Live intimate masterclass session on Zoom with personal guidance and feedback.",
+  learningOutcomesHeading: "",
+  learningOutcomesSubheading: "",
+  learningOutcomes: [],
+  whyHeading: "",
+  whyDescription: "",
+  whyCallout: "",
+  scheduleHeading: "Live Workshop Details",
+  scheduleItems: [],
+  scheduleNote:
+    "Live interactive atelier sessions on Zoom with personal feedback and guidance.",
+  ctaText: "Register Now",
+};
+
 /**
  * Safely parses course details from JSON string or returns baseline fallback
  */
@@ -138,9 +162,14 @@ export function parseCourseDetails(
   slug: string,
   rawDescription: string | null
 ): CourseContentDetails {
+  const isWorkshop =
+    slug === "the-watercolour" || slug === "the-watercolour-roadmap";
+
   const fallback =
     slug === "watercolour-artistry-foundation"
       ? DEFAULT_ARTISTRY_DETAILS
+      : isWorkshop
+      ? DEFAULT_WORKSHOP_DETAILS
       : DEFAULT_FOUNDATION_DETAILS;
 
   if (!rawDescription) {
@@ -151,6 +180,16 @@ export function parseCourseDetails(
   if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
     try {
       const parsed = JSON.parse(trimmed);
+
+      if (isWorkshop) {
+        return {
+          ...DEFAULT_WORKSHOP_DETAILS,
+          ...parsed,
+          learningOutcomes: [],
+          scheduleItems: [],
+        };
+      }
+
       return {
         ...fallback,
         ...parsed,

@@ -25,6 +25,10 @@ import {
   HelpCircle,
   MousePointerClick,
   Percent,
+  Video,
+  Globe,
+  Hourglass,
+  ExternalLink,
 } from "lucide-react";
 import { AdminCourseData } from "@/lib/courses-admin/service";
 import { CourseScheduleItem } from "@/lib/validations/course-admin";
@@ -47,6 +51,10 @@ export function CourseManager({
 
   const activeCourse =
     courses.find((c) => c.id === selectedCourseId) || courses[0];
+
+  const isLandingPageWorkshop =
+    activeCourse?.slug === "the-watercolour" ||
+    activeCourse?.slug === "the-watercolour-roadmap";
 
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<
@@ -232,36 +240,64 @@ export function CourseManager({
     setFieldErrors({});
 
     try {
-      const detailsPayload = {
-        cardSubtitle: formData.cardSubtitle.trim(),
-        cardSummary: formData.cardSummary.trim(),
-        cardDescription: formData.cardDescription.trim(),
-        subjects: formData.subjects.trim(),
-        cardPriceLabel: formData.cardPriceLabel.trim(),
+      const detailsPayload = isLandingPageWorkshop
+        ? {
+            cardSubtitle: "One-Day Masterclass",
+            cardSummary: "Interactive Live Masterclass on Zoom",
+            cardDescription:
+              formData.description?.trim() ||
+              "Live Masterclass designed to fix basics and get you painting.",
+            subjects: "Watercolour Essentials • Live Demonstration",
+            cardPriceLabel:
+              formData.cardPriceLabel?.trim() || "Complete Live Atelier Access",
+            sessionCountText: "1 Live Session",
+            sessionDurationText: `${formData.durationMinutes} mins`,
+            durationMonthsText: "1 Day",
+            fullDescription:
+              formData.description?.trim() ||
+              "Live intimate masterclass session on Zoom with personal guidance.",
+            learningOutcomesHeading: "",
+            learningOutcomesSubheading: "",
+            learningOutcomes: [],
+            scheduleHeading: "Live Workshop Details",
+            scheduleItems: [],
+            scheduleNote:
+              "Live interactive atelier sessions on Zoom with personal feedback and guidance.",
+            whyHeading: "",
+            whyDescription: "",
+            whyCallout: "",
+            ctaText: "Register Now",
+          }
+        : {
+            cardSubtitle: formData.cardSubtitle.trim(),
+            cardSummary: formData.cardSummary.trim(),
+            cardDescription: formData.cardDescription.trim(),
+            subjects: formData.subjects.trim(),
+            cardPriceLabel: formData.cardPriceLabel.trim(),
 
-        sessionCountText: formData.sessionCountText.trim(),
-        sessionDurationText: formData.sessionDurationText.trim(),
-        durationMonthsText: formData.durationMonthsText.trim(),
+            sessionCountText: formData.sessionCountText.trim(),
+            sessionDurationText: formData.sessionDurationText.trim(),
+            durationMonthsText: formData.durationMonthsText.trim(),
 
-        fullDescription: formData.fullDescription.trim(),
+            fullDescription: formData.fullDescription.trim(),
 
-        learningOutcomesHeading: formData.learningOutcomesHeading.trim(),
-        learningOutcomesSubheading: formData.learningOutcomesSubheading.trim(),
-        learningOutcomes: formData.learningOutcomes
-          .map((item) => item.trim())
-          .filter(Boolean),
+            learningOutcomesHeading: formData.learningOutcomesHeading.trim(),
+            learningOutcomesSubheading: formData.learningOutcomesSubheading.trim(),
+            learningOutcomes: formData.learningOutcomes
+              .map((item) => item.trim())
+              .filter(Boolean),
 
-        scheduleHeading: formData.scheduleHeading.trim(),
-        scheduleItems: formData.scheduleItems.filter(
-          (item) => item.label.trim().length > 0
-        ),
-        scheduleNote: formData.scheduleNote.trim(),
+            scheduleHeading: formData.scheduleHeading.trim(),
+            scheduleItems: formData.scheduleItems.filter(
+              (item) => item.label.trim().length > 0
+            ),
+            scheduleNote: formData.scheduleNote.trim(),
 
-        whyHeading: formData.whyHeading.trim(),
-        whyDescription: formData.whyDescription.trim(),
-        whyCallout: formData.whyCallout.trim(),
-        ctaText: formData.ctaText.trim(),
-      };
+            whyHeading: formData.whyHeading.trim(),
+            whyDescription: formData.whyDescription.trim(),
+            whyCallout: formData.whyCallout.trim(),
+            ctaText: formData.ctaText.trim(),
+          };
 
       const res = await fetch(`/api/admin/courses/${activeCourse.id}`, {
         method: "PATCH",
@@ -269,7 +305,9 @@ export function CourseManager({
         body: JSON.stringify({
           title: formData.title.trim(),
           slug: formData.slug.trim(),
-          description: JSON.stringify(detailsPayload),
+          description: isLandingPageWorkshop
+            ? formData.description?.trim() || ""
+            : JSON.stringify(detailsPayload),
           durationMinutes: Number(formData.durationMinutes),
           originalPrice: Number(formData.originalPrice),
           offerPrice: Number(formData.offerPrice),
@@ -290,7 +328,9 @@ export function CourseManager({
       }
 
       setSuccessMessage(
-        "Course content and pricing updated successfully! Public listing and detail pages updated."
+        isLandingPageWorkshop
+          ? "Landing page masterclass details and pricing updated successfully! Live hero workshop box updated."
+          : "Course content and pricing updated successfully! Public listing and detail pages updated."
       );
       setIsEditing(false);
 
@@ -352,24 +392,34 @@ export function CourseManager({
 
       {/* Course Selection Tabs */}
       <div className="flex items-center gap-2 border-b border-[#464137]/15 pb-2 overflow-x-auto">
-        {courses.map((course) => (
-          <button
-            key={course.id}
-            onClick={() => handleSelectCourse(course)}
-            className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              course.id === selectedCourseId
-                ? "bg-[#68705A] text-[#FAF8F2] shadow-sm"
-                : "bg-[#FAF8F2] text-[#6F6B61] hover:text-[#292923] border border-[#464137]/15"
-            }`}
-          >
-            <span>{course.title}</span>
-            {course.isActive ? (
-              <span className="size-2 rounded-full bg-emerald-400"></span>
-            ) : (
-              <span className="size-2 rounded-full bg-amber-400"></span>
-            )}
-          </button>
-        ))}
+        {courses.map((course) => {
+          const isWorkshopTab =
+            course.slug === "the-watercolour" ||
+            course.slug === "the-watercolour-roadmap";
+          return (
+            <button
+              key={course.id}
+              onClick={() => handleSelectCourse(course)}
+              className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                course.id === selectedCourseId
+                  ? "bg-[#68705A] text-[#FAF8F2] shadow-sm"
+                  : "bg-[#FAF8F2] text-[#6F6B61] hover:text-[#292923] border border-[#464137]/15"
+              }`}
+            >
+              <span>{course.title}</span>
+              {isWorkshopTab && (
+                <span className="text-[0.62rem] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-[#C8D1C7]/40 text-[#444C38]">
+                  Landing Page
+                </span>
+              )}
+              {course.isActive ? (
+                <span className="size-2 rounded-full bg-emerald-400"></span>
+              ) : (
+                <span className="size-2 rounded-full bg-amber-400"></span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Notifications */}
@@ -416,8 +466,15 @@ export function CourseManager({
                 </span>
                 <span className="text-xs text-[#6F6B61]">·</span>
                 <span className="text-[0.68rem] text-[#6F6B61] font-mono">
-                  /course/{activeCourse?.slug}
+                  {isLandingPageWorkshop
+                    ? "/ (Landing Page Hero)"
+                    : `/course/${activeCourse?.slug}`}
                 </span>
+                {isLandingPageWorkshop && (
+                  <span className="text-[0.62rem] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[#68705A]/15 text-[#68705A]">
+                    Landing Page Masterclass
+                  </span>
+                )}
               </div>
               <h2 className="font-serif text-xl font-bold text-[#14120E] mt-0.5">
                 {activeCourse?.title}
@@ -435,61 +492,412 @@ export function CourseManager({
               </span>
             </div>
             <a
-              href={`/course/${activeCourse?.slug}`}
+              href={isLandingPageWorkshop ? "/" : `/course/${activeCourse?.slug}`}
               target="_blank"
               rel="noreferrer"
-              className="text-xs font-bold text-[#68705A] hover:underline px-3 py-1.5 rounded-md bg-[#FAF8F2] border border-[#464137]/20"
+              className="text-xs font-bold text-[#68705A] hover:underline px-3 py-1.5 rounded-md bg-[#FAF8F2] border border-[#464137]/20 inline-flex items-center gap-1.5"
             >
-              View Public Page ↗
+              <span>{isLandingPageWorkshop ? "View Landing Page" : "View Public Page"}</span>
+              <ExternalLink className="size-3" />
             </a>
           </div>
         </div>
 
-        {/* Section Navigation Tabs */}
-        <div className="flex border-b border-[#464137]/15 bg-[#FAF8F2] px-4 overflow-x-auto">
-          {[
-            { id: "basic", label: "1. Basic Info", icon: Info },
-            { id: "listing", label: "2. Listing Card", icon: Layers },
-            { id: "pricing", label: "3. Pricing", icon: IndianRupee },
-            { id: "duration", label: "4. Sessions & Duration", icon: Clock },
-            { id: "description", label: "5. Description", icon: FileText },
-            { id: "outcomes", label: "6. Learning Outcomes", icon: BookOpen },
-            { id: "schedule", label: "7. Schedule", icon: Calendar },
-            { id: "cta", label: "8. Additional & CTA", icon: MousePointerClick },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isCurrent = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 py-3 px-3.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
-                  isCurrent
-                    ? "border-[#68705A] text-[#14120E] font-bold"
-                    : "border-transparent text-[#6F6B61] hover:text-[#292923]"
-                }`}
-              >
-                <Icon className="size-3.5" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Section Navigation Tabs: ONLY displayed for the 2 multi-week watercolour courses! */}
+        {!isLandingPageWorkshop ? (
+          <div className="flex border-b border-[#464137]/15 bg-[#FAF8F2] px-4 overflow-x-auto">
+            {[
+              { id: "basic", label: "1. Basic Info", icon: Info },
+              { id: "listing", label: "2. Listing Card", icon: Layers },
+              { id: "pricing", label: "3. Pricing", icon: IndianRupee },
+              { id: "duration", label: "4. Sessions & Duration", icon: Clock },
+              { id: "description", label: "5. Description", icon: FileText },
+              { id: "outcomes", label: "6. Learning Outcomes", icon: BookOpen },
+              { id: "schedule", label: "7. Schedule", icon: Calendar },
+              { id: "cta", label: "8. Additional & CTA", icon: MousePointerClick },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isCurrent = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 py-3 px-3.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
+                    isCurrent
+                      ? "border-[#68705A] text-[#14120E] font-bold"
+                      : "border-transparent text-[#6F6B61] hover:text-[#292923]"
+                  }`}
+                >
+                  <Icon className="size-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="border-b border-[#464137]/15 bg-[#FAF8F2] px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-4 text-[#68705A]" />
+              <span className="text-xs font-bold text-[#14120E] uppercase tracking-wider">
+                Landing Page Workshop Box Settings
+              </span>
+            </div>
+            <span className="text-[0.68rem] text-[#6F6B61] italic">
+              Controls the Workshop Box directly on the main landing page
+            </span>
+          </div>
+        )}
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* SECTION 1: BASIC INFORMATION */}
-          {activeTab === "basic" && (
-            <div className="space-y-4">
-              <div className="border-b border-[#464137]/10 pb-2">
-                <h3 className="font-serif text-base font-bold text-[#14120E]">
-                  1. Basic Information
-                </h3>
-                <p className="text-xs text-[#6F6B61]">
-                  Core course identifiers and publishing status.
-                </p>
+          {isLandingPageWorkshop ? (
+            <div className="space-y-6">
+              {/* Alert helper */}
+              <div className="p-4 rounded-xl bg-[#EEE9DE]/60 border border-[#464137]/15 flex items-start gap-3">
+                <Sparkles className="size-4.5 text-[#68705A] shrink-0 mt-0.5" />
+                <div className="text-xs text-[#3E3A32] leading-relaxed">
+                  <p className="font-bold">Landing Page Workshop Manager</p>
+                  <p className="mt-0.5 text-[#6F6B61]">
+                    This masterclass is featured directly on the main landing page hero. Manage the title, duration (mins), authoritative pricing (MRP and Special Offer Fee), and availability below. All changes immediately reflect in the public hero workshop box.
+                  </p>
+                </div>
               </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left Column: Workshop Settings Form */}
+                <div className="lg:col-span-7 space-y-5">
+                  {/* Masterclass Title & Route */}
+                  <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 space-y-4">
+                    <div className="border-b border-[#464137]/10 pb-2">
+                      <h3 className="font-serif text-sm font-bold text-[#14120E]">
+                        Workshop Identity & Title
+                      </h3>
+                      <p className="text-[0.68rem] text-[#6F6B61]">
+                        Primary masterclass title displayed on the landing page hero and booking modal.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#68705A] mb-1.5">
+                        Masterclass Title *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        disabled={!isEditing}
+                        value={formData.title}
+                        onChange={(e) => handleInputChange("title", e.target.value)}
+                        className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2.5 text-xs sm:text-sm text-[#14120E] font-medium outline-none focus:border-[#68705A] disabled:opacity-75 disabled:cursor-not-allowed"
+                      />
+                      {fieldErrors.title && (
+                        <p className="text-rose-600 text-xs mt-1">
+                          {fieldErrors.title[0]}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#68705A] mb-1.5 flex items-center gap-1.5">
+                          <Clock className="size-3.5" />
+                          <span>Duration (Minutes) *</span>
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          required
+                          disabled={!isEditing}
+                          value={formData.durationMinutes}
+                          onChange={(e) =>
+                            handleInputChange("durationMinutes", Number(e.target.value))
+                          }
+                          className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2.5 text-xs sm:text-sm text-[#14120E] font-medium outline-none focus:border-[#68705A] disabled:opacity-75 disabled:cursor-not-allowed"
+                        />
+                        <p className="text-[0.66rem] text-[#6F6B61] mt-1">
+                          Reflected as &ldquo;{formData.durationMinutes} mins&rdquo; in the workshop box
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#68705A] mb-1.5">
+                          Workshop Fee Label
+                        </label>
+                        <input
+                          type="text"
+                          disabled={!isEditing}
+                          placeholder="Complete Live Atelier Access"
+                          value={formData.cardPriceLabel}
+                          onChange={(e) =>
+                            handleInputChange("cardPriceLabel", e.target.value)
+                          }
+                          className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2.5 text-xs sm:text-sm text-[#14120E] font-medium outline-none focus:border-[#68705A] disabled:opacity-75 disabled:cursor-not-allowed"
+                        />
+                        <p className="text-[0.66rem] text-[#6F6B61] mt-1">
+                          Badge / note displayed above the pricing
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Authoritative Pricing */}
+                  <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 space-y-4">
+                    <div className="border-b border-[#464137]/10 pb-2 flex items-center justify-between">
+                      <div>
+                        <h3 className="font-serif text-sm font-bold text-[#14120E] flex items-center gap-1.5">
+                          <IndianRupee className="size-3.5 text-[#68705A]" />
+                          <span>Authoritative Pricing (INR Rupees)</span>
+                        </h3>
+                        <p className="text-[0.68rem] text-[#6F6B61]">
+                          Live pricing that directly dictates Razorpay payment amounts.
+                        </p>
+                      </div>
+                      {discountPercent > 0 && (
+                        <span className="text-[0.68rem] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2.5 py-0.5 rounded">
+                          {discountPercent}% OFF
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#68705A] mb-1.5">
+                          Original MRP Price (₹) *
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          required
+                          disabled={!isEditing}
+                          value={formData.originalPrice}
+                          onChange={(e) =>
+                            handleInputChange("originalPrice", Number(e.target.value))
+                          }
+                          className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2.5 text-xs sm:text-sm text-[#14120E] font-medium outline-none focus:border-[#68705A] disabled:opacity-75 disabled:cursor-not-allowed"
+                        />
+                        <p className="text-[0.66rem] text-[#6F6B61] mt-1">
+                          Crossed-out anchor price (e.g. ₹{formData.originalPrice})
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#68705A] mb-1.5 text-[#B93821]">
+                          Special Offer Price (₹) *
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          required
+                          disabled={!isEditing}
+                          value={formData.offerPrice}
+                          onChange={(e) =>
+                            handleInputChange("offerPrice", Number(e.target.value))
+                          }
+                          className="w-full rounded-md border border-[#B93821]/40 bg-[#F7F4EC] px-3.5 py-2.5 text-xs sm:text-sm text-[#B93821] font-bold outline-none focus:border-[#B93821] disabled:opacity-75 disabled:cursor-not-allowed"
+                        />
+                        <p className="text-[0.66rem] text-[#6F6B61] mt-1">
+                          Amount charged: ₹{formData.offerPrice} ({internalPaise} paise)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-[#EEE9DE]/60 border border-[#464137]/15 flex items-center justify-between text-xs">
+                      <span className="text-[#6F6B61]">Learner Savings:</span>
+                      <span className="font-bold text-emerald-800">
+                        ₹{discountAmount} saved ({discountPercent}% OFF)
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Availability & Description */}
+                  <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 space-y-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        disabled={!isEditing}
+                        checked={formData.isActive}
+                        onChange={(e) =>
+                          handleInputChange("isActive", e.target.checked)
+                        }
+                        className="size-4 text-[#68705A] rounded-sm focus:ring-[#68705A]"
+                      />
+                      <div>
+                        <span className="text-xs font-bold text-[#14120E]">
+                          Masterclass is Active & Accepting Registrations
+                        </span>
+                        <p className="text-[0.68rem] text-[#6F6B61]">
+                          When active, the registration button and modal allow new enrolments.
+                        </p>
+                      </div>
+                    </label>
+
+                    <div className="pt-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#68705A] mb-1.5">
+                        Supporting Atelier Note (Optional)
+                      </label>
+                      <textarea
+                        rows={2}
+                        disabled={!isEditing}
+                        placeholder="Live interactive atelier sessions on Zoom with personal feedback and guidance."
+                        value={formData.description}
+                        onChange={(e) =>
+                          handleInputChange("description", e.target.value)
+                        }
+                        className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2 text-xs text-[#14120E] font-medium outline-none focus:border-[#68705A] disabled:opacity-75 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Live Landing Page Visual Preview Matching Screenshot 2 */}
+                <div className="lg:col-span-5 space-y-3">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[0.7rem] uppercase tracking-wider font-bold text-[#68705A] flex items-center gap-1.5">
+                      <Sparkles className="size-3.5" />
+                      <span>Live Landing Page Preview</span>
+                    </span>
+                    <span className="text-[0.62rem] text-[#6F6B61] font-mono bg-[#444C38]/10 px-2 py-0.5 rounded">
+                      Hero Workshop Box
+                    </span>
+                  </div>
+
+                  {/* The exact card from Screenshot 2 */}
+                  <div className="group relative overflow-hidden rounded-xl bg-[#FAF8F2]/95 backdrop-blur-md p-4 sm:p-5 border border-[#444C38]/40 shadow-md">
+                    {/* Botanical Watercolor Texture Overlay */}
+                    <div className="pointer-events-none absolute inset-0 z-0">
+                      <Image
+                        src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 100vw, 400px"
+                        className="object-cover object-center opacity-30 mix-blend-multiply select-none"
+                      />
+                      <div className="absolute inset-1 rounded-lg border border-[#444C38]/20 pointer-events-none" />
+                    </div>
+
+                    <div className="relative z-10 space-y-3.5">
+                      {/* 5 Core Details Grid: Date, Time, Platform, Duration, Language */}
+                      <div className="grid grid-cols-2 gap-y-3.5 gap-x-3 text-xs">
+                        {/* Date */}
+                        <div className="flex items-start gap-2.5 col-span-2">
+                          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#444C38]/15 border border-[#444C38]/25 text-[#444C38]">
+                            <Calendar className="size-3.5" />
+                          </div>
+                          <div>
+                            <span className="text-[0.62rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none mb-1">
+                              Date
+                            </span>
+                            <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] leading-tight block">
+                              Saturday, 28 October 2026
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Time */}
+                        <div className="flex items-start gap-2.5">
+                          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#444C38]/15 border border-[#444C38]/25 text-[#444C38]">
+                            <Clock className="size-3.5" />
+                          </div>
+                          <div>
+                            <span className="text-[0.62rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none mb-1">
+                              Time
+                            </span>
+                            <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] leading-tight block">
+                              6:30 PM – 8:30 PM IST
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Platform */}
+                        <div className="flex items-start gap-2.5">
+                          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#1E3A5F]/15 border border-[#1E3A5F]/25 text-[#132A45]">
+                            <Video className="size-3.5" />
+                          </div>
+                          <div>
+                            <span className="text-[0.62rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none mb-1">
+                              Platform
+                            </span>
+                            <span className="inline-flex items-center font-bold text-[#132A45] bg-[#1E3A5F]/15 border border-[#1E3A5F]/30 px-2 py-0.5 rounded text-[0.76rem] leading-none">
+                              Zoom
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Duration */}
+                        <div className="flex items-start gap-2.5">
+                          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#444C38]/15 border border-[#444C38]/25 text-[#444C38]">
+                            <Hourglass className="size-3.5" />
+                          </div>
+                          <div>
+                            <span className="text-[0.62rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none mb-1">
+                              Duration
+                            </span>
+                            <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] leading-tight block">
+                              {formData.durationMinutes ? `${formData.durationMinutes} mins` : "130 mins"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Language */}
+                        <div className="flex items-start gap-2.5">
+                          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#444C38]/15 border border-[#444C38]/25 text-[#444C38]">
+                            <Globe className="size-3.5" />
+                          </div>
+                          <div>
+                            <span className="text-[0.62rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none mb-1">
+                              Language
+                            </span>
+                            <span className="font-bold text-xs sm:text-[0.84rem] text-[#353D2A] tracking-wider leading-tight block">
+                              HINGLISH
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Workshop Fee Row */}
+                      <div className="pt-3 border-t border-[#464137]/15 flex items-center justify-between gap-3">
+                        <div>
+                          <span className="text-[0.64rem] uppercase tracking-[0.14em] font-bold text-[#3E3A32] block leading-none">
+                            Workshop Fee:
+                          </span>
+                          <span className="text-[0.64rem] font-semibold text-[#38352E] mt-0.5 block">
+                            {formData.cardPriceLabel || "Complete Live Atelier Access"}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="line-through text-[#6F6B61] text-xs sm:text-sm font-semibold">
+                            ₹{formData.originalPrice}
+                          </span>
+                          <span className="font-serif text-2xl sm:text-[1.85rem] font-extrabold text-[#B93821] tracking-tight">
+                            ₹{formData.offerPrice}
+                          </span>
+                          <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2 py-0.5 rounded-sm">
+                            SPECIAL OFFER
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-[#EEE9DE]/60 border border-[#464137]/15 text-[0.68rem] text-[#6F6B61] leading-relaxed">
+                    💡 <strong>Live Synchronization:</strong> Changes saved here immediately update the live workshop box and booking checkout on the main landing page.
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* SECTION 1: BASIC INFORMATION */}
+              {activeTab === "basic" && (
+                <div className="space-y-4">
+                  <div className="border-b border-[#464137]/10 pb-2">
+                    <h3 className="font-serif text-base font-bold text-[#14120E]">
+                      1. Basic Information
+                    </h3>
+                    <p className="text-xs text-[#6F6B61]">
+                      Core course identifiers and publishing status.
+                    </p>
+                  </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -550,23 +958,6 @@ export function CourseManager({
                     </p>
                   </div>
                 </label>
-              </div>
-
-              {/* Static Image Notice */}
-              <div className="mt-4 p-3.5 rounded-lg bg-[#EEE9DE]/60 border border-[#464137]/15 flex items-start gap-3">
-                <Info className="size-4 text-[#68705A] shrink-0 mt-0.5" />
-                <div className="text-xs text-[#3E3A32]">
-                  <p className="font-bold">Course Image (Static Brand Asset)</p>
-                  <p className="mt-0.5">
-                    This course uses image path:{" "}
-                    <code className="font-mono bg-[#FAF8F2] px-1 py-0.5 rounded-sm">
-                      {activeCourse?.imagePath}
-                    </code>
-                    . Course images remain fixed to protect the studio brand
-                    identity. All course text, syllabus, and prices are fully
-                    editable here.
-                  </p>
-                </div>
               </div>
             </div>
           )}
@@ -1195,6 +1586,8 @@ export function CourseManager({
               </div>
             </div>
           )}
+        </>
+      )}
 
           {/* Form Actions Footer */}
           {isEditing && (
@@ -1220,9 +1613,26 @@ export function CourseManager({
                 ) : (
                   <>
                     <Save className="size-3.5" />
-                    <span>Save Course Updates</span>
+                    <span>
+                      {isLandingPageWorkshop
+                        ? "Save Workshop Details"
+                        : "Save Course Updates"}
+                    </span>
                   </>
                 )}
+              </button>
+            </div>
+          )}
+
+          {!isEditing && !isReadOnly && isLandingPageWorkshop && (
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsEditing(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#68705A] text-[#FAF8F2] text-xs font-semibold hover:bg-[#575E4B] transition-colors shadow-xs cursor-pointer"
+              >
+                <Edit3 className="size-3.5" />
+                <span>Edit Workshop Details</span>
               </button>
             </div>
           )}
