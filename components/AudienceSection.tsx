@@ -68,6 +68,7 @@ export const AudienceSection: React.FC = () => {
           src="/images/background/ChatGPT Image Sep 25, 2026, 07_07_15 PM.png"
           alt=""
           fill
+          sizes="100vw"
           className="object-cover object-center opacity-30 mix-blend-multiply select-none"
         />
         {/* Soft blend at top from hero section */}
@@ -108,6 +109,7 @@ export const AudienceSection: React.FC = () => {
                         src={bgImage}
                         alt=""
                         fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1200px"
                         className="object-cover object-center opacity-25 mix-blend-multiply group-hover:opacity-35 transition-opacity duration-300 select-none"
                       />
                       {/* Artful Inner Border */}
@@ -144,6 +146,7 @@ export const AudienceSection: React.FC = () => {
                       src={bgImage}
                       alt=""
                       fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
                     />
                     {/* Artful Inner Border Frame */}

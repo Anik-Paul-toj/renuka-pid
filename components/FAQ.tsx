@@ -34,6 +34,7 @@ export const FAQ: React.FC = () => {
           src="/images/background/ChatGPT Image Sep 25, 2026, 07_10_43 PM.png"
           alt=""
           fill
+          sizes="100vw"
           className="object-cover object-center opacity-22 mix-blend-multiply select-none"
           priority
         />
@@ -77,6 +78,7 @@ export const FAQ: React.FC = () => {
                     src={faqBoxTextures[index % faqBoxTextures.length]}
                     alt=""
                     fill
+                    sizes="(max-width: 768px) 100vw, 500px"
                     className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
                   />
                   <div className="absolute inset-1 rounded-lg border border-[#444C38]/15 pointer-events-none" />

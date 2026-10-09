@@ -70,6 +70,7 @@ export const Hero: React.FC<HeroProps> = ({
           src="/images/background/ChatGPT Image Sep 25, 2026, 07_06_12 PM.png"
           alt=""
           fill
+          sizes="100vw"
           priority
           className="object-cover object-top opacity-35 mix-blend-multiply select-none"
         />
@@ -130,6 +131,7 @@ export const Hero: React.FC<HeroProps> = ({
                   src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
                   alt=""
                   fill
+                  sizes="(max-width: 640px) 100vw, 672px"
                   className="object-cover object-center opacity-30 mix-blend-multiply group-hover:opacity-38 transition-opacity duration-300 select-none"
                 />
                 {/* Refined Inner Hairline Border Framing */}

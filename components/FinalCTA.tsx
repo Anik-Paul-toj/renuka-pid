@@ -20,6 +20,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
           src="/images/background/image.png"
           alt=""
           fill
+          sizes="100vw"
           className="object-cover object-center opacity-30 mix-blend-multiply select-none"
           priority
         />

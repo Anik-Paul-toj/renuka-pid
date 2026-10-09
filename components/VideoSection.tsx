@@ -32,6 +32,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
           src="/images/background/ChatGPT Image Sep 25, 2026, 07_08_15 PM.png"
           alt=""
           fill
+          sizes="100vw"
           className="object-cover object-top opacity-30 mix-blend-multiply select-none"
         />
         {/* Seamless blend from audience section above */}
@@ -119,6 +120,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                           src={boxImg}
                           alt=""
                           fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
                           className="object-cover object-center opacity-18 mix-blend-multiply group-hover:opacity-28 transition-opacity duration-300 select-none"
                         />
                         {/* Artful Inner Border Frame */}
@@ -146,6 +148,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                     src={takeawayBoxImage}
                     alt=""
                     fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 600px"
                     className="object-cover object-center opacity-25 mix-blend-multiply group-hover:opacity-35 transition-opacity duration-300 select-none"
                   />
                   <div className="absolute inset-1 rounded-lg border border-[#444C38]/15 pointer-events-none" />

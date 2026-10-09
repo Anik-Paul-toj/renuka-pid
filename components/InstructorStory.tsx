@@ -58,6 +58,7 @@ export const InstructorStory: React.FC = () => {
           src="/images/background/ChatGPT Image Sep 25, 2026, 07_09_39 PM.png"
           alt=""
           fill
+          sizes="100vw"
           className="object-cover object-center opacity-20 mix-blend-multiply select-none"
           priority
         />
@@ -113,6 +114,7 @@ export const InstructorStory: React.FC = () => {
                   src={badge.boxImage}
                   alt=""
                   fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 280px"
                   className="object-cover object-center opacity-20 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
                 />
                 <div className="absolute inset-1 rounded-xl border border-[#444C38]/15 pointer-events-none" />
