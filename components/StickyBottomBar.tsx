@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
@@ -32,13 +33,13 @@ export const StickyBottomBar: React.FC<StickyBottomBarProps> = ({ onOpenModal })
 
         {/* CTA Button */}
         <div>
-          <button
-            onClick={onOpenModal}
-            className="btn-studio px-5 py-2.5 text-xs shadow-none"
+          <Link
+            href="/course"
+            className="btn-studio px-5 py-2.5 text-xs shadow-none inline-flex items-center gap-1.5"
           >
             <span>Explore Courses</span>
             <ArrowRight className="size-3.5" />
-          </button>
+          </Link>
         </div>
       </div>
     </aside>

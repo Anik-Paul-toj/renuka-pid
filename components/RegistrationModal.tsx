@@ -8,6 +8,9 @@ interface RegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   batchId?: string;
+  courseSlug?: string;
+  courseTitle?: string;
+  coursePrice?: number;
 }
 
 interface ActiveBatchInfo {
@@ -18,6 +21,7 @@ interface ActiveBatchInfo {
   endTime: string;
   isEnrollmentOpen: boolean;
   isSoldOut: boolean;
+  courseTitle?: string;
   offerPrice?: number;
   offerPricePaise?: number;
 }
@@ -50,6 +54,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   isOpen,
   onClose,
   batchId: propBatchId,
+  courseSlug,
+  courseTitle,
+  coursePrice,
 }) => {
   const { hero } = useLandingContent();
   const [name, setName] = useState("");
@@ -67,7 +74,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   // Helper to fetch active batch
   const fetchActiveBatch = async (): Promise<ActiveBatchInfo | null> => {
     try {
-      const res = await fetch("/api/cohort-batches/active", { cache: "no-store" });
+      const url = courseSlug
+        ? `/api/cohort-batches/active?courseSlug=${encodeURIComponent(courseSlug)}`
+        : propBatchId
+        ? `/api/cohort-batches/active?courseId=${encodeURIComponent(propBatchId)}`
+        : "/api/cohort-batches/active";
+
+      const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) return null;
       const data = await res.json();
       if (data?.success && data?.batch?.id) {
@@ -79,8 +92,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           endTime: data.batch.endTime,
           isEnrollmentOpen: Boolean(data.batch.isEnrollmentOpen),
           isSoldOut: Boolean(data.batch.isSoldOut),
-          offerPrice: data.batch.course?.offerPrice,
-          offerPricePaise: data.batch.course?.offerPricePaise,
+          courseTitle: data.batch.course?.title || courseTitle,
+          offerPrice: data.batch.course?.offerPrice ?? coursePrice,
+          offerPricePaise: data.batch.course?.offerPricePaise ?? (coursePrice ? coursePrice * 100 : undefined),
         };
         setActiveBatch(batchInfo);
         return batchInfo;
@@ -91,16 +105,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     }
   };
 
-  // Fetch active cohort batch details immediately on mount and when modal opens
+  // Fetch active cohort batch details on mount and when modal opens or courseSlug changes
   useEffect(() => {
-    fetchActiveBatch();
-  }, []);
-
-  useEffect(() => {
-    if (isOpen && !activeBatch) {
+    if (isOpen) {
       fetchActiveBatch();
     }
-  }, [isOpen, activeBatch]);
+  }, [isOpen, courseSlug, propBatchId]);
 
   const handleReset = () => {
     if (isPaymentLocked) return;
@@ -425,9 +435,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#444C38]">
                 <Sparkles className="size-3 text-[#444C38]" />
-                {activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
+                {activeBatch?.courseTitle || (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
                   ? "Live Workshop Registration"
-                  : "Complimentary Masterclass"}
+                  : "Complimentary Masterclass")}
               </span>
             </div>
 
@@ -435,9 +445,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               id="modal-title"
               className="mt-3 font-serif text-2xl font-bold tracking-tight text-[#14120E] sm:text-3xl"
             >
-              {activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
+              {activeBatch?.courseTitle ? "Reserve Your Seat" : (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
                 ? "Reserve Your Seat"
-                : "Reserve Your Free Seat"}
+                : "Reserve Your Free Seat")}
             </h3>
 
             <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium">

@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { MasterclassData } from "@/data/content";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface NavbarProps {
-  onOpenModal: () => void;
+  onOpenModal?: () => void;
   content?: MasterclassData["brand"];
 }
 
@@ -51,9 +52,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
           <a href="#about" className="hover:text-[#14120E] transition-colors">
             About
           </a>
-          <a href="#courses" className="hover:text-[#14120E] transition-colors">
+          <Link href="/course" className="hover:text-[#14120E] transition-colors">
             Courses
-          </a>
+          </Link>
           <a href="#testimonials" className="hover:text-[#14120E] transition-colors">
             Testimonials
           </a>
@@ -64,13 +65,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
 
         {/* CTA Button */}
         <div>
-          <button
-            onClick={onOpenModal}
-            className="btn-studio px-5 py-2.5 shadow-none"
-          >
-            <span>Let&apos;s Create</span>
-            <ArrowRight className="size-3.5" />
-          </button>
+          {onOpenModal ? (
+            <button
+              onClick={onOpenModal}
+              className="btn-studio px-5 py-2.5 shadow-none"
+            >
+              <span>Let&apos;s Create</span>
+              <ArrowRight className="size-3.5" />
+            </button>
+          ) : (
+            <Link
+              href="/course"
+              className="btn-studio px-5 py-2.5 shadow-none inline-flex items-center gap-1.5"
+            >
+              <span>Let&apos;s Create</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
+          )}
         </div>
       </div>
     </header>

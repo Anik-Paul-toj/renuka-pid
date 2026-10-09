@@ -25,15 +25,18 @@ export const Footer: React.FC = () => {
 
           {/* Links */}
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-xs uppercase tracking-wider text-[#3E3A32] font-semibold">
-            {footer.links.map((link, idx) => (
-              <a
-                key={idx}
-                href={link.href}
-                className="hover:text-[#14120E] transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
+            {footer.links.map((link, idx) => {
+              const href = link.label.toLowerCase() === "courses" ? "/course" : link.href;
+              return (
+                <a
+                  key={idx}
+                  href={href}
+                  className="hover:text-[#14120E] transition-colors"
+                >
+                  {link.label}
+                </a>
+              );
+            })}
           </nav>
         </div>
 
