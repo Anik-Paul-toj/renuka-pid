@@ -67,7 +67,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   // Helper to fetch active batch
   const fetchActiveBatch = async (): Promise<ActiveBatchInfo | null> => {
     try {
-      const res = await fetch("/api/cohort-batches/active");
+      const res = await fetch("/api/cohort-batches/active", { cache: "no-store" });
       if (!res.ok) return null;
       const data = await res.json();
       if (data?.success && data?.batch?.id) {

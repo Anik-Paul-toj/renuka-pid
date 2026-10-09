@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data: batches, error } = await supabase
-      .from("public_cohort_batches")
+      .from("cohort_batches")
       .select("id, course_id, batch_name, start_date, end_date, start_time, end_time, timezone, total_seats, seats_booked, is_enrollment_open")
+      .eq("is_enrollment_open", true)
       .order("start_date", { ascending: true })
       .limit(1);
 
@@ -22,7 +23,12 @@ export async function GET() {
             message: "No active workshop batch is currently open for enrollment.",
           },
         },
-        { status: 404 }
+        {
+          status: 404,
+          headers: {
+            "Cache-Control": "no-store, max-age=0, must-revalidate",
+          },
+        }
       );
     }
 
@@ -39,37 +45,44 @@ export async function GET() {
       courseData = c;
     }
 
-    return NextResponse.json({
-      success: true,
-      batch: {
-        id: batch.id,
-        courseId: batch.course_id,
-        batchName: batch.batch_name,
-        startDate: batch.start_date,
-        endDate: batch.end_date,
-        startTime: batch.start_time,
-        endTime: batch.end_time,
-        timezone: batch.timezone,
-        totalSeats: batch.total_seats,
-        seatsBooked: batch.seats_booked,
-        seatsRemaining,
-        isEnrollmentOpen: batch.is_enrollment_open,
-        isSoldOut: seatsRemaining <= 0,
-        course: courseData
-          ? {
-              title: courseData.title,
-              slug: courseData.slug,
-              description: courseData.description,
-              originalPricePaise: courseData.original_price_paise,
-              offerPricePaise: courseData.offer_price_paise,
-              originalPrice: Math.round(courseData.original_price_paise / 100),
-              offerPrice: Math.round(courseData.offer_price_paise / 100),
-              currency: courseData.currency,
-              durationMinutes: courseData.duration_minutes,
-            }
-          : null,
+    return NextResponse.json(
+      {
+        success: true,
+        batch: {
+          id: batch.id,
+          courseId: batch.course_id,
+          batchName: batch.batch_name,
+          startDate: batch.start_date,
+          endDate: batch.end_date,
+          startTime: batch.start_time,
+          endTime: batch.end_time,
+          timezone: batch.timezone,
+          totalSeats: batch.total_seats,
+          seatsBooked: batch.seats_booked,
+          seatsRemaining,
+          isEnrollmentOpen: batch.is_enrollment_open,
+          isSoldOut: seatsRemaining <= 0,
+          course: courseData
+            ? {
+                title: courseData.title,
+                slug: courseData.slug,
+                description: courseData.description,
+                originalPricePaise: courseData.original_price_paise,
+                offerPricePaise: courseData.offer_price_paise,
+                originalPrice: Math.round(courseData.original_price_paise / 100),
+                offerPrice: Math.round(courseData.offer_price_paise / 100),
+                currency: courseData.currency,
+                durationMinutes: courseData.duration_minutes,
+              }
+            : null,
+        },
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0, must-revalidate",
+        },
+      }
+    );
   } catch (err: any) {
     return NextResponse.json(
       {
@@ -79,7 +92,12 @@ export async function GET() {
           message: "Unable to retrieve cohort batch information.",
         },
       },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store, max-age=0, must-revalidate",
+        },
+      }
     );
   }
 }

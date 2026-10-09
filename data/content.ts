@@ -216,8 +216,9 @@ export const workshopData: WorkshopData = {
   language: "HINGLISH",
   duration: "120 Minutes",
   platform: "Zoom",
+  // NOTE: Static offline fallback only. Live prices are managed dynamically from the Admin Panel via Supabase courses table.
   originalPrice: 599,
-  offerPrice: 99,
+  offerPrice: 199,
   registrationDeadline: "2026-10-28T18:30:00+05:30",
   cta: "REGISTER NOW",
   handwrittenPhrase: "Art heals. Always.",

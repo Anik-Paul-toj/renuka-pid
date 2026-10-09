@@ -17,8 +17,14 @@ import { GSAPProvider } from "@/components/GSAPProvider";
 
 export function LandingPageClient({
   content,
+  initialCourse,
 }: {
   content: MasterclassData;
+  initialCourse?: {
+    originalPrice: number;
+    offerPrice: number;
+    durationMinutes?: number;
+  } | null;
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,7 +40,7 @@ export function LandingPageClient({
 
           <main className="flex-1">
             {/* Section 01: Hero & Stats */}
-            <Hero onOpenModal={handleOpenModal} />
+            <Hero onOpenModal={handleOpenModal} initialCourse={initialCourse} />
 
             {/* Section 02: About Renuka (Instructor Story & Credentials) */}
             <InstructorStory />

@@ -10,21 +10,40 @@ import { useLandingContent } from "@/components/LandingContentProvider";
 interface HeroProps {
   onOpenModal: () => void;
   content?: MasterclassData["hero"];
+  initialCourse?: {
+    originalPrice: number;
+    offerPrice: number;
+    durationMinutes?: number;
+  } | null;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onOpenModal, content }) => {
+export const Hero: React.FC<HeroProps> = ({
+  onOpenModal,
+  content,
+  initialCourse,
+}) => {
   const [isExpired, setIsExpired] = useState(false);
   const [coursePricing, setCoursePricing] = useState<{
     originalPrice: number;
     offerPrice: number;
     duration?: string;
-  } | null>(null);
+  } | null>(
+    initialCourse
+      ? {
+          originalPrice: initialCourse.originalPrice,
+          offerPrice: initialCourse.offerPrice,
+          duration: initialCourse.durationMinutes
+            ? `${initialCourse.durationMinutes} mins`
+            : undefined,
+        }
+      : null
+  );
 
   const { hero: contextHero } = useLandingContent();
   const heroContent = content || contextHero;
 
   useEffect(() => {
-    fetch("/api/cohort-batches/active")
+    fetch("/api/cohort-batches/active", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (data?.success && data?.batch?.course) {
