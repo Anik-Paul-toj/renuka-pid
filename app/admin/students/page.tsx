@@ -19,12 +19,20 @@ export default async function AdminStudentsPage() {
     search: "",
     status: "all",
     paymentStatus: "all",
+    courseId: "all",
   });
 
   const initialData = initialResult.success
     ? initialResult.data
     : {
         students: [],
+        summary: {
+          totalStudents: 0,
+          masterclassStudents: 0,
+          foundationStudents: 0,
+          artistryStudents: 0,
+        },
+        courses: [],
         pagination: {
           page: 1,
           limit: 20,

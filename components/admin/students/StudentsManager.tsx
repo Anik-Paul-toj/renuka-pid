@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Users,
   Search,
@@ -21,11 +21,17 @@ import {
   X,
   RefreshCw,
   Eye,
+  Sparkles,
+  BookOpen,
+  GraduationCap,
+  Layers,
 } from "lucide-react";
 import {
   StudentListItem,
   StudentListResult,
   StudentDetail,
+  StudentListSummary,
+  CourseCategorySummary,
 } from "@/lib/students/service";
 
 interface StudentsManagerProps {
@@ -34,7 +40,18 @@ interface StudentsManagerProps {
 
 export function StudentsManager({ initialData }: StudentsManagerProps) {
   const [students, setStudents] = useState<StudentListItem[]>(initialData.students);
+  const [summary, setSummary] = useState<StudentListSummary>(
+    initialData.summary || {
+      totalStudents: 0,
+      masterclassStudents: 0,
+      foundationStudents: 0,
+      artistryStudents: 0,
+    }
+  );
+  const [courses, setCourses] = useState<CourseCategorySummary[]>(initialData.courses || []);
   const [pagination, setPagination] = useState(initialData.pagination);
+
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<string>("all");
@@ -69,6 +86,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
           search: debouncedSearch.trim(),
           status,
           paymentStatus,
+          courseId: selectedCourseId,
         });
 
         const res = await fetch(`/api/admin/students?${params.toString()}`);
@@ -80,7 +98,13 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
           return;
         }
 
-        setStudents(data.data.students);
+        setStudents(data.data.students || []);
+        if (data.data.summary) {
+          setSummary(data.data.summary);
+        }
+        if (data.data.courses) {
+          setCourses(data.data.courses);
+        }
         setPagination(data.data.pagination);
       } catch (err: any) {
         setErrorMessage("Network error while loading students list.");
@@ -88,13 +112,13 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
         setIsLoading(false);
       }
     },
-    [debouncedSearch, status, paymentStatus]
+    [debouncedSearch, status, paymentStatus, selectedCourseId]
   );
 
   // Trigger fetch when search or filters change (reset to page 1)
   useEffect(() => {
     fetchStudents(1);
-  }, [debouncedSearch, status, paymentStatus, fetchStudents]);
+  }, [debouncedSearch, status, paymentStatus, selectedCourseId, fetchStudents]);
 
   // Open detail view for a student
   const handleOpenDetail = async (studentId: string) => {
@@ -138,40 +162,197 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedStudentId]);
 
+  const hasActiveFilters =
+    search.trim() !== "" || status !== "all" || paymentStatus !== "all" || selectedCourseId !== "all";
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setStatus("all");
+    setPaymentStatus("all");
+    setSelectedCourseId("all");
+  };
+
+  // Helper to format course badge style
+  const getCourseBadgeColor = (titleOrSlug: string) => {
+    const lower = titleOrSlug.toLowerCase();
+    if (lower.includes("artistry")) {
+      return "bg-[#333D29]/10 text-[#333D29] border-[#333D29]/25";
+    }
+    if (lower.includes("foundation")) {
+      return "bg-[#68705A]/15 text-[#444C38] border-[#444C38]/25";
+    }
+    return "bg-[#C8D1C7]/35 text-[#525A45] border-[#525A45]/20";
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="p-6 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs">
+      {/* 1. Top Header Banner */}
+      <div className="p-6 sm:p-7 rounded-2xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-0.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#68705A] mb-2">
               <Users className="size-3" />
               <span>Customer Directory</span>
             </div>
-            <h1 className="font-serif text-2xl font-bold text-[#292923]">Registered Students</h1>
-            <p className="text-xs text-[#6F6B61] mt-1">
-              Search and view student profiles, contact details (email, WhatsApp), and real-time enrollment histories.
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#292923]">Registered Students</h1>
+            <p className="text-xs sm:text-sm text-[#6F6B61] mt-1">
+              View and manage registered students categorized by course with real-time enrollment and payment records.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="px-3.5 py-1.5 rounded-lg bg-[#EEE9DE] border border-[#464137]/10 text-xs font-semibold text-[#292923]">
-              Total Students: {pagination.totalCount}
-            </span>
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => fetchStudents(pagination.page)}
               disabled={isLoading}
-              className="p-2 rounded-lg bg-[#FAF8F2] border border-[#464137]/15 text-[#68705A] hover:bg-[#EEE9DE] transition-colors disabled:opacity-50"
-              title="Refresh list"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-[#464137]/15 text-xs font-semibold text-[#292923] hover:bg-[#FAF8F2] transition-colors shadow-2xs disabled:opacity-50"
+              title="Refresh student records"
             >
-              <RefreshCw className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`size-3.5 text-[#68705A] ${isLoading ? "animate-spin" : ""}`} />
+              <span>Refresh</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-4">
+      {/* 2. Top Summary Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Students */}
+        <div className="p-5 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[#6F6B61]">
+              Total Students
+            </span>
+            <div className="grid size-8 place-items-center rounded-lg bg-[#C8D1C7]/35 text-[#68705A]">
+              <Users className="size-4" />
+            </div>
+          </div>
+          <div>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#292923]">
+              {summary.totalStudents.toLocaleString()}
+            </div>
+            <p className="text-[0.68rem] text-[#6F6B61] mt-0.5">
+              Unique student accounts registered
+            </p>
+          </div>
+        </div>
+
+        {/* Masterclass Students */}
+        <div className="p-5 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[#6F6B61]">
+              Masterclass
+            </span>
+            <div className="grid size-8 place-items-center rounded-lg bg-[#68705A]/15 text-[#525A45]">
+              <Sparkles className="size-4" />
+            </div>
+          </div>
+          <div>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#292923]">
+              {summary.masterclassStudents.toLocaleString()}
+            </div>
+            <p className="text-[0.68rem] text-[#6F6B61] mt-0.5">
+              One-Day Masterclass Roadmap students
+            </p>
+          </div>
+        </div>
+
+        {/* Foundation Students */}
+        <div className="p-5 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[#6F6B61]">
+              Foundation
+            </span>
+            <div className="grid size-8 place-items-center rounded-lg bg-[#444C38]/15 text-[#444C38]">
+              <BookOpen className="size-4" />
+            </div>
+          </div>
+          <div>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#292923]">
+              {summary.foundationStudents.toLocaleString()}
+            </div>
+            <p className="text-[0.68rem] text-[#6F6B61] mt-0.5">
+              2-Session Foundation Workshop students
+            </p>
+          </div>
+        </div>
+
+        {/* Artistry + Foundation Students */}
+        <div className="p-5 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[#6F6B61]">
+              Artistry + Foundation
+            </span>
+            <div className="grid size-8 place-items-center rounded-lg bg-[#333D29]/15 text-[#333D29]">
+              <GraduationCap className="size-4" />
+            </div>
+          </div>
+          <div>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#292923]">
+              {summary.artistryStudents.toLocaleString()}
+            </div>
+            <p className="text-[0.68rem] text-[#6F6B61] mt-0.5">
+              3-Month Intensive Program students
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Course-Selection Tabs */}
+      <div className="p-2 sm:p-2.5 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          {/* All Courses Tab */}
+          <button
+            onClick={() => setSelectedCourseId("all")}
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+              selectedCourseId === "all"
+                ? "bg-[#68705A] text-[#FAF8F2] shadow-xs"
+                : "bg-transparent text-[#6F6B61] hover:bg-[#EEE9DE] hover:text-[#292923]"
+            }`}
+          >
+            <Layers className="size-3.5" />
+            <span>All Courses</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[0.65rem] font-bold ${
+                selectedCourseId === "all"
+                  ? "bg-[#FAF8F2]/20 text-[#FAF8F2]"
+                  : "bg-[#464137]/10 text-[#6F6B61]"
+              }`}
+            >
+              {summary.totalStudents}
+            </span>
+          </button>
+
+          {/* Dynamic Course Tabs from Database */}
+          {courses.map((course) => {
+            const isSelected = selectedCourseId === course.id;
+            return (
+              <button
+                key={course.id}
+                onClick={() => setSelectedCourseId(course.id)}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                  isSelected
+                    ? "bg-[#68705A] text-[#FAF8F2] shadow-xs"
+                    : "bg-transparent text-[#6F6B61] hover:bg-[#EEE9DE] hover:text-[#292923]"
+                }`}
+              >
+                <span>{course.title}</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[0.65rem] font-bold ${
+                    isSelected
+                      ? "bg-[#FAF8F2]/20 text-[#FAF8F2]"
+                      : "bg-[#464137]/10 text-[#6F6B61]"
+                  }`}
+                >
+                  {course.studentCount}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 4. Search & Filter Bar */}
+      <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-3">
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
@@ -181,7 +362,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
               placeholder="Search by student name, email, or phone number..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#464137]/15 bg-[#F7F4EC] text-xs text-[#292923] outline-none transition-all placeholder:text-[#6F6B61]/60 focus:border-[#68705A] focus:ring-1 focus:ring-[#68705A]"
+              className="w-full pl-10 pr-12 py-2.5 rounded-lg border border-[#464137]/15 bg-[#F7F4EC] text-xs text-[#292923] outline-none transition-all placeholder:text-[#6F6B61]/60 focus:border-[#68705A] focus:ring-1 focus:ring-[#68705A]"
             />
             {search && (
               <button
@@ -218,6 +399,16 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
               <option value="created">Payment Created</option>
               <option value="failed">Payment Failed</option>
             </select>
+
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="px-3 py-2.5 rounded-lg border border-[#464137]/15 bg-white text-xs font-semibold text-[#6F6B61] hover:text-[#292923] hover:bg-[#FAF8F2] transition-colors"
+                title="Reset all filters"
+              >
+                Reset
+              </button>
+            )}
           </div>
         </div>
 
@@ -229,22 +420,33 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
         )}
       </div>
 
-      {/* Students Table */}
+      {/* 5. Students Table */}
       <div className="rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs overflow-hidden">
         {isLoading ? (
-          <div className="p-12 text-center text-xs text-[#6F6B61] flex flex-col items-center justify-center gap-2">
+          <div className="p-16 text-center text-xs text-[#6F6B61] flex flex-col items-center justify-center gap-2.5">
             <RefreshCw className="size-6 animate-spin text-[#68705A]" />
             <span>Loading student directory...</span>
           </div>
         ) : students.length === 0 ? (
-          <div className="p-12 text-center text-[#6F6B61] space-y-2">
-            <Users className="size-8 mx-auto text-[#68705A]/50" />
+          <div className="p-16 text-center text-[#6F6B61] space-y-2.5">
+            <Users className="size-9 mx-auto text-[#68705A]/45" />
             <p className="text-sm font-semibold text-[#292923]">No students found</p>
-            <p className="text-xs">
+            <p className="text-xs max-w-md mx-auto leading-relaxed">
               {search || status !== "all" || paymentStatus !== "all"
-                ? "Try adjusting your search criteria or filters."
-                : "No customer registrations exist in the directory yet."}
+                ? "No student records match your current search and filter combination."
+                : selectedCourseId !== "all"
+                ? "No students have registered for this specific course yet."
+                : "No student registrations exist in the directory yet. When attendees register, their profiles will appear here."}
             </p>
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#EEE9DE] text-xs font-semibold text-[#292923] hover:bg-[#E3DCCB] transition-colors"
+              >
+                <X className="size-3" />
+                <span>Clear Filters</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -253,64 +455,104 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                 <tr>
                   <th className="px-5 py-3.5 font-semibold">Student Name</th>
                   <th className="px-5 py-3.5 font-semibold">Contact Info</th>
-                  <th className="px-5 py-3.5 font-semibold">Bookings</th>
-                  <th className="px-5 py-3.5 font-semibold">Latest Enrollment</th>
-                  <th className="px-5 py-3.5 font-semibold">Latest Payment</th>
+                  <th className="px-5 py-3.5 font-semibold">Course Enrolled</th>
+                  <th className="px-5 py-3.5 font-semibold">Booking Ref</th>
+                  <th className="px-5 py-3.5 font-semibold">Booking Status</th>
+                  <th className="px-5 py-3.5 font-semibold">Payment</th>
+                  <th className="px-5 py-3.5 font-semibold">Amount</th>
                   <th className="px-5 py-3.5 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#464137]/10">
-                {students.map((student) => (
-                  <tr
-                    key={student.id}
-                    onClick={() => handleOpenDetail(student.id)}
-                    className="hover:bg-[#F7F4EC] transition-colors cursor-pointer"
-                  >
-                    {/* Student Info */}
-                    <td className="px-5 py-4">
-                      <div className="font-bold text-[#292923] text-sm">{student.fullName}</div>
-                      <div className="text-[0.68rem] text-[#6F6B61] mt-0.5">
-                        Joined {new Date(student.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}
-                      </div>
-                    </td>
+                {students.map((student) => {
+                  const coursesToShow =
+                    student.enrolledCourses.length > 0
+                      ? student.enrolledCourses
+                      : [
+                          {
+                            courseId: "",
+                            courseSlug: "",
+                            courseTitle: student.latestCourseTitle || "Workshop Course",
+                            batchName: "Upcoming Batch",
+                            bookingReference: student.latestBookingReference || "—",
+                            bookingStatus: (student.latestBookingStatus as any) || "pending",
+                            paymentStatus: student.latestPaymentStatus,
+                            amountPaise: student.latestAmountPaise,
+                            currency: student.latestCurrency || "INR",
+                            createdAt: student.createdAt,
+                          },
+                        ];
 
-                    {/* Contact */}
-                    <td className="px-5 py-4 space-y-1">
-                      <div className="flex items-center gap-1.5 text-[#292923]">
-                        <Mail className="size-3 text-[#68705A]" />
-                        <span>{student.email}</span>
-                      </div>
-                      {student.phone && (
-                        <div className="flex items-center gap-1.5 text-[#6F6B61]">
-                          <Phone className="size-3 text-[#68705A]" />
-                          <span>{student.phone}</span>
+                  return (
+                    <tr
+                      key={student.id}
+                      onClick={() => handleOpenDetail(student.id)}
+                      className="hover:bg-[#F7F4EC] transition-colors cursor-pointer"
+                    >
+                      {/* Student Name */}
+                      <td className="px-5 py-4">
+                        <div className="font-bold text-[#292923] text-sm">{student.fullName}</div>
+                        <div className="text-[0.68rem] text-[#6F6B61] mt-0.5">
+                          Joined{" "}
+                          {new Date(student.createdAt).toLocaleDateString("en-IN", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
                         </div>
-                      )}
-                      {student.whatsappPhone && student.whatsappPhone !== student.phone && (
-                        <div className="flex items-center gap-1.5 text-[#68705A] font-medium">
-                          <MessageSquare className="size-3 text-[#68705A]" />
-                          <span>WA: {student.whatsappPhone}</span>
-                        </div>
-                      )}
-                    </td>
+                      </td>
 
-                    {/* Bookings */}
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-[#292923]">{student.totalBookings} total</span>
-                        {student.confirmedBookings > 0 && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#C8D1C7]/50 px-2 py-0.5 text-[0.65rem] font-bold text-[#68705A]">
-                            <CheckCircle2 className="size-2.5" />
-                            {student.confirmedBookings} confirmed
-                          </span>
+                      {/* Contact Info */}
+                      <td className="px-5 py-4 space-y-1">
+                        <div className="flex items-center gap-1.5 text-[#292923]">
+                          <Mail className="size-3 text-[#68705A] shrink-0" />
+                          <span className="truncate max-w-[160px] sm:max-w-none">{student.email}</span>
+                        </div>
+                        {student.phone && (
+                          <div className="flex items-center gap-1.5 text-[#6F6B61]">
+                            <Phone className="size-3 text-[#68705A] shrink-0" />
+                            <span>{student.phone}</span>
+                          </div>
                         )}
-                      </div>
-                    </td>
+                        {student.whatsappPhone && student.whatsappPhone !== student.phone && (
+                          <div className="flex items-center gap-1.5 text-[#68705A] font-medium">
+                            <MessageSquare className="size-3 text-[#68705A] shrink-0" />
+                            <span>WA: {student.whatsappPhone}</span>
+                          </div>
+                        )}
+                      </td>
 
-                    {/* Latest Booking */}
-                    <td className="px-5 py-4">
-                      {student.latestBookingStatus ? (
-                        <div className="space-y-1">
+                      {/* Course Enrolled (Badges) */}
+                      <td className="px-5 py-4">
+                        <div className="flex flex-col gap-1 max-w-[210px]">
+                          {coursesToShow.map((c, idx) => (
+                            <span
+                              key={idx}
+                              className={`inline-block px-2.5 py-0.5 rounded-md text-[0.68rem] font-bold border truncate ${getCourseBadgeColor(
+                                c.courseTitle
+                              )}`}
+                              title={c.courseTitle}
+                            >
+                              {c.courseTitle}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+
+                      {/* Booking Reference */}
+                      <td className="px-5 py-4 font-mono text-[0.72rem] text-[#292923]">
+                        {student.latestBookingReference ? (
+                          <span className="bg-[#EEE9DE] px-2 py-0.5 rounded font-semibold">
+                            {student.latestBookingReference}
+                          </span>
+                        ) : (
+                          <span className="text-[#6F6B61]">—</span>
+                        )}
+                      </td>
+
+                      {/* Booking Status */}
+                      <td className="px-5 py-4">
+                        {student.latestBookingStatus ? (
                           <span
                             className={`inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider ${
                               student.latestBookingStatus === "confirmed"
@@ -322,60 +564,63 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                           >
                             {student.latestBookingStatus}
                           </span>
-                          {student.latestBookingDate && (
-                            <div className="text-[0.68rem] text-[#6F6B61]">
-                              {new Date(student.latestBookingDate).toLocaleDateString("en-IN", {
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-[#6F6B61] text-[0.7rem]">—</span>
-                      )}
-                    </td>
+                        ) : (
+                          <span className="text-[#6F6B61] text-[0.7rem]">—</span>
+                        )}
+                      </td>
 
-                    {/* Latest Payment */}
-                    <td className="px-5 py-4">
-                      {student.latestPaymentStatus ? (
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider ${
-                            student.latestPaymentStatus === "captured"
-                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                              : student.latestPaymentStatus === "failed"
-                              ? "bg-rose-100 text-rose-800 border border-rose-200"
-                              : "bg-amber-100 text-amber-800 border border-amber-200"
-                          }`}
+                      {/* Payment Status */}
+                      <td className="px-5 py-4">
+                        {student.latestPaymentStatus ? (
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider ${
+                              student.latestPaymentStatus === "captured"
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                : student.latestPaymentStatus === "failed"
+                                ? "bg-rose-100 text-rose-800 border border-rose-200"
+                                : "bg-amber-100 text-amber-800 border border-amber-200"
+                            }`}
+                          >
+                            {student.latestPaymentStatus}
+                          </span>
+                        ) : (
+                          <span className="text-[#6F6B61] text-[0.7rem]">—</span>
+                        )}
+                      </td>
+
+                      {/* Amount */}
+                      <td className="px-5 py-4">
+                        {student.latestAmountPaise > 0 ? (
+                          <span className="font-bold text-[#292923] text-xs">
+                            ₹{(student.latestAmountPaise / 100).toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="text-[#6F6B61] text-xs font-medium">₹0</span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-5 py-4 text-right">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDetail(student.id);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#EEE9DE] hover:bg-[#E3DCCB] text-[#292923] text-xs font-semibold transition-colors"
                         >
-                          {student.latestPaymentStatus}
-                        </span>
-                      ) : (
-                        <span className="text-[#6F6B61] text-[0.7rem]">—</span>
-                      )}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-5 py-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenDetail(student.id);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#EEE9DE] hover:bg-[#E3DCCB] text-[#292923] text-xs font-semibold transition-colors"
-                      >
-                        <Eye className="size-3.5 text-[#68705A]" />
-                        <span>View</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                          <Eye className="size-3.5 text-[#68705A]" />
+                          <span>View</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
 
-        {/* Pagination Bar */}
+        {/* 6. Pagination Bar */}
         {pagination.totalPages > 1 && (
           <div className="p-4 bg-[#F7F4EC] border-t border-[#464137]/10 flex items-center justify-between text-xs text-[#6F6B61]">
             <div>
@@ -387,8 +632,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
               <span className="font-semibold text-[#292923]">
                 {Math.min(pagination.page * pagination.limit, pagination.totalCount)}
               </span>{" "}
-              of <span className="font-semibold text-[#292923]">{pagination.totalCount}</span>{" "}
-              students
+              of <span className="font-semibold text-[#292923]">{pagination.totalCount}</span> students
             </div>
 
             <div className="flex items-center gap-2">
@@ -418,7 +662,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
         )}
       </div>
 
-      {/* Student Detail Modal */}
+      {/* 7. Comprehensive Student Detail Modal */}
       {selectedStudentId && (
         <div
           role="dialog"
@@ -598,15 +842,15 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                                         Order: {pmt.razorpayOrderId}
                                       </div>
                                       {pmt.razorpayPaymentId && (
-                                        <div className="font-mono text-[0.72rem] font-bold text-[#68705A]">
-                                          Payment: {pmt.razorpayPaymentId}
+                                        <div className="font-mono text-[0.68rem] text-[#6F6B61]">
+                                          Payment ID: {pmt.razorpayPaymentId}
                                         </div>
                                       )}
                                     </div>
 
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
                                       <span
-                                        className={`px-2 py-0.5 rounded text-[0.62rem] font-bold uppercase tracking-wider ${
+                                        className={`px-1.5 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider ${
                                           pmt.status === "captured"
                                             ? "bg-emerald-100 text-emerald-800"
                                             : pmt.status === "failed"
@@ -616,7 +860,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                                       >
                                         {pmt.status}
                                       </span>
-                                      <span className="font-bold text-[#292923]">
+                                      <span className="font-semibold text-[#292923]">
                                         ₹{(pmt.amountPaise / 100).toFixed(0)}
                                       </span>
                                     </div>
@@ -632,16 +876,6 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                 </div>
               </div>
             ) : null}
-
-            {/* Modal Footer */}
-            <div className="border-t border-[#464137]/10 pt-4 flex justify-end">
-              <button
-                onClick={handleCloseDetail}
-                className="px-4 py-2 rounded-lg bg-[#EEE9DE] hover:bg-[#E3DCCB] text-[#292923] text-xs font-semibold transition-colors"
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}

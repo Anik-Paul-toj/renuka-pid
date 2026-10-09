@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
       search: url.searchParams.get("search") || "",
       status: url.searchParams.get("status") || "all",
       paymentStatus: url.searchParams.get("paymentStatus") || "all",
+      courseId: url.searchParams.get("courseId") || "all",
     };
 
     const validationResult = studentListQuerySchema.safeParse(rawParams);

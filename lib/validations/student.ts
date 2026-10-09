@@ -12,6 +12,7 @@ export const studentListQuerySchema = z.object({
     .enum(["all", "captured", "failed", "created", "refunded"])
     .optional()
     .default("all"),
+  courseId: z.string().optional().default("all"),
 });
 
 export type StudentListQuery = z.infer<typeof studentListQuerySchema>;
