@@ -185,12 +185,12 @@ export default async function CourseCatalogPage() {
                   </div>
 
                   {/* Card Footer: Price & CTA */}
-                  <div className="relative z-10 pt-4 border-t border-[#464137]/20 flex items-center justify-between gap-4">
+                  <div className="relative z-10 pt-4 border-t border-[#464137]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
                     <div>
                       <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
                         Course Fee
                       </span>
-                      <div className="flex items-baseline gap-2 mt-1">
+                      <div className="flex flex-wrap items-baseline gap-2 mt-1">
                         <span className="font-serif text-2xl sm:text-3xl font-extrabold text-[#B93821] tracking-tight">
                           ₹{foundationCourse.offerPrice}/-
                         </span>
@@ -212,7 +212,7 @@ export default async function CourseCatalogPage() {
 
                     <Link
                       href={`/course/${foundationCourse.slug}`}
-                      className="btn-studio px-5 sm:px-6 py-3 text-xs tracking-wider font-bold inline-flex items-center gap-2 shadow-sm"
+                      className="btn-studio w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm shrink-0 text-center"
                     >
                       <span>Learn More</span>
                       <ArrowRight className="size-3.5" />
@@ -334,12 +334,12 @@ export default async function CourseCatalogPage() {
                   </div>
 
                   {/* Card Footer: Price & CTA */}
-                  <div className="relative z-10 pt-4 border-t border-[#464137]/20 flex items-center justify-between gap-4">
+                  <div className="relative z-10 pt-4 border-t border-[#464137]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
                     <div>
                       <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
                         Course Fee
                       </span>
-                      <div className="flex items-baseline gap-2 mt-1">
+                      <div className="flex flex-wrap items-baseline gap-2 mt-1">
                         <span className="font-serif text-2xl sm:text-3xl font-extrabold text-[#B93821] tracking-tight">
                           ₹{artistryCourse.offerPrice.toLocaleString()}/-
                         </span>
@@ -361,7 +361,7 @@ export default async function CourseCatalogPage() {
 
                     <Link
                       href={`/course/${artistryCourse.slug}`}
-                      className="btn-studio px-5 sm:px-6 py-3 text-xs tracking-wider font-bold inline-flex items-center gap-2 shadow-sm"
+                      className="btn-studio w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm shrink-0 text-center"
                     >
                       <span>Learn More</span>
                       <ArrowRight className="size-3.5" />

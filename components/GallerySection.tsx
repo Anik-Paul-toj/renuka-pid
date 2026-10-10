@@ -52,7 +52,25 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
     lightboxIndex !== null && images[lightboxIndex] ? images[lightboxIndex] : null;
 
   return (
-    <section id="gallery" className="py-20 sm:py-28 bg-[#FAF8F2] relative overflow-hidden border-t border-[#464137]/10">
+    <section
+      id="gallery"
+      className="relative overflow-hidden py-16 sm:py-24 lg:py-28 bg-[#F7F4EC]"
+    >
+      {/* Botanical Watercolor Background Art */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <Image
+          src="/images/background/ChatGPT Image Sep 25, 2026, 07_08_32 PM.png"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover object-center opacity-25 mix-blend-multiply select-none"
+        />
+        {/* Soft edge blending masks to match preceding video section and following FAQ */}
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#F7F4EC] via-[#F7F4EC]/60 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#F7F4EC] via-[#F7F4EC]/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F7F4EC]/60 via-transparent to-[#F7F4EC]/60" />
+      </div>
+
       {/* Subtle Watercolor Ambient Glow */}
       <div className="absolute top-1/4 right-0 size-96 rounded-full bg-[#C8D1C7]/20 blur-3xl pointer-events-none -mr-48" />
       <div className="absolute bottom-10 left-0 size-80 rounded-full bg-[#D4A373]/15 blur-3xl pointer-events-none -ml-40" />
