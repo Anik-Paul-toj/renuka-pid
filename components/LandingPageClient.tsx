@@ -8,16 +8,19 @@ import { Hero } from "@/components/Hero";
 import { AudienceSection } from "@/components/AudienceSection";
 import { VideoSection } from "@/components/VideoSection";
 import { InstructorStory } from "@/components/InstructorStory";
+import { GallerySection } from "@/components/GallerySection";
 import { FAQ } from "@/components/FAQ";
 import { FinalCTA } from "@/components/FinalCTA";
 import { Footer } from "@/components/Footer";
 import { StickyBottomBar } from "@/components/StickyBottomBar";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import { GSAPProvider } from "@/components/GSAPProvider";
+import { GalleryItem } from "@/lib/gallery/service";
 
 export function LandingPageClient({
   content,
   initialCourse,
+  initialGalleryImages = [],
 }: {
   content: MasterclassData;
   initialCourse?: {
@@ -25,6 +28,7 @@ export function LandingPageClient({
     offerPrice: number;
     durationMinutes?: number;
   } | null;
+  initialGalleryImages?: GalleryItem[];
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -51,10 +55,13 @@ export function LandingPageClient({
             {/* Section 04: Video Preview */}
             <VideoSection onOpenModal={handleOpenModal} />
 
-            {/* Section 05: Frequently Asked Questions */}
+            {/* Section 05: Curated Watercolour Gallery */}
+            <GallerySection initialImages={initialGalleryImages} />
+
+            {/* Section 06: Frequently Asked Questions */}
             <FAQ />
 
-            {/* Section 06: Final Conversion Call to Action */}
+            {/* Section 07: Final Conversion Call to Action */}
             <FinalCTA onOpenModal={handleOpenModal} />
           </main>
 

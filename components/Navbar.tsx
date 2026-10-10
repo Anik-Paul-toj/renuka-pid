@@ -78,6 +78,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
             Courses
           </Link>
           <Link
+            href="/#gallery"
+            className="hover:text-[#14120E] transition-colors"
+          >
+            Gallery
+          </Link>
+          <Link
             href="/#testimonials"
             className="hover:text-[#14120E] transition-colors"
           >

@@ -2,6 +2,7 @@ import React from "react";
 import { getPublicLandingContent } from "@/lib/cms/public-loader";
 import { LandingPageClient } from "@/components/LandingPageClient";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getPublicGalleryImages } from "@/lib/gallery/service";
 
 export const dynamic = "force-dynamic";
 
@@ -29,10 +30,17 @@ async function getActivePublicCourse() {
 }
 
 export default async function MasterclassLandingPage() {
-  const [content, activeCourse] = await Promise.all([
+  const [content, activeCourse, galleryImages] = await Promise.all([
     getPublicLandingContent(),
     getActivePublicCourse(),
+    getPublicGalleryImages(),
   ]);
 
-  return <LandingPageClient content={content} initialCourse={activeCourse} />;
+  return (
+    <LandingPageClient
+      content={content}
+      initialCourse={activeCourse}
+      initialGalleryImages={galleryImages}
+    />
+  );
 }

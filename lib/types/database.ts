@@ -358,13 +358,16 @@ export interface Database {
           file_size_bytes: number;
           alt_text: string | null;
           category: string;
+          is_published?: boolean;
+          display_order?: number;
+          metadata?: Json | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
-          bucket: string;
+          bucket?: string;
           file_path: string;
           public_url: string;
           file_name: string;
@@ -372,6 +375,9 @@ export interface Database {
           file_size_bytes: number;
           alt_text?: string | null;
           category?: string;
+          is_published?: boolean;
+          display_order?: number;
+          metadata?: Json | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -386,6 +392,9 @@ export interface Database {
           file_size_bytes?: number;
           alt_text?: string | null;
           category?: string;
+          is_published?: boolean;
+          display_order?: number;
+          metadata?: Json | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
