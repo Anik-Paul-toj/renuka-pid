@@ -176,6 +176,9 @@ export interface Database {
           batch_id: string;
           status: BookingStatus;
           amount_paise: number;
+          original_amount_paise: number | null;
+          discount_amount_paise: number;
+          credit_applied: boolean;
           currency: string;
           seat_released: boolean;
           expires_at: string;
@@ -189,6 +192,9 @@ export interface Database {
           batch_id: string;
           status?: BookingStatus;
           amount_paise: number;
+          original_amount_paise?: number | null;
+          discount_amount_paise?: number;
+          credit_applied?: boolean;
           currency?: string;
           seat_released?: boolean;
           expires_at?: string;
@@ -202,6 +208,9 @@ export interface Database {
           batch_id?: string;
           status?: BookingStatus;
           amount_paise?: number;
+          original_amount_paise?: number | null;
+          discount_amount_paise?: number;
+          credit_applied?: boolean;
           currency?: string;
           seat_released?: boolean;
           expires_at?: string;
@@ -467,6 +476,76 @@ export interface Database {
           updated_at?: string;
         };
       };
+      course_credit_rules: {
+        Row: {
+          id: string;
+          source_course_id: string;
+          target_course_id: string;
+          credit_amount_paise: number;
+          is_active: boolean;
+          description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          source_course_id: string;
+          target_course_id: string;
+          credit_amount_paise: number;
+          is_active?: boolean;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          source_course_id?: string;
+          target_course_id?: string;
+          credit_amount_paise?: number;
+          is_active?: boolean;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      booking_credits: {
+        Row: {
+          id: string;
+          customer_id: string;
+          rule_id: string | null;
+          source_booking_id: string;
+          target_booking_id: string;
+          credit_amount_paise: number;
+          status: "reserved" | "consumed" | "released";
+          metadata: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          customer_id: string;
+          rule_id?: string | null;
+          source_booking_id: string;
+          target_booking_id: string;
+          credit_amount_paise: number;
+          status: "reserved" | "consumed" | "released";
+          metadata?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          customer_id?: string;
+          rule_id?: string | null;
+          source_booking_id?: string;
+          target_booking_id?: string;
+          credit_amount_paise?: number;
+          status?: "reserved" | "consumed" | "released";
+          metadata?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       public_cohort_batches: {
@@ -494,6 +573,9 @@ export interface Database {
           p_customer_id: string;
           p_amount_paise: number;
           p_booking_reference: string;
+          p_source_booking_id?: string | null;
+          p_rule_id?: string | null;
+          p_discount_amount_paise?: number;
         };
         Returns: {
           success: boolean;
@@ -501,6 +583,8 @@ export interface Database {
           error_code: string | null;
           message: string | null;
           seats_remaining: number | null;
+          credit_applied?: boolean;
+          amount_paise?: number;
         };
       };
       release_seat_atomic: {

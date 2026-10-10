@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { consumeCreditForBooking } from "@/lib/course-credit/service";
 import crypto from "crypto";
 
 export interface PaymentServiceError {
@@ -521,6 +522,9 @@ export async function verifyPayment(input: {
       })
       .eq("id", booking.id);
 
+    // Atomically consume any reserved course credit permanently
+    await consumeCreditForBooking(booking.id);
+
     return {
       success: true,
       data: {
@@ -627,6 +631,9 @@ export async function handleWebhookEvent(
           updated_at: nowIso,
         })
         .eq("id", payment.booking_id);
+
+      // Atomically consume any reserved course credit permanently
+      await consumeCreditForBooking(payment.booking_id);
 
       return { status: 200, message: "Payment captured successfully.", handled: true };
     }

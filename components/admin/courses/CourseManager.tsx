@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   GraduationCap,
@@ -111,6 +111,24 @@ export function CourseManager({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+
+  // Credit Rule Configuration State
+  const [creditRuleAmount, setCreditRuleAmount] = useState<number>(990);
+  const [creditRuleActive, setCreditRuleActive] = useState<boolean>(true);
+  const [creditRuleId, setCreditRuleId] = useState<string>("c1111111-3333-4444-5555-666666666666");
+
+  useEffect(() => {
+    fetch("/api/admin/credit-rules")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.success && data?.rules?.[0]) {
+          setCreditRuleAmount(data.rules[0].creditAmountRupees ?? 990);
+          setCreditRuleActive(data.rules[0].is_active ?? true);
+          setCreditRuleId(data.rules[0].id);
+        }
+      })
+      .catch(() => null);
+  }, []);
 
   // Reset form when switching courses
   const handleSelectCourse = (course: AdminCourseData) => {
@@ -327,10 +345,23 @@ export function CourseManager({
         return;
       }
 
+      // Also update credit rule if on pricing tab
+      if (activeTab === "pricing") {
+        await fetch("/api/admin/credit-rules", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ruleId: creditRuleId,
+            creditAmountRupees: creditRuleAmount,
+            isActive: creditRuleActive,
+          }),
+        }).catch(() => null);
+      }
+
       setSuccessMessage(
         isLandingPageWorkshop
           ? "Landing page masterclass details and pricing updated successfully! Live hero workshop box updated."
-          : "Course content and pricing updated successfully! Public listing and detail pages updated."
+          : "Course content, pricing, and discount rules updated successfully! Public listing and detail pages updated."
       );
       setIsEditing(false);
 
@@ -1157,6 +1188,74 @@ export function CourseManager({
                   <span className="font-mono text-xs font-semibold text-[#14120E]">
                     {internalPaise.toLocaleString()} paise
                   </span>
+                </div>
+              </div>
+
+              {/* Course Credit Rule Management */}
+              <div className="mt-6 pt-4 border-t border-[#464137]/15 space-y-4">
+                <div>
+                  <h4 className="font-serif text-sm font-bold text-[#14120E] flex items-center gap-2">
+                    <Sparkles className="size-4 text-[#B93821]" />
+                    <span>One-Way Foundation Course Credit Configuration</span>
+                  </h4>
+                  <p className="text-xs text-[#6F6B61] mt-0.5">
+                    Configure the authoritative discount applied when students who completed Foundation enroll in Artistry + Foundation.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-[#464137]/20 bg-[#FAF8F2] p-4 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div>
+                      <span className="font-bold text-[#68705A] block mb-1 uppercase tracking-wider">
+                        Qualifying Source Course
+                      </span>
+                      <span className="font-medium text-[#14120E] block bg-[#F7F4EC] p-2.5 rounded border border-[#464137]/10">
+                        WATERCOLOUR FOUNDATION (₹990)
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-[#68705A] block mb-1 uppercase tracking-wider">
+                        Target Course
+                      </span>
+                      <span className="font-medium text-[#14120E] block bg-[#F7F4EC] p-2.5 rounded border border-[#464137]/10">
+                        WATERCOLOUR ARTISTRY + FOUNDATION (₹9,990)
+                      </span>
+                    </div>
+                    <div>
+                      <label className="font-bold text-[#B93821] block mb-1 uppercase tracking-wider">
+                        Credit Amount (₹) *
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-2 text-[#B93821] font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          min={1}
+                          disabled={!isEditing}
+                          value={creditRuleAmount}
+                          onChange={(e) => setCreditRuleAmount(parseInt(e.target.value) || 0)}
+                          className="w-full rounded border border-[#464137]/20 bg-[#F7F4EC] pl-7 pr-3 py-1.5 text-xs font-bold text-[#14120E] outline-none focus:border-[#B93821] disabled:opacity-75 disabled:cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[#464137]/10 pt-3">
+                    <label className="flex items-center gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        disabled={!isEditing}
+                        checked={creditRuleActive}
+                        onChange={(e) => setCreditRuleActive(e.target.checked)}
+                        className="size-4 accent-[#68705A] rounded"
+                      />
+                      <span className="text-xs font-bold text-[#14120E]">
+                        Enable One-Way Foundation Course Credit Rule
+                      </span>
+                    </label>
+                    <span className="text-[11px] font-mono text-[#6F6B61]">
+                      Effective Artistry Price: ₹{Math.max(0, 9990 - (creditRuleActive ? creditRuleAmount : 0))}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

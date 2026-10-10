@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateBookingInput } from "@/lib/validations/booking";
+import { verifyCreditVerificationToken } from "@/lib/course-credit/identity";
 import crypto from "crypto";
 
 export interface SafeBookingDetails {
@@ -21,6 +22,10 @@ export interface SafeBookingDetails {
   };
   seatsRemaining?: number;
   isExisting?: boolean;
+  originalAmountPaise?: number;
+  discountAmountPaise?: number;
+  creditApplied?: boolean;
+  creditMessage?: string | null;
 }
 
 export type BookingServiceError = {
@@ -30,6 +35,11 @@ export type BookingServiceError = {
     | "COURSE_INACTIVE"
     | "ENROLLMENT_CLOSED"
     | "SOLD_OUT"
+    | "CREDIT_ALREADY_USED"
+    | "INVALID_CREDIT_TOKEN"
+    | "CREDIT_MIGRATION_REQUIRED"
+    | "CREDIT_RESERVATION_FAILED"
+    | "CREDIT_SNAPSHOT_MISMATCH"
     | "COLLISION_RETRY_FAILED"
     | "INTERNAL_ERROR";
   message: string;
@@ -51,7 +61,8 @@ export function generateBookingReference(): string {
 }
 
 /**
- * Creates or retrieves a booking atomically using the database authoritative rules.
+ * Creates or retrieves a booking atomically using database authoritative rules.
+ * Strictly enforces token-based identity verification for Foundation credit.
  */
 export async function processBooking(
   input: CreateBookingInput
@@ -130,15 +141,63 @@ export async function processBooking(
     };
   }
 
-  // Authoritative values from database
-  const amountPaise = course.offer_price_paise;
+  // Authoritative course pricing from database
+  const originalAmountPaise = course.offer_price_paise;
   const currency = course.currency || "INR";
   const courseTitle = course.title;
   const normalizedEmail = input.email.trim().toLowerCase();
   const trimmedName = input.fullName.trim();
   const formattedPhone = input.phone && input.phone.trim().length > 0 ? input.phone.trim() : null;
 
-  // 2. Customer Lookup or Reuse
+  // Release any expired pending reservations before evaluating eligibility and seats
+  try {
+    await adminClient.rpc("release_expired_pending_bookings");
+  } catch {
+    // Continue if RPC not available
+  }
+
+  // 2. Identity-Verified Credit Entitlement Evaluation
+  let creditApplied = false;
+  let discountAmountPaise = 0;
+  let payableAmountPaise = originalAmountPaise;
+  let sourceBookingId: string | null = null;
+  let ruleId: string | null = null;
+  let tokenNonce: string | null = null;
+  let creditMessage: string | null = null;
+
+  if (input.creditVerificationToken) {
+    const tokenResult = await verifyCreditVerificationToken(
+      input.creditVerificationToken,
+      {
+        email: normalizedEmail,
+        phone: formattedPhone,
+        targetCourseId: batchData.course_id,
+      }
+    );
+
+    if (!tokenResult.valid || !tokenResult.payload) {
+      return {
+        success: false,
+        error: {
+          code: "INVALID_CREDIT_TOKEN",
+          message:
+            tokenResult.error ||
+            "The credit verification token is invalid, expired, or does not match this booking.",
+          statusCode: 400,
+        },
+      };
+    }
+
+    creditApplied = true;
+    tokenNonce = tokenResult.payload.nonce;
+    sourceBookingId = tokenResult.payload.sourceBookingId;
+    ruleId = tokenResult.payload.ruleId;
+    discountAmountPaise = tokenResult.payload.discountAmountPaise;
+    payableAmountPaise = Math.max(0, originalAmountPaise - discountAmountPaise);
+    creditMessage = "Foundation course credit applied.";
+  }
+
+  // 3. Customer Lookup or Reuse
   let customerId: string;
   let customerName = trimmedName;
 
@@ -211,11 +270,13 @@ export async function processBooking(
     }
   }
 
-  // 3. Idempotency Check: Existing active pending/confirmed reservation for this customer & batch
+  // 4. Idempotency Check: Existing active pending/confirmed reservation for this customer & batch
   const nowIso = new Date().toISOString();
-  const { data: existingBooking } = await adminClient
+  let { data: existingBooking, error: existingErr } = await adminClient
     .from("bookings")
-    .select("id, booking_reference, status, amount_paise, currency, expires_at, created_at")
+    .select(
+      "id, booking_reference, status, amount_paise, original_amount_paise, discount_amount_paise, credit_applied, currency, expires_at, created_at"
+    )
     .eq("customer_id", customerId)
     .eq("batch_id", input.batchId)
     .in("status", ["pending", "confirmed"])
@@ -224,6 +285,29 @@ export async function processBooking(
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  // If credit columns do not exist yet (pre-migration schema), query baseline columns
+  if (
+    existingErr &&
+    (existingErr.code === "42703" ||
+      existingErr.message?.includes("original_amount_paise") ||
+      existingErr.message?.includes("column"))
+  ) {
+    const fallback = await adminClient
+      .from("bookings")
+      .select(
+        "id, booking_reference, status, amount_paise, currency, expires_at, created_at"
+      )
+      .eq("customer_id", customerId)
+      .eq("batch_id", input.batchId)
+      .in("status", ["pending", "confirmed"])
+      .eq("seat_released", false)
+      .gt("expires_at", nowIso)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    existingBooking = fallback.data as any;
+  }
 
   if (existingBooking) {
     // Return existing active booking safely without re-reserving or consuming an extra seat
@@ -239,6 +323,10 @@ export async function processBooking(
         endTime: batchData.end_time,
         timezone: batchData.timezone,
         amountPaise: existingBooking.amount_paise,
+        originalAmountPaise: existingBooking.original_amount_paise || originalAmountPaise,
+        discountAmountPaise: existingBooking.discount_amount_paise || 0,
+        creditApplied: existingBooking.credit_applied || false,
+        creditMessage: existingBooking.credit_applied ? "Foundation course credit applied." : null,
         currency: existingBooking.currency,
         expiresAt: existingBooking.expires_at,
         customer: {
@@ -250,7 +338,7 @@ export async function processBooking(
     };
   }
 
-  // 4. Atomic Seat Reservation via reserve_seat_atomic RPC
+  // 5. Atomic Seat Reservation via reserve_seat_atomic RPC
   let bookingReference = generateBookingReference();
   let reservationAttempts = 0;
   let rpcSuccess = false;
@@ -258,35 +346,96 @@ export async function processBooking(
 
   while (reservationAttempts < 3 && !rpcSuccess) {
     reservationAttempts++;
-    const { data: result, error: rpcErr } = await adminClient.rpc(
-      "reserve_seat_atomic",
-      {
+
+    // When credit is applied, invoke the unified 7-arg signature with credit parameters
+    if (creditApplied) {
+      const rpcPayload: any = {
         p_batch_id: input.batchId,
         p_customer_id: customerId,
-        p_amount_paise: amountPaise,
+        p_amount_paise: payableAmountPaise,
         p_booking_reference: bookingReference,
-      }
-    );
-
-    if (rpcErr) {
-      // Check if reference collision occurred (unique index violation)
-      if (rpcErr.code === "23505" || rpcErr.message?.includes("booking_reference")) {
-        bookingReference = generateBookingReference();
-        continue;
-      }
-
-      return {
-        success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: "Failed to reserve seat. Please try again.",
-          statusCode: 500,
-        },
+        p_source_booking_id: sourceBookingId,
+        p_rule_id: ruleId,
+        p_discount_amount_paise: discountAmountPaise,
+        p_token_nonce: tokenNonce,
       };
-    }
 
-    rpcData = result;
-    rpcSuccess = true;
+      const { data: result, error: rpcErr } = await adminClient.rpc(
+        "reserve_seat_atomic",
+        rpcPayload
+      );
+
+      if (rpcErr) {
+        if (rpcErr.code === "23505" || rpcErr.message?.includes("booking_reference")) {
+          bookingReference = generateBookingReference();
+          continue;
+        }
+
+        // If credit migration is missing, FAIL CLOSED. Do NOT silently fall back to legacy RPC!
+        if (
+          rpcErr.code === "PGRST202" ||
+          rpcErr.message?.includes("function") ||
+          rpcErr.message?.includes("argument") ||
+          rpcErr.message?.includes("booking_credits") ||
+          rpcErr.message?.includes("original_amount_paise")
+        ) {
+          return {
+            success: false,
+            error: {
+              code: "CREDIT_MIGRATION_REQUIRED",
+              message:
+                "Foundation course credit system is temporarily unavailable. Please complete checkout at the standard rate or contact support.",
+              statusCode: 503,
+            },
+          };
+        }
+
+        return {
+          success: false,
+          error: {
+            code: "INTERNAL_ERROR",
+            message: "Failed to reserve seat. Please try again.",
+            statusCode: 500,
+          },
+        };
+      }
+
+      rpcData = result;
+      rpcSuccess = true;
+    } else {
+      // Standard booking (e.g. Masterclass or full price Artistry):
+      // Invoke with 4 parameters. Backwards compatible with legacy 4-arg RPC and new 7-arg RPC defaults.
+      const rpcPayload: any = {
+        p_batch_id: input.batchId,
+        p_customer_id: customerId,
+        p_amount_paise: payableAmountPaise,
+        p_booking_reference: bookingReference,
+      };
+
+      const { data: result, error: rpcErr } = await adminClient.rpc(
+        "reserve_seat_atomic",
+        rpcPayload
+      );
+
+      if (rpcErr) {
+        if (rpcErr.code === "23505" || rpcErr.message?.includes("booking_reference")) {
+          bookingReference = generateBookingReference();
+          continue;
+        }
+
+        return {
+          success: false,
+          error: {
+            code: "INTERNAL_ERROR",
+            message: "Failed to reserve seat. Please try again.",
+            statusCode: 500,
+          },
+        };
+      }
+
+      rpcData = result;
+      rpcSuccess = true;
+    }
   }
 
   if (!rpcSuccess || !rpcData) {
@@ -323,6 +472,19 @@ export async function processBooking(
         },
       };
     }
+    if (errorCode === "CREDIT_ALREADY_USED" || errorCode === "TOKEN_ALREADY_REDEEMED") {
+      return {
+        success: false,
+        error: {
+          code: "CREDIT_ALREADY_USED",
+          message:
+            errorCode === "TOKEN_ALREADY_REDEEMED"
+              ? "This credit verification token has already been redeemed. Please check your eligibility again."
+              : "This Foundation course credit has already been used or is reserved by an active booking.",
+          statusCode: 409,
+        },
+      };
+    }
     if (errorCode === "BATCH_NOT_FOUND") {
       return {
         success: false,
@@ -344,15 +506,42 @@ export async function processBooking(
     };
   }
 
-  // Fetch the newly created booking record to ensure authoritative expires_at
-  const { data: createdBooking, error: fetchBookingErr } = await adminClient
+  // 6. Strict Transactional Verification
+  // If credit was requested, RPC MUST confirm that credit was atomically applied
+  if (creditApplied && rpcData.credit_applied !== true) {
+    // Compensating release of seat if credit reservation failed
+    await adminClient.rpc("release_seat_atomic", {
+      p_booking_id: rpcData.booking_id,
+      p_reason: "cancelled",
+    });
+
+    return {
+      success: false,
+      error: {
+        code: "CREDIT_RESERVATION_FAILED",
+        message: "Unable to allocate course credit atomically. Please try again.",
+        statusCode: 500,
+      },
+    };
+  }
+
+  // 7. Verify authoritative persisted booking snapshot
+  // Base columns exist on both pre-migration and post-migration schemas.
+  // Query snapshot credit columns only when credit was applied.
+  const { data: createdBookingRaw, error: fetchBookingErr } = await adminClient
     .from("bookings")
-    .select("id, booking_reference, status, amount_paise, currency, expires_at")
+    .select(
+      creditApplied
+        ? ("id, booking_reference, status, amount_paise, original_amount_paise, discount_amount_paise, credit_applied, currency, expires_at" as any)
+        : ("id, booking_reference, status, amount_paise, currency, expires_at" as any)
+    )
     .eq("id", rpcData.booking_id)
     .single();
 
+  const createdBooking = createdBookingRaw as any;
+
   if (fetchBookingErr || !createdBooking) {
-    // If fetching fails, compensating release ensures no dangling seat
+    // If fetching fails, compensating release ensures no dangling seat or reservation
     await adminClient.rpc("release_seat_atomic", {
       p_booking_id: rpcData.booking_id,
       p_reason: "cancelled",
@@ -363,6 +552,27 @@ export async function processBooking(
       error: {
         code: "INTERNAL_ERROR",
         message: "Failed to retrieve booking confirmation.",
+        statusCode: 500,
+      },
+    };
+  }
+
+  // If credit was applied, verify snapshot integrity in the database record
+  if (
+    creditApplied &&
+    (!createdBooking.credit_applied ||
+      createdBooking.discount_amount_paise !== discountAmountPaise)
+  ) {
+    await adminClient.rpc("release_seat_atomic", {
+      p_booking_id: rpcData.booking_id,
+      p_reason: "cancelled",
+    });
+
+    return {
+      success: false,
+      error: {
+        code: "CREDIT_SNAPSHOT_MISMATCH",
+        message: "Discrepancy detected in booking discount snapshot.",
         statusCode: 500,
       },
     };
@@ -380,6 +590,10 @@ export async function processBooking(
       endTime: batchData.end_time,
       timezone: batchData.timezone,
       amountPaise: createdBooking.amount_paise,
+      originalAmountPaise,
+      discountAmountPaise,
+      creditApplied,
+      creditMessage,
       currency: createdBooking.currency,
       expiresAt: createdBooking.expires_at,
       customer: {
@@ -401,10 +615,7 @@ export async function getBookingByReference(
 ): Promise<BookingServiceResult> {
   const adminClient = createAdminClient();
 
-  const { data: booking, error } = await adminClient
-    .from("bookings")
-    .select(
-      `
+  const baseBookingQuery = `
       id,
       booking_reference,
       status,
@@ -426,10 +637,36 @@ export async function getBookingByReference(
         full_name,
         email
       )
+  `;
+
+  let { data: booking, error } = await adminClient
+    .from("bookings")
+    .select(
+      `
+      ${baseBookingQuery},
+      original_amount_paise,
+      discount_amount_paise,
+      credit_applied
     `
     )
     .eq("booking_reference", bookingReference)
     .maybeSingle();
+
+  // If credit columns do not exist yet (pre-migration schema), fallback to base columns
+  if (
+    error &&
+    (error.code === "42703" ||
+      error.message?.includes("original_amount_paise") ||
+      error.message?.includes("column"))
+  ) {
+    const fallback = await adminClient
+      .from("bookings")
+      .select(baseBookingQuery)
+      .eq("booking_reference", bookingReference)
+      .maybeSingle();
+    booking = fallback.data as any;
+    error = fallback.error;
+  }
 
   if (error || !booking) {
     return {
@@ -458,6 +695,10 @@ export async function getBookingByReference(
       endTime: batch?.end_time || "",
       timezone: batch?.timezone || "Asia/Kolkata",
       amountPaise: booking.amount_paise,
+      originalAmountPaise: booking.original_amount_paise || booking.amount_paise,
+      discountAmountPaise: booking.discount_amount_paise || 0,
+      creditApplied: booking.credit_applied || false,
+      creditMessage: booking.credit_applied ? "Foundation course credit applied." : null,
       currency: booking.currency,
       expiresAt: booking.expires_at,
       customer: {

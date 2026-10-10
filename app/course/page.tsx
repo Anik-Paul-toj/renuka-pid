@@ -204,6 +204,10 @@ export default async function CourseCatalogPage() {
                           Special Offer
                         </span>
                       </div>
+                      <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-[#3E522D] font-bold">
+                        <Sparkles className="size-3 text-[#B93821] shrink-0" />
+                        <span>Includes ₹990 credit toward subsequent Artistry course</span>
+                      </div>
                     </div>
 
                     <Link
@@ -348,6 +352,10 @@ export default async function CourseCatalogPage() {
                         <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2 py-0.5 rounded-sm">
                           Special Offer
                         </span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-[#3E522D] font-bold">
+                        <Sparkles className="size-3 text-[#B93821] shrink-0" />
+                        <span>Foundation Alumni: ₹990 Credit (Pay ₹9,000)</span>
                       </div>
                     </div>
 

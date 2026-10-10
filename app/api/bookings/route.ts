@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
       { status: bookingResult.data.isExisting ? 200 : 201 }
     );
   } catch (err: any) {
+    console.error("API /api/bookings error:", err);
     return NextResponse.json(
       {
         success: false,

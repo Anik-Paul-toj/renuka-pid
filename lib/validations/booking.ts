@@ -25,6 +25,7 @@ export const createBookingSchema = z.object({
       /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
       "Invalid batch ID format"
     ),
+  creditVerificationToken: z.string().trim().optional(),
 });
 
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;

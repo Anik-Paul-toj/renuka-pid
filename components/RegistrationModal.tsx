@@ -70,6 +70,17 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   const [paymentPending, setPaymentPending] = useState(false);
   const [pendingBookingRef, setPendingBookingRef] = useState<string | null>(null);
   const [isPaymentLocked, setIsPaymentLocked] = useState(false);
+  const [foundationBookingRef, setFoundationBookingRef] = useState("");
+  const [creditInfo, setCreditInfo] = useState<{
+    checked: boolean;
+    eligible: boolean;
+    originalAmountPaise: number;
+    creditAmountPaise: number;
+    payableAmountPaise: number;
+    creditVerificationToken?: string;
+    message?: string;
+  } | null>(null);
+  const [, setIsCheckingCredit] = useState(false);
 
   // Helper to fetch active batch
   const fetchActiveBatch = async (): Promise<ActiveBatchInfo | null> => {
@@ -123,8 +134,79 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     setPaymentPending(false);
     setPendingBookingRef(null);
     setIsPaymentLocked(false);
+    setFoundationBookingRef("");
+    setCreditInfo(null);
+    setIsCheckingCredit(false);
     onClose();
   };
+
+  const isArtistry =
+    courseSlug === "watercolour-artistry-foundation" ||
+    Boolean(activeBatch?.courseTitle?.toLowerCase().includes("artistry"));
+
+  // Evaluate Course Credit Eligibility dynamically when customer enters email, phone, and Foundation booking reference
+  useEffect(() => {
+    const trimmedEmail = email.trim();
+    const digitsOnly = phone.trim().replace(/\D/g, "");
+    const trimmedRef = foundationBookingRef.trim();
+
+    // Credit eligibility strictly requires email, phone, and the private Foundation booking confirmation reference
+    if (
+      !isArtistry ||
+      !trimmedRef ||
+      trimmedRef.length < 3 ||
+      !trimmedEmail ||
+      !trimmedEmail.includes("@") ||
+      !trimmedEmail.includes(".") ||
+      digitsOnly.length < 10
+    ) {
+      setCreditInfo(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsCheckingCredit(true);
+      try {
+        const res = await fetch("/api/bookings/check-credit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: trimmedEmail,
+            phone: phone.trim(),
+            sourceBookingReference: trimmedRef,
+            targetBatchId: activeBatch?.id || propBatchId,
+          }),
+        });
+        const data = await res.json().catch(() => null);
+        if (data?.success && data?.data) {
+          const isEligible = Boolean(data.data.eligible);
+          setCreditInfo({
+            checked: true,
+            eligible: isEligible,
+            originalAmountPaise: data.data.originalAmountPaise,
+            creditAmountPaise: data.data.creditAmountPaise,
+            payableAmountPaise: data.data.payableAmountPaise,
+            creditVerificationToken: data.data.creditVerificationToken,
+            message: isEligible ? "Foundation course credit applied." : data.data.reason,
+          });
+
+          // Reset any pending un-discounted payment session so fresh credit booking is submitted
+          if (isEligible) {
+            setPaymentPending(false);
+            setPendingBookingRef(null);
+          }
+        } else {
+          setCreditInfo(null);
+        }
+      } catch {
+        setCreditInfo(null);
+      } finally {
+        setIsCheckingCredit(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [email, phone, foundationBookingRef, isArtistry, activeBatch?.id, propBatchId]);
 
   // Handle Escape key: lock dismissal during active payment/verification
   useEffect(() => {
@@ -349,6 +431,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           email: email.trim(),
           phone: phone.trim() || undefined,
           batchId: resolvedBatchId,
+          creditVerificationToken: creditInfo?.eligible ? creditInfo.creditVerificationToken : undefined,
         }),
       });
 
@@ -415,7 +498,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       />
 
       {/* Modal Container */}
-      <div className="paper-card relative w-full max-w-lg overflow-hidden rounded-xl bg-[#FAF8F2] p-6 shadow-2xl border border-[#464137]/15 sm:p-8 z-10">
+      <div className="paper-card relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-xl bg-[#FAF8F2] p-5 sm:p-6 shadow-2xl border border-[#464137]/15 z-10 custom-scrollbar">
         {/* Close button - hidden/disabled while payment is locked */}
         {!isPaymentLocked && (
           <button
@@ -423,7 +506,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               if (isPaymentLocked) return;
               handleReset();
             }}
-            className="absolute right-5 top-5 grid size-8 place-items-center rounded-full bg-[#EEE9DE] text-[#6F6B61] transition-colors hover:text-[#292923]"
+            className="absolute right-4 top-4 grid size-8 place-items-center rounded-full bg-[#EEE9DE] text-[#6F6B61] transition-colors hover:text-[#292923]"
             aria-label="Close registration modal"
           >
             <X className="size-4" />
@@ -433,7 +516,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         {!isSubmitted ? (
           <div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#444C38]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-2.5 py-0.5 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[#444C38]">
                 <Sparkles className="size-3 text-[#444C38]" />
                 {activeBatch?.courseTitle || (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
                   ? "Live Workshop Registration"
@@ -443,32 +526,32 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
             <h3
               id="modal-title"
-              className="mt-3 font-serif text-2xl font-bold tracking-tight text-[#14120E] sm:text-3xl"
+              className="mt-2 font-serif text-xl sm:text-2xl font-bold tracking-tight text-[#14120E]"
             >
               {activeBatch?.courseTitle ? "Reserve Your Seat" : (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
                 ? "Reserve Your Seat"
                 : "Reserve Your Free Seat")}
             </h3>
 
-            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium">
-              Enter your details below to receive your private stream link, calendar invitation, and complimentary preparation guides.
+            <p className="mt-1 text-xs leading-relaxed text-[#2C2A24] font-medium">
+              Enter your details below to receive your private stream link, calendar invitation, and preparation guides.
             </p>
 
             {/* Quick Session Details */}
-            <div className="mt-4 rounded-md bg-[#F7F4EC] p-3.5 border border-[#464137]/15 text-xs text-[#14120E] flex flex-col gap-1.5">
+            <div className="mt-3 rounded-md bg-[#F7F4EC] p-2.5 border border-[#464137]/15 text-[11px] text-[#14120E] flex flex-col gap-1">
               <div className="flex items-center gap-2 font-semibold">
-                <Calendar className="size-3.5 text-[#444C38] shrink-0" />
+                <Calendar className="size-3 text-[#444C38] shrink-0" />
                 <span>{activeBatch?.startDate ? `${activeBatch.batchName} (${activeBatch.startDate})` : hero.date}</span>
               </div>
               <div className="flex items-center gap-2 font-semibold">
-                <Clock className="size-3.5 text-[#444C38] shrink-0" />
+                <Clock className="size-3 text-[#444C38] shrink-0" />
                 <span>{activeBatch?.startTime ? `${activeBatch.startTime} – ${activeBatch.endTime} IST` : `${hero.time} (${hero.duration})`}</span>
               </div>
             </div>
 
             {/* Payment Pending Alert */}
             {paymentPending && (
-              <div className="mt-4 flex items-start gap-2.5 rounded-md border border-amber-400 bg-amber-50/95 p-3 text-xs text-amber-950">
+              <div className="mt-3 flex items-start gap-2.5 rounded-md border border-amber-400 bg-amber-50/95 p-2.5 text-xs text-amber-950">
                 <AlertCircle className="size-4 shrink-0 text-amber-700 mt-0.5" />
                 <div className="space-y-0.5">
                   <p className="font-bold">Payment Pending</p>
@@ -479,16 +562,16 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
             {/* Error Message Alert */}
             {errorMessage && (
-              <div className="mt-4 flex items-start gap-2.5 rounded-md border border-rose-300 bg-rose-50/90 p-3 text-xs text-rose-900 font-medium">
+              <div className="mt-3 flex items-start gap-2.5 rounded-md border border-rose-300 bg-rose-50/90 p-2.5 text-xs text-rose-900 font-medium">
                 <AlertCircle className="size-4 shrink-0 text-rose-700 mt-0.5" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <form onSubmit={handleSubmit} className="mt-4 space-y-3">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1">
                   Full Name *
                 </label>
                 <input
@@ -498,12 +581,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   value={name}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-4 py-3 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
+                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1">
                   Email Address *
                 </label>
                 <input
@@ -513,13 +596,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   value={email}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-4 py-3 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
+                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1.5">
-                  WhatsApp Number (Optional for gentle reminders)
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#444C38] mb-1">
+                  WhatsApp Number *
                 </label>
                 <input
                   type="tel"
@@ -527,14 +610,75 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   value={phone}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-4 py-3 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
+                  className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2 text-sm text-[#14120E] font-medium outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
                 />
               </div>
+
+              {isArtistry && (
+                <div className="rounded-lg border border-[#444C38]/20 bg-[#F7F4EC] p-3 text-xs space-y-1.5">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#444C38]">
+                    Foundation Booking Reference (To claim ₹990 Credit)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. REF-KYZ8A1-7F3A"
+                    value={foundationBookingRef}
+                    readOnly={isPaymentLocked}
+                    onChange={(e) => {
+                      setFoundationBookingRef(e.target.value.toUpperCase());
+                      if (paymentPending) {
+                        setPaymentPending(false);
+                        setPendingBookingRef(null);
+                      }
+                    }}
+                    className="w-full rounded-md border border-[#464137]/20 bg-[#FAF8F2] px-3.5 py-2 text-xs text-[#14120E] font-mono outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
+                  />
+                  <p className="text-[10px] text-[#6F6B61]">
+                    Enter the booking reference from your Watercolour Foundation purchase confirmation receipt to verify and apply your credit.
+                  </p>
+                  {foundationBookingRef.trim().length >= 3 && creditInfo && !creditInfo.eligible && creditInfo.message && (
+                    <p className="text-[11px] text-[#B93821] font-medium pt-0.5">
+                      {creditInfo.message}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Dynamic Course Credit Breakdown (Only displayed if customer qualifies) */}
+              {creditInfo?.eligible && (
+                <div
+                  id="foundation-credit-summary"
+                  className="rounded-lg border border-[#444C38]/30 bg-[#FAF8F2] p-3 text-xs space-y-1.5 shadow-2xs"
+                >
+                  <div className="flex items-center justify-between text-[#6F6B61]">
+                    <span>Course price:</span>
+                    <span className="font-semibold line-through">
+                      ₹{(creditInfo.originalAmountPaise / 100).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#3E522D] font-bold">
+                    <span>Foundation credit:</span>
+                    <span>
+                      −₹{(creditInfo.creditAmountPaise / 100).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm font-extrabold text-[#14120E] border-t border-[#464137]/15 pt-1.5">
+                    <span>Amount payable:</span>
+                    <span className="text-[#B93821]">
+                      ₹{(creditInfo.payableAmountPaise / 100).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#3E522D] font-bold pt-0.5">
+                    <Sparkles className="size-3 text-[#B93821] shrink-0" />
+                    <span>Foundation course credit applied.</span>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
                 disabled={isLoading || (isPaymentLocked && !paymentPending) || activeBatch?.isSoldOut}
-                className="btn-studio w-full py-3.5 mt-2 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-studio w-full py-3 mt-1.5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <span>Processing...</span>
@@ -547,7 +691,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </>
                 ) : activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0 ? (
                   <>
-                    <span>Proceed to Payment • ₹{activeBatch.offerPrice}</span>
+                    <span>
+                      Proceed to Payment • ₹
+                      {creditInfo?.eligible
+                        ? (creditInfo.payableAmountPaise / 100).toLocaleString("en-IN")
+                        : activeBatch.offerPrice?.toLocaleString("en-IN")}
+                    </span>
                     <ArrowRight className="size-4" />
                   </>
                 ) : (
@@ -558,7 +707,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 )}
               </button>
 
-              <p className="text-center text-[0.72rem] text-[#3E3A32] font-medium mt-3">
+              <p className="text-center text-[0.7rem] text-[#3E3A32] font-medium mt-2">
                 🔒 We respect your privacy. No spam ever. One-click unsubscribe at any time.
               </p>
             </form>

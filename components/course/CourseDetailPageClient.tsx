@@ -379,8 +379,16 @@ export function CourseDetailPageClient({
                           Special Offer
                         </span>
                       </div>
+                      <div className="mt-2 flex items-center gap-1.5 text-[0.72rem] text-[#3E522D] font-bold">
+                        <Sparkles className="size-3.5 text-[#B93821] shrink-0" />
+                        <span>
+                          {isFoundation
+                            ? "Includes ₹990 credit toward subsequent Artistry + Foundation course"
+                            : "Foundation Students: ₹990 Credit automatically applied at checkout (Pay ₹9,000)"}
+                        </span>
+                      </div>
                       {activeBatch && (
-                        <span className="text-[0.72rem] text-[#353D2A] font-bold block mt-2">
+                        <span className="text-[0.72rem] text-[#353D2A] font-bold block mt-1.5">
                           ✓ {activeBatch.batchName} ({activeBatch.startDate}) • {activeBatch.seatsRemaining ? `${activeBatch.seatsRemaining} seats left` : "Seats available"}
                         </span>
                       )}
