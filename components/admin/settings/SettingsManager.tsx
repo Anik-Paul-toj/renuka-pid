@@ -8,26 +8,23 @@ import {
   Globe,
   Mail,
   Phone,
-  MessageSquare,
-  ShieldCheck,
   CheckCircle2,
   AlertCircle,
   Save,
   Lock,
   Radio,
-  Server,
+  MessageSquare,
 } from "lucide-react";
 import { SettingsData, SystemStatusData } from "@/lib/settings/service";
 
 interface SettingsManagerProps {
   initialSettings: SettingsData;
-  systemStatus: SystemStatusData;
+  systemStatus?: SystemStatusData;
   userRole: "super_admin" | "admin" | "editor";
 }
 
 export function SettingsManager({
   initialSettings,
-  systemStatus,
   userRole,
 }: SettingsManagerProps) {
   const isReadOnly = userRole === "editor";
@@ -350,82 +347,10 @@ export function SettingsManager({
           </div>
         </div>
 
-        {/* Section 4: System Integrations & Security (Read-Only Status) */}
-        <div className="p-6 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-[#464137]/10">
-            <Server className="size-4 text-[#68705A]" />
-            <h2 className="font-serif text-base font-bold text-[#292923]">System Integrations &amp; Security</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Razorpay Gateway */}
-            <div className="p-3 rounded-lg bg-[#F7F4EC] border border-[#464137]/10">
-              <span className="text-[0.68rem] uppercase font-bold text-[#6F6B61] tracking-wider block mb-1">
-                Payment Gateway
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#292923]">Razorpay</span>
-                {systemStatus.paymentGateway.isConfigured ? (
-                  <span className={`text-[0.68rem] px-2 py-0.5 rounded font-bold ${
-                    systemStatus.paymentGateway.mode === "live"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-amber-100 text-amber-800"
-                  }`}>
-                    {systemStatus.paymentGateway.mode === "live" ? "Live Mode" : "Test Mode"}
-                  </span>
-                ) : (
-                  <span className="text-[0.68rem] px-2 py-0.5 rounded bg-gray-100 text-gray-700 font-bold">
-                    Not Configured
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Resend Email Transport */}
-            <div className="p-3 rounded-lg bg-[#F7F4EC] border border-[#464137]/10">
-              <span className="text-[0.68rem] uppercase font-bold text-[#6F6B61] tracking-wider block mb-1">
-                Email Transport
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#292923]">Resend</span>
-                {systemStatus.emailService.isConfigured ? (
-                  <span className="text-[0.68rem] px-2 py-0.5 rounded bg-green-100 text-green-800 font-bold">
-                    Configured
-                  </span>
-                ) : (
-                  <span className="text-[0.68rem] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">
-                    Mock / Dev
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Supabase Database & Auth */}
-            <div className="p-3 rounded-lg bg-[#F7F4EC] border border-[#464137]/10">
-              <span className="text-[0.68rem] uppercase font-bold text-[#6F6B61] tracking-wider block mb-1">
-                Auth &amp; Database
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#292923]">Supabase RLS</span>
-                <span className="text-[0.68rem] px-2 py-0.5 rounded bg-green-100 text-green-800 font-bold">
-                  Active
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg bg-[#EEE9DE]/60 p-4 border border-[#464137]/10 text-xs text-[#6F6B61] flex items-start gap-2">
-            <ShieldCheck className="size-4 shrink-0 text-[#68705A] mt-0.5" />
-            <div>
-              <strong>Strict Security Guarantee:</strong> Payment secrets (`RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`), Resend API tokens, and Supabase service-role keys are securely encapsulated in server environment variables and are never transmitted to or editable via client browsers.
-            </div>
-          </div>
-        </div>
-
         {/* Footer Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
           <div className="text-[0.7rem] text-[#6F6B61]">
-            Last updated: <span className="font-semibold">{new Date(lastSaved).toLocaleString()}</span>
+            Last updated: <span className="font-semibold" suppressHydrationWarning>{lastSaved ? new Date(lastSaved).toLocaleString() : "Never"}</span>
             {lastUpdatedBy && <span> by <span className="font-semibold">{lastUpdatedBy}</span></span>}
           </div>
 
