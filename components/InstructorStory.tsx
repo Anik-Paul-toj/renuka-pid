@@ -68,17 +68,8 @@ export const InstructorStory: React.FC = () => {
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 text-center">
-        {/* Eyebrow */}
-        <div className="inline-flex items-center justify-center gap-2">
-          <span className="h-px w-6 bg-[#444C38]/40" />
-          <p className="text-[0.72rem] sm:text-[0.78rem] font-bold uppercase tracking-[0.26em] text-[#444C38]">
-            {instructorStory.overline || "ABOUT RENUKA"}
-          </p>
-          <span className="h-px w-6 bg-[#444C38]/40" />
-        </div>
-
         {/* Heading */}
-        <h2 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-[2.75rem] font-medium tracking-tight text-[#14120E] leading-tight">
+        <h2 className="font-serif text-3xl sm:text-4xl lg:text-[2.75rem] font-medium tracking-tight text-[#14120E] leading-tight">
           <span>{instructorStory.headline}</span>
           <span className="font-bold text-[#14120E]">{instructorStory.name}</span>
         </h2>
@@ -100,37 +91,6 @@ export const InstructorStory: React.FC = () => {
           {instructorStory.paragraphs.map((p, idx) => (
             <p key={idx}>{formatBioParagraph(p)}</p>
           ))}
-        </div>
-
-        {/* Social Connect Badges */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="https://www.instagram.com/renuka_art_educator?obrf=aHE1aXliMWhwbWZ4&utm_source=qr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-[#444C38]/25 bg-[#FAF8F2] px-3.5 py-1.5 text-xs font-semibold text-[#444C38] transition-all duration-200 hover:border-[#444C38]/60 hover:bg-[#EBE7DC] hover:text-[#14120E] hover:shadow-2xs group"
-            aria-label="Follow Renuka on Instagram @renuka_art_educator"
-          >
-            <svg className="size-3.5 fill-none stroke-current stroke-[1.8] transition-transform duration-200 group-hover:scale-110" viewBox="0 0 24 24">
-              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-            </svg>
-            <span>Instagram: @renuka_art_educator</span>
-          </a>
-
-          <a
-            href="https://www.facebook.com/share/1ccDJzNQHj/?mibextid=wwXIfr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-[#444C38]/25 bg-[#FAF8F2] px-3.5 py-1.5 text-xs font-semibold text-[#444C38] transition-all duration-200 hover:border-[#444C38]/60 hover:bg-[#EBE7DC] hover:text-[#14120E] hover:shadow-2xs group"
-            aria-label="Connect with Renuka on Facebook"
-          >
-            <svg className="size-3.5 fill-none stroke-current stroke-[1.8] transition-transform duration-200 group-hover:scale-110" viewBox="0 0 24 24">
-              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-            </svg>
-            <span>Facebook Community</span>
-          </a>
         </div>
 
         {/* Credentials Cards: 3 columns on desktop, 1 on mobile */}
