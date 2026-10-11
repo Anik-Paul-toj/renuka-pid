@@ -586,8 +586,10 @@ export function CourseManager({
         {activeTab === "batch-schedule" && !isLandingPageWorkshop ? (
           <div className="p-6">
             <AdminBatchScheduleManager
+              key={activeCourse.id}
               initialCourseId={activeCourse.id}
               userRole={userRole}
+              hideCourseSwitcher={true}
             />
           </div>
         ) : (

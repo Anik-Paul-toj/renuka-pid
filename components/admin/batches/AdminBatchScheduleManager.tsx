@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import {
   Calendar,
   Clock,
@@ -14,6 +15,10 @@ import {
   Layers,
   GraduationCap,
   ExternalLink,
+  Upload,
+  Image as ImageIcon,
+  RefreshCw,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -42,14 +47,17 @@ interface AdminBatchScheduleManagerProps {
   initialCourseId?: string;
   userRole?: "super_admin" | "admin" | "editor";
   onBatchUpdated?: (batch: any) => void;
+  hideCourseSwitcher?: boolean;
 }
 
 export function AdminBatchScheduleManager({
   initialCourseId,
   userRole = "admin",
   onBatchUpdated,
+  hideCourseSwitcher = false,
 }: AdminBatchScheduleManagerProps) {
   const isReadOnly = userRole === "editor";
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // The two core watercolor courses
   const COURSES = [
@@ -59,6 +67,7 @@ export function AdminBatchScheduleManager({
       slug: "watercolour-foundation",
       defaultTiming: "6:30 PM",
       defaultEndTime: "8:00 PM",
+      defaultImage: "/images/foundation.jpeg",
     },
     {
       id: "e2222222-2222-3333-4444-555555555555",
@@ -66,6 +75,7 @@ export function AdminBatchScheduleManager({
       slug: "watercolour-artistry-foundation",
       defaultTiming: "6:30 PM",
       defaultEndTime: "8:00 PM",
+      defaultImage: "/images/ARTISTRY.jpeg",
     },
   ];
 
@@ -81,6 +91,21 @@ export function AdminBatchScheduleManager({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // Cover image management state
+  const [coverImageUrl, setCoverImageUrl] = useState<string>(
+    activeCourse.defaultImage
+  );
+  const [coverImagePublicId, setCoverImagePublicId] = useState<string | null>(
+    null
+  );
+  const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
+  const [imageUploadMessage, setImageUploadMessage] = useState<string | null>(
+    null
+  );
+  const [imageErrorMessage, setImageErrorMessage] = useState<string | null>(
+    null
+  );
 
   const [formData, setFormData] = useState<BatchFormData>({
     id: "",
@@ -105,12 +130,17 @@ export function AdminBatchScheduleManager({
     setIsLoading(true);
     setSuccessMessage(null);
     setErrorMessage(null);
+    setImageUploadMessage(null);
+    setImageErrorMessage(null);
     setFieldErrors({});
 
     try {
-      const res = await fetch(`/api/admin/batches?courseId=${encodeURIComponent(courseId)}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `/api/admin/batches?courseId=${encodeURIComponent(courseId)}`,
+        {
+          cache: "no-store",
+        }
+      );
       const data = await res.json();
 
       if (data?.success && data?.batch) {
@@ -132,6 +162,14 @@ export function AdminBatchScheduleManager({
         };
         setFormData(initialForm);
         setOriginalData(initialForm);
+
+        if (b.coverImageUrl) {
+          setCoverImageUrl(b.coverImageUrl);
+          setCoverImagePublicId(b.coverImagePublicId || null);
+        } else {
+          setCoverImageUrl(activeCourse.defaultImage);
+          setCoverImagePublicId(null);
+        }
       } else {
         // Fallback default structure
         const defaultForm: BatchFormData = {
@@ -151,6 +189,8 @@ export function AdminBatchScheduleManager({
         };
         setFormData(defaultForm);
         setOriginalData(defaultForm);
+        setCoverImageUrl(activeCourse.defaultImage);
+        setCoverImagePublicId(null);
       }
     } catch {
       setErrorMessage("Failed to load batch schedule from database.");
@@ -162,6 +202,12 @@ export function AdminBatchScheduleManager({
   useEffect(() => {
     loadBatch(selectedCourseId);
   }, [selectedCourseId]);
+
+  useEffect(() => {
+    if (initialCourseId && initialCourseId !== selectedCourseId) {
+      setSelectedCourseId(initialCourseId);
+    }
+  }, [initialCourseId]);
 
   const handleSelectCourse = (courseId: string) => {
     setSelectedCourseId(courseId);
@@ -188,6 +234,104 @@ export function AdminBatchScheduleManager({
       setFieldErrors({});
       setErrorMessage(null);
       setSuccessMessage(null);
+    }
+  };
+
+  // Image Upload Handler
+  const handleImageFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file || isReadOnly) return;
+
+    setImageErrorMessage(null);
+    setImageUploadMessage(null);
+
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+    if (!validTypes.includes(file.type)) {
+      setImageErrorMessage(
+        "Please select a valid image file (JPEG, PNG, WEBP, or AVIF)."
+      );
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setImageErrorMessage(
+        `Image size exceeds 10MB (${(file.size / (1024 * 1024)).toFixed(1)}MB provided).`
+      );
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
+
+      const targetId = formData.id || selectedCourseId;
+      const res = await fetch(
+        `/api/admin/batches/${encodeURIComponent(targetId)}/image`,
+        {
+          method: "POST",
+          body: uploadFormData,
+        }
+      );
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || "Failed to upload image to Cloudinary.");
+      }
+
+      setCoverImageUrl(result.coverImageUrl);
+      setCoverImagePublicId(result.coverImagePublicId || null);
+      setImageUploadMessage(
+        `Cover image for ${activeCourse.title} updated successfully via Cloudinary! Live on public /course page.`
+      );
+    } catch (err: any) {
+      setImageErrorMessage(
+        err.message || "Failed to upload cover image to Cloudinary."
+      );
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Reset image back to default artwork
+  const handleResetImage = async () => {
+    if (isReadOnly || isUploadingImage) return;
+
+    setIsUploadingImage(true);
+    setImageErrorMessage(null);
+    setImageUploadMessage(null);
+
+    try {
+      const targetId = formData.id || selectedCourseId;
+      const res = await fetch(
+        `/api/admin/batches/${encodeURIComponent(targetId)}/image`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || "Failed to reset cover image.");
+      }
+
+      setCoverImageUrl(result.coverImageUrl || activeCourse.defaultImage);
+      setCoverImagePublicId(null);
+      setImageUploadMessage(
+        `Cover image for ${activeCourse.title} reset to default studio artwork.`
+      );
+    } catch (err: any) {
+      setImageErrorMessage(err.message || "Failed to reset cover image.");
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -218,41 +362,43 @@ export function AdminBatchScheduleManager({
       }
     }
 
-    if (formData.endDate && formData.startDate && formData.endDate < formData.startDate) {
-      errors.endDate = "Batch end date cannot be earlier than start date.";
+    if (formData.endDate && formData.startDate) {
+      if (formData.endDate < formData.startDate) {
+        errors.endDate = "Batch end date cannot be earlier than start date.";
+      }
     }
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setErrorMessage(Object.values(errors)[0]);
-      return;
-    }
-
-    if (!formData.id) {
-      setErrorMessage("Batch record ID is not found. Please reload.");
+      setErrorMessage(
+        "Please fix the validation errors before saving the batch schedule."
+      );
       return;
     }
 
     setIsSaving(true);
-    setSuccessMessage(null);
     setErrorMessage(null);
+    setSuccessMessage(null);
     setFieldErrors({});
 
     try {
-      const res = await fetch(`/api/admin/batches/${encodeURIComponent(formData.id)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          batchName: formData.batchName.trim(),
-          startDate: formData.startDate,
-          endDate: formData.endDate || null,
-          lastRegistrationDate: formData.lastRegistrationDate,
-          startTime: formData.startTime.trim(),
-          endTime: formData.endTime ? formData.endTime.trim() : null,
-          status: formData.status,
-          totalSeats: Number(formData.totalSeats) || 100,
-        }),
-      });
+      const res = await fetch(
+        `/api/admin/batches/${encodeURIComponent(formData.id)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            batchName: formData.batchName.trim(),
+            startDate: formData.startDate,
+            endDate: formData.endDate || null,
+            lastRegistrationDate: formData.lastRegistrationDate,
+            startTime: formData.startTime.trim(),
+            endTime: formData.endTime ? formData.endTime.trim() : null,
+            status: formData.status,
+            totalSeats: Number(formData.totalSeats) || 100,
+          }),
+        }
+      );
 
       const result = await res.json();
 
@@ -282,112 +428,229 @@ export function AdminBatchScheduleManager({
     }
   };
 
-  const isExpired = isRegistrationDeadlineExpired(formData.lastRegistrationDate);
+  const isExpired = isRegistrationDeadlineExpired(
+    formData.lastRegistrationDate
+  );
   const isClosed =
     formData.status === "closed" ||
     formData.status === "completed" ||
     isExpired;
 
+  const isCloudinaryActive = Boolean(
+    coverImageUrl && coverImageUrl.includes("cloudinary.com")
+  );
+
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="p-5 sm:p-6 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-0.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#68705A] mb-2">
-              <Calendar className="size-3" />
-              <span>Cohort Scheduling Engine</span>
+      {/* Header Banner - Only shown on standalone /admin/batches page */}
+      {!hideCourseSwitcher && (
+        <div className="p-5 sm:p-6 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-0.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#68705A] mb-2">
+                <Calendar className="size-3" />
+                <span>Cohort Scheduling Engine</span>
+              </div>
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#292923]">
+                Dynamic Batch & Schedule Management
+              </h2>
+              <p className="text-xs text-[#6F6B61] mt-1 max-w-2xl">
+                Configure live workshop start dates, registration deadlines,
+                atelier batch timings, and custom Cloudinary cover images. Changes
+                persist authoritatively in Supabase and reflect instantly on
+                public course cards.
+              </p>
             </div>
-            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#292923]">
-              Dynamic Batch & Schedule Management
-            </h2>
-            <p className="text-xs text-[#6F6B61] mt-1 max-w-2xl">
-              Configure live workshop start dates, registration deadlines, and atelier batch timings.
-              Changes persist authoritatively in Supabase and reflect instantly on public course cards and booking modals.
-            </p>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/course/${activeCourse.slug}`}
-              target="_blank"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#464137]/20 text-xs font-semibold text-[#464137] hover:bg-[#F7F4EC] transition-colors"
-            >
-              <span>View Public Page</span>
-              <ExternalLink className="size-3" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Course Switcher Pills */}
-        <div className="mt-5 flex flex-wrap gap-2.5 pt-4 border-t border-[#464137]/10">
-          {COURSES.map((course) => {
-            const isSelected = course.id === selectedCourseId;
-            return (
-              <button
-                key={course.id}
-                type="button"
-                onClick={() => handleSelectCourse(course.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-[#68705A] text-[#FAF8F2] shadow-sm ring-2 ring-[#68705A]/30"
-                    : "bg-[#F7F4EC] text-[#464137] hover:bg-[#EBE7DC] border border-[#464137]/15"
-                }`}
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/course/${activeCourse.slug}`}
+                target="_blank"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#464137]/20 text-xs font-semibold text-[#464137] hover:bg-[#F7F4EC] transition-colors"
               >
-                <GraduationCap className="size-3.5" />
-                <span>{course.title}</span>
-              </button>
-            );
-          })}
+                <span>View Public Page</span>
+                <ExternalLink className="size-3" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Course Switcher Pills */}
+          <div className="mt-5 flex flex-wrap gap-2.5 pt-4 border-t border-[#464137]/10">
+            {COURSES.map((course) => {
+              const isSelected = course.id === selectedCourseId;
+              return (
+                <button
+                  key={course.id}
+                  type="button"
+                  onClick={() => handleSelectCourse(course.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-[#68705A] text-[#FAF8F2] shadow-sm ring-2 ring-[#68705A]/30"
+                      : "bg-[#F7F4EC] text-[#464137] hover:bg-[#EBE7DC] border border-[#464137]/15"
+                  }`}
+                >
+                  <GraduationCap className="size-3.5" />
+                  <span>{course.title}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Grid: Form on Left, Live Preview on Right */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Editor Form Column */}
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-7 space-y-6">
+          {/* ========================================================== */}
+          {/* 1. CLOUDINARY COVER IMAGE MANAGEMENT SECTION               */}
+          {/* ========================================================== */}
+          <div className="p-5 sm:p-6 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-4">
+            <div className="flex items-center justify-between gap-3 border-b border-[#464137]/10 pb-3">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="size-4 text-[#68705A]" />
+                <h3 className="font-serif text-base font-bold text-[#292923]">
+                  Course Cover Image (Cloudinary)
+                </h3>
+              </div>
+              <span
+                className={`text-[0.62rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                  isCloudinaryActive
+                    ? "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
+                    : "bg-[#464137]/10 text-[#464137] border border-[#464137]/20"
+                }`}
+              >
+                {isCloudinaryActive
+                  ? "Cloudinary CDN Active"
+                  : "Default Studio Artwork"}
+              </span>
+            </div>
+
+            <p className="text-xs text-[#6F6B61]">
+              Manage the cover image displayed on the horizontal course card for{" "}
+              <strong>{activeCourse.title}</strong>. Images are optimized and
+              served via Cloudinary CDN (
+              <code>renuka-art-studio/course-covers/</code>).
+            </p>
+
+            {/* Image Preview & Upload Controls */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
+              <div className="relative w-full sm:w-44 aspect-[16/10] rounded-lg overflow-hidden bg-[#EBE7DC] border border-[#464137]/25 shrink-0 shadow-2xs">
+                <Image
+                  src={coverImageUrl || activeCourse.defaultImage}
+                  alt={activeCourse.title}
+                  fill
+                  sizes="200px"
+                  className="object-cover object-center"
+                />
+                {isUploadingImage && (
+                  <div className="absolute inset-0 bg-[#14120E]/60 flex items-center justify-center text-[#FAF8F2]">
+                    <div className="size-5 border-2 border-[#FAF8F2] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-2.5 w-full">
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  onChange={handleImageFileChange}
+                  className="hidden"
+                  disabled={isReadOnly || isUploadingImage}
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isReadOnly || isUploadingImage}
+                    className="btn-studio px-4 py-2 text-xs font-bold inline-flex items-center gap-1.5 shadow-xs disabled:opacity-50 cursor-pointer"
+                  >
+                    <Upload className="size-3.5" />
+                    <span>
+                      {isUploadingImage
+                        ? "Uploading to Cloudinary..."
+                        : isCloudinaryActive
+                        ? "Replace Image"
+                        : "Upload New Image"}
+                    </span>
+                  </button>
+
+                  {isCloudinaryActive && (
+                    <button
+                      type="button"
+                      onClick={handleResetImage}
+                      disabled={isReadOnly || isUploadingImage}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#B93821]/30 text-xs font-semibold text-[#B93821] hover:bg-[#B93821]/10 transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                      <Trash2 className="size-3.5" />
+                      <span>Reset to Default</span>
+                    </button>
+                  )}
+                </div>
+
+                <span className="text-[0.66rem] text-[#6F6B61] block leading-relaxed">
+                  Supported formats: JPEG, PNG, WEBP, AVIF • Max size: 10MB.
+                  Replacing this image will only update{" "}
+                  <strong>{activeCourse.title}</strong>.
+                </span>
+              </div>
+            </div>
+
+            {/* Image Feedback Alerts */}
+            {imageUploadMessage && (
+              <div className="p-3 rounded-lg bg-[#3E522D]/10 border border-[#3E522D]/25 flex items-start gap-2 text-xs text-[#3E522D] font-medium">
+                <CheckCircle2 className="size-4 shrink-0 mt-0.5" />
+                <span>{imageUploadMessage}</span>
+              </div>
+            )}
+
+            {imageErrorMessage && (
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 flex items-start gap-2 text-xs text-rose-800 font-medium">
+                <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                <span>{imageErrorMessage}</span>
+              </div>
+            )}
+          </div>
+
+          {/* ========================================================== */}
+          {/* 2. BATCH SCHEDULE FORM                                      */}
+          {/* ========================================================== */}
           <form
             onSubmit={handleSave}
             className="p-5 sm:p-6 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-5"
           >
-            <div className="flex items-center justify-between border-b border-[#464137]/10 pb-3">
-              <div>
-                <span className="text-[0.66rem] uppercase font-bold tracking-wider text-[#68705A] block">
-                  Editing Schedule For
-                </span>
-                <h3 className="font-serif text-lg font-bold text-[#292923]">
-                  {activeCourse.title}
-                </h3>
-              </div>
-
-              {isReadOnly && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[0.65rem] font-bold uppercase tracking-wider bg-[#E6DFD3] text-[#464137]">
-                  <Lock className="size-3" />
-                  Read-Only
-                </span>
-              )}
-            </div>
-
-            {/* Success Alert */}
+            {/* Feedback Alerts */}
             {successMessage && (
-              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-[#3E522D]/10 border border-[#3E522D]/30 text-xs text-[#2A371F] font-semibold">
-                <CheckCircle2 className="size-4 text-[#3E522D] shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-lg bg-[#3E522D]/10 border border-[#3E522D]/25 flex items-start gap-2 text-xs text-[#3E522D] font-medium">
+                <CheckCircle2 className="size-4 shrink-0 mt-0.5" />
                 <span>{successMessage}</span>
               </div>
             )}
 
-            {/* Error Alert */}
             {errorMessage && (
-              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-rose-50 border border-rose-300 text-xs text-rose-900 font-semibold">
-                <AlertCircle className="size-4 text-rose-700 shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 flex items-start gap-2 text-xs text-rose-800 font-medium">
+                <AlertCircle className="size-4 shrink-0 mt-0.5" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
+            {isReadOnly && (
+              <div className="p-3 rounded-lg bg-[#EBE7DC] border border-[#464137]/20 flex items-center gap-2 text-xs text-[#6F6B61]">
+                <Lock className="size-3.5" />
+                <span>
+                  You have read-only access. Only administrators can save batch
+                  schedules.
+                </span>
+              </div>
+            )}
+
             {isLoading ? (
-              <div className="py-12 text-center text-xs text-[#6F6B61] space-y-2">
-                <div className="size-6 border-2 border-[#68705A] border-t-transparent rounded-full animate-spin mx-auto" />
-                <p>Loading batch schedule details...</p>
+              <div className="py-12 flex flex-col items-center justify-center gap-3 text-xs text-[#6F6B61]">
+                <div className="size-6 border-2 border-[#68705A] border-t-transparent rounded-full animate-spin" />
+                <span>Loading batch schedule for {activeCourse.title}...</span>
               </div>
             ) : (
               <div className="space-y-4">
@@ -400,79 +663,89 @@ export function AdminBatchScheduleManager({
                     type="text"
                     disabled={isReadOnly}
                     value={formData.batchName}
-                    onChange={(e) => handleInputChange("batchName", e.target.value)}
-                    placeholder="e.g. Watercolour Foundation — Upcoming Live Batch"
+                    onChange={(e) =>
+                      handleInputChange("batchName", e.target.value)
+                    }
+                    placeholder="e.g. November 2026 Live Cohort"
                     className={`w-full rounded-lg bg-[#F7F4EC] border px-3 py-2 text-xs text-[#292923] focus:outline-hidden focus:ring-1 focus:ring-[#68705A] ${
                       fieldErrors.batchName
-                        ? "border-rose-400 bg-rose-50/50"
+                        ? "border-rose-400 ring-1 ring-rose-400"
                         : "border-[#464137]/20"
                     }`}
                   />
                   {fieldErrors.batchName && (
-                    <p className="text-[0.7rem] text-rose-600 font-medium mt-1">
+                    <span className="text-[0.68rem] text-rose-600 mt-0.5 block font-medium">
                       {fieldErrors.batchName}
-                    </p>
+                    </span>
                   )}
                 </div>
 
-                {/* 2. Dates Row: Batch Start Date & Last Registration Date */}
+                {/* 2. Dates Row: Start Date & Registration Deadline */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Batch Start Date */}
                   <div>
                     <label className="block text-xs font-bold text-[#292923] mb-1">
-                      Batch Start Date <span className="text-rose-600">*</span>
+                      Batch Start Date (YYYY-MM-DD){" "}
+                      <span className="text-rose-600">*</span>
                     </label>
                     <input
                       type="date"
                       disabled={isReadOnly}
                       value={formData.startDate}
-                      onChange={(e) => handleInputChange("startDate", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("startDate", e.target.value)
+                      }
                       className={`w-full rounded-lg bg-[#F7F4EC] border px-3 py-2 text-xs text-[#292923] focus:outline-hidden focus:ring-1 focus:ring-[#68705A] ${
                         fieldErrors.startDate
-                          ? "border-rose-400 bg-rose-50/50"
+                          ? "border-rose-400 ring-1 ring-rose-400"
                           : "border-[#464137]/20"
                       }`}
                     />
-                    {fieldErrors.startDate && (
-                      <p className="text-[0.7rem] text-rose-600 font-medium mt-1">
-                        {fieldErrors.startDate}
-                      </p>
-                    )}
                     <span className="text-[0.66rem] text-[#6F6B61] mt-0.5 block">
                       IST Display: {formatBatchDateIST(formData.startDate)}
                     </span>
+                    {fieldErrors.startDate && (
+                      <span className="text-[0.68rem] text-rose-600 mt-0.5 block font-medium">
+                        {fieldErrors.startDate}
+                      </span>
+                    )}
                   </div>
 
-                  {/* Last Registration Date */}
+                  {/* Last Date for Registration */}
                   <div>
                     <label className="block text-xs font-bold text-[#292923] mb-1">
-                      Last Date for Registration <span className="text-rose-600">*</span>
+                      Last Date for Registration (YYYY-MM-DD){" "}
+                      <span className="text-rose-600">*</span>
                     </label>
                     <input
                       type="date"
                       disabled={isReadOnly}
                       value={formData.lastRegistrationDate}
                       onChange={(e) =>
-                        handleInputChange("lastRegistrationDate", e.target.value)
+                        handleInputChange(
+                          "lastRegistrationDate",
+                          e.target.value
+                        )
                       }
                       className={`w-full rounded-lg bg-[#F7F4EC] border px-3 py-2 text-xs text-[#292923] focus:outline-hidden focus:ring-1 focus:ring-[#68705A] ${
                         fieldErrors.lastRegistrationDate
-                          ? "border-rose-400 bg-rose-50/50"
+                          ? "border-rose-400 ring-1 ring-rose-400"
                           : "border-[#464137]/20"
                       }`}
                     />
-                    {fieldErrors.lastRegistrationDate && (
-                      <p className="text-[0.7rem] text-rose-600 font-medium mt-1">
-                        {fieldErrors.lastRegistrationDate}
-                      </p>
-                    )}
                     <span className="text-[0.66rem] text-[#6F6B61] mt-0.5 block">
-                      IST Display: {formatBatchDateIST(formData.lastRegistrationDate)}
+                      IST Display:{" "}
+                      {formatBatchDateIST(formData.lastRegistrationDate)}
                     </span>
+                    {fieldErrors.lastRegistrationDate && (
+                      <span className="text-[0.68rem] text-rose-600 mt-0.5 block font-medium">
+                        {fieldErrors.lastRegistrationDate}
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* 3. Timings Row: Start Time & End Time */}
+                {/* 3. Timings Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-[#292923] mb-1">
@@ -482,18 +755,20 @@ export function AdminBatchScheduleManager({
                       type="text"
                       disabled={isReadOnly}
                       value={formData.startTime}
-                      onChange={(e) => handleInputChange("startTime", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("startTime", e.target.value)
+                      }
                       placeholder="e.g. 6:30 PM"
                       className={`w-full rounded-lg bg-[#F7F4EC] border px-3 py-2 text-xs text-[#292923] focus:outline-hidden focus:ring-1 focus:ring-[#68705A] ${
                         fieldErrors.startTime
-                          ? "border-rose-400 bg-rose-50/50"
+                          ? "border-rose-400 ring-1 ring-rose-400"
                           : "border-[#464137]/20"
                       }`}
                     />
                     {fieldErrors.startTime && (
-                      <p className="text-[0.7rem] text-rose-600 font-medium mt-1">
+                      <span className="text-[0.68rem] text-rose-600 mt-0.5 block font-medium">
                         {fieldErrors.startTime}
-                      </p>
+                      </span>
                     )}
                   </div>
 
@@ -505,12 +780,18 @@ export function AdminBatchScheduleManager({
                       type="text"
                       disabled={isReadOnly}
                       value={formData.endTime}
-                      onChange={(e) => handleInputChange("endTime", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("endTime", e.target.value)
+                      }
                       placeholder="e.g. 8:00 PM"
                       className="w-full rounded-lg bg-[#F7F4EC] border border-[#464137]/20 px-3 py-2 text-xs text-[#292923] focus:outline-hidden focus:ring-1 focus:ring-[#68705A]"
                     />
                     <span className="text-[0.66rem] text-[#6F6B61] mt-0.5 block">
-                      IST Display: {formatBatchTimeIST(formData.startTime, formData.endTime)}
+                      IST Display:{" "}
+                      {formatBatchTimeIST(
+                        formData.startTime,
+                        formData.endTime
+                      )}
                     </span>
                   </div>
                 </div>
@@ -527,7 +808,11 @@ export function AdminBatchScheduleManager({
                       onChange={(e) =>
                         handleInputChange(
                           "status",
-                          e.target.value as "open" | "closed" | "upcoming" | "completed"
+                          e.target.value as
+                            | "open"
+                            | "closed"
+                            | "upcoming"
+                            | "completed"
                         )
                       }
                       className="w-full rounded-lg bg-[#F7F4EC] border border-[#464137]/20 px-3 py-2 text-xs text-[#292923] font-semibold focus:outline-hidden focus:ring-1 focus:ring-[#68705A]"
@@ -553,13 +838,19 @@ export function AdminBatchScheduleManager({
                       min={1}
                       max={1000}
                       onChange={(e) =>
-                        handleInputChange("totalSeats", parseInt(e.target.value) || 100)
+                        handleInputChange(
+                          "totalSeats",
+                          parseInt(e.target.value) || 100
+                        )
                       }
                       className="w-full rounded-lg bg-[#F7F4EC] border border-[#464137]/20 px-3 py-2 text-xs text-[#292923] focus:outline-hidden focus:ring-1 focus:ring-[#68705A]"
                     />
                     <span className="text-[0.66rem] text-[#6F6B61] mt-0.5 block">
                       Booked: {formData.seatsBooked} • Remaining:{" "}
-                      {Math.max(0, formData.totalSeats - formData.seatsBooked)}
+                      {Math.max(
+                        0,
+                        formData.totalSeats - formData.seatsBooked
+                      )}
                     </span>
                   </div>
                 </div>
@@ -612,11 +903,29 @@ export function AdminBatchScheduleManager({
             </div>
 
             <p className="text-xs text-[#6F6B61]">
-              This is how students will see the schedule on <strong>/course</strong> and <strong>/course/{activeCourse.slug}</strong>:
+              This is how students will see the card on{" "}
+              <strong>/course</strong> and{" "}
+              <strong>/course/{activeCourse.slug}</strong>:
             </p>
 
-            {/* Rendered Badge Preview */}
+            {/* Rendered Preview with Dynamic Cover Image */}
             <div className="group/sched relative overflow-hidden rounded-xl bg-[#FAF8F2] border border-[#444C38]/30 p-4 shadow-2xs space-y-3">
+              {/* Cover Image in Preview */}
+              <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-[#EBE7DC] border border-[#444C38]/20">
+                <Image
+                  src={coverImageUrl || activeCourse.defaultImage}
+                  alt={activeCourse.title}
+                  fill
+                  sizes="400px"
+                  className="object-cover object-center"
+                />
+                <div className="absolute top-2 left-2">
+                  <span className="rounded bg-[#FAF8F2]/90 backdrop-blur-xs px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-[#444C38] border border-[#444C38]/20">
+                    {activeCourse.title}
+                  </span>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between gap-2 border-b border-[#444C38]/15 pb-2">
                 <div className="flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-[#444C38] animate-pulse" />
@@ -663,7 +972,9 @@ export function AdminBatchScheduleManager({
                     </span>
                     <span
                       className={`font-bold text-xs block ${
-                        isClosed ? "text-[#6F6B61] line-through" : "text-[#B93821]"
+                        isClosed
+                          ? "text-[#6F6B61] line-through"
+                          : "text-[#B93821]"
                       }`}
                     >
                       {formatBatchDateIST(formData.lastRegistrationDate)}
@@ -681,7 +992,10 @@ export function AdminBatchScheduleManager({
                       Batch Timing (IST)
                     </span>
                     <span className="font-bold text-[#14120E] text-xs block">
-                      {formatBatchTimeIST(formData.startTime, formData.endTime)}
+                      {formatBatchTimeIST(
+                        formData.startTime,
+                        formData.endTime
+                      )}
                     </span>
                   </div>
                 </div>
@@ -711,10 +1025,18 @@ export function AdminBatchScheduleManager({
               📌 Atelier Validation Rules
             </span>
             <ul className="list-disc list-inside space-y-1 text-[0.72rem]">
-              <li>The registration deadline must not be earlier than the batch start date.</li>
-              <li>Times are formatted with the official India timezone (Asia/Kolkata).</li>
-              <li>When status is set to closed or deadline expires, new bookings are automatically locked.</li>
-              <li>Existing confirmed bookings, payments, and credit redemptions remain unaffected.</li>
+              <li>
+                Cover images are uploaded to Cloudinary (<code>course-covers/</code>) and served via global CDN.
+              </li>
+              <li>
+                The registration deadline must not be earlier than the batch start date.
+              </li>
+              <li>
+                Times are formatted with the official India timezone (Asia/Kolkata).
+              </li>
+              <li>
+                When status is set to closed or deadline expires, new bookings are automatically locked.
+              </li>
             </ul>
           </div>
         </div>

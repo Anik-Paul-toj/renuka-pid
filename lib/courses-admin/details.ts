@@ -1,4 +1,4 @@
-import { CourseContentDetails } from "@/lib/validations/course-admin";
+import type { CourseContentDetails } from "../validations/course-admin.ts";
 
 export const COURSE_IMAGES: Record<string, string> = {
   "watercolour-foundation": "/images/foundation.jpeg",

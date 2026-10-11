@@ -1,5 +1,5 @@
 import "server-only";
-import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 
 function getCloudinaryCredentials() {
   let envLocalCredentials: {
@@ -95,6 +95,7 @@ function getCloudinary() {
 }
 
 export const CLOUDINARY_GALLERY_FOLDER = "renuka-art-studio/gallery";
+export const CLOUDINARY_COURSE_COVERS_FOLDER = "renuka-art-studio/course-covers";
 export const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -159,6 +160,52 @@ export async function uploadGalleryImageBuffer(
     const errMsg = error?.message || error?.error?.message || "Unknown error";
     console.error("Cloudinary upload failed:", errMsg);
     throw new Error(`Cloudinary upload failed: ${errMsg}`);
+  }
+}
+
+/**
+ * Upload a course cover image buffer directly to Cloudinary under the dedicated course-covers folder.
+ */
+export async function uploadCourseCoverBuffer(
+  buffer: Buffer,
+  fileName: string,
+  mimeType: string = "image/jpeg",
+  customPublicId?: string
+): Promise<CloudinaryUploadResult> {
+  const { cloudName, apiKey, apiSecret } = getCloudinaryCredentials();
+  const client = getCloudinary();
+
+  const uploadOptions: Record<string, any> = {
+    folder: CLOUDINARY_COURSE_COVERS_FOLDER,
+    resource_type: "image",
+    overwrite: true,
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+  };
+
+  if (customPublicId) {
+    uploadOptions.public_id = customPublicId;
+  }
+
+  const base64Data = buffer.toString("base64");
+  const dataUri = `data:${mimeType || "image/jpeg"};base64,${base64Data}`;
+
+  try {
+    const result: UploadApiResponse = await client.uploader.upload(dataUri, uploadOptions);
+
+    return {
+      publicId: result.public_id,
+      secureUrl: result.secure_url,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+      bytes: result.bytes,
+    };
+  } catch (error: any) {
+    const errMsg = error?.message || error?.error?.message || "Unknown error";
+    console.error("Cloudinary course cover upload failed:", errMsg);
+    throw new Error(`Cloudinary course cover upload failed: ${errMsg}`);
   }
 }
 

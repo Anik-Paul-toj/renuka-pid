@@ -146,7 +146,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
             {/* Left Side: Course Image (~40% on Desktop/Tablet) */}
             <div className="relative w-full md:w-[38%] lg:w-[40%] min-h-[260px] sm:min-h-[320px] md:min-h-full overflow-hidden bg-[#EBE7DC] shrink-0 border-b md:border-b-0 md:border-r border-[#444C38]/20">
               <Image
-                src="/images/foundation.jpeg"
+                src={foundationCourse.imagePath || "/images/foundation.jpeg"}
                 alt={foundationCourse.title}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 500px"
@@ -293,7 +293,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
             {/* Left Side: Course Image (~40% on Desktop/Tablet) */}
             <div className="relative w-full md:w-[38%] lg:w-[40%] min-h-[260px] sm:min-h-[320px] md:min-h-full overflow-hidden bg-[#EBE7DC] shrink-0 border-b md:border-b-0 md:border-r border-[#444C38]/20">
               <Image
-                src="/images/ARTISTRY.jpeg"
+                src={artistryCourse.imagePath || "/images/ARTISTRY.jpeg"}
                 alt={artistryCourse.title}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 500px"

@@ -51,6 +51,8 @@ export interface Database {
           slug: string;
           title: string;
           description: string | null;
+          cover_image_url?: string | null;
+          cover_image_public_id?: string | null;
           original_price_paise: number;
           offer_price_paise: number;
           currency: string;
@@ -64,6 +66,8 @@ export interface Database {
           slug: string;
           title: string;
           description?: string | null;
+          cover_image_url?: string | null;
+          cover_image_public_id?: string | null;
           original_price_paise: number;
           offer_price_paise: number;
           currency?: string;
@@ -77,6 +81,8 @@ export interface Database {
           slug?: string;
           title?: string;
           description?: string | null;
+          cover_image_url?: string | null;
+          cover_image_public_id?: string | null;
           original_price_paise?: number;
           offer_price_paise?: number;
           currency?: string;
@@ -94,6 +100,8 @@ export interface Database {
           start_date: string;
           end_date: string | null;
           last_registration_date?: string | null;
+          cover_image_url?: string | null;
+          cover_image_public_id?: string | null;
           start_time: string;
           end_time: string;
           timezone: string;
@@ -112,6 +120,8 @@ export interface Database {
           start_date: string;
           end_date?: string | null;
           last_registration_date?: string | null;
+          cover_image_url?: string | null;
+          cover_image_public_id?: string | null;
           start_time: string;
           end_time: string;
           timezone?: string;
@@ -130,6 +140,8 @@ export interface Database {
           start_date?: string;
           end_date?: string | null;
           last_registration_date?: string | null;
+          cover_image_url?: string | null;
+          cover_image_public_id?: string | null;
           start_time?: string;
           end_time?: string;
           timezone?: string;

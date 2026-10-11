@@ -22,6 +22,7 @@ export interface AdminCourseData {
   updatedAt: string;
   batchesCount?: number;
   imagePath: string;
+  coverImagePublicId?: string | null;
   details: CourseContentDetails;
   activeBatch?: any | null;
 }
@@ -74,8 +75,11 @@ export async function getAdminCourses(): Promise<AdminCourseData[]> {
       : 0;
 
     const details = parseCourseDetails(c.slug, c.description);
+    const coverImage = (c as any).cover_image_url || details.coverImage;
+    const coverImagePublicId =
+      (c as any).cover_image_public_id || details.coverImagePublicId || null;
     const imagePath =
-      COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
+      coverImage || COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
 
     return {
       id: c.id,
@@ -134,7 +138,11 @@ export async function getAdminCourseById(
     : 0;
 
   const details = parseCourseDetails(c.slug, c.description);
-  const imagePath = COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
+  const coverImage = (c as any).cover_image_url || details.coverImage;
+  const coverImagePublicId =
+    (c as any).cover_image_public_id || details.coverImagePublicId || null;
+  const imagePath =
+    coverImage || COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
 
   return {
     id: c.id,
@@ -219,8 +227,11 @@ export async function updateAdminCourse(
   }
 
   const details = parseCourseDetails(updated.slug, updated.description);
+  const coverImage = (updated as any).cover_image_url || details.coverImage;
+  const coverImagePublicId =
+    (updated as any).cover_image_public_id || details.coverImagePublicId || null;
   const imagePath =
-    COURSE_IMAGES[updated.slug] || "/images/foundation.jpeg";
+    coverImage || COURSE_IMAGES[updated.slug] || "/images/foundation.jpeg";
 
   return {
     id: updated.id,
@@ -321,8 +332,11 @@ export async function getPublicCourses(): Promise<AdminCourseData[]> {
   const coursesWithBatches = await Promise.all(
     sortedCourses.map(async (c) => {
       const details = parseCourseDetails(c.slug, c.description);
+      const coverImage = (c as any).cover_image_url || details.coverImage;
+      const coverImagePublicId =
+        (c as any).cover_image_public_id || details.coverImagePublicId || null;
       const imagePath =
-        COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
+        coverImage || COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
       const activeBatch = await getBatchByCourseId(c.id);
 
       return {
@@ -448,8 +462,11 @@ export async function getPublicCourseBySlug(
   // Fetch dynamic batch schedule for this course
   const activeBatch = await getBatchByCourseId(course.id);
   const details = parseCourseDetails(course.slug, course.description);
+  const coverImage = (course as any).cover_image_url || details.coverImage;
+  const coverImagePublicId =
+    (course as any).cover_image_public_id || details.coverImagePublicId || null;
   const imagePath =
-    COURSE_IMAGES[course.slug] || "/images/foundation.jpeg";
+    coverImage || COURSE_IMAGES[course.slug] || "/images/foundation.jpeg";
 
   return {
     course: {
@@ -471,5 +488,189 @@ export async function getPublicCourseBySlug(
       activeBatch,
     },
     activeBatch,
+  };
+}
+
+/**
+ * Updates a course and its cohort batch cover image via Cloudinary.
+ * Resilient to database column state: saves to columns if present,
+ * and maintains JSON synchronization in courses.description.
+ */
+export async function updateCourseCoverImage(
+  courseIdOrSlug: string,
+  coverImageUrl: string,
+  coverImagePublicId: string
+): Promise<{ success: boolean; coverImageUrl: string; coverImagePublicId: string }> {
+  const adminClient = createAdminClient();
+
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    courseIdOrSlug
+  );
+
+  let query = adminClient.from("courses").select("id, slug, description");
+  if (isUuid) {
+    query = query.eq("id", courseIdOrSlug);
+  } else {
+    query = query.eq("slug", courseIdOrSlug);
+  }
+
+  const { data: course, error: fetchErr } = await query.single();
+  if (fetchErr || !course) {
+    throw new Error(`Course not found for identifier: ${courseIdOrSlug}`);
+  }
+
+  const currentDetails = parseCourseDetails(course.slug, course.description);
+  const updatedDetails = {
+    ...currentDetails,
+    coverImage: coverImageUrl,
+    coverImagePublicId,
+  };
+  const updatedDescriptionJson = JSON.stringify(updatedDetails);
+
+  // 1. Resilient update on courses: try column update with fallback to description JSON
+  try {
+    const { error: colErr } = await adminClient
+      .from("courses")
+      .update({
+        cover_image_url: coverImageUrl,
+        cover_image_public_id: coverImagePublicId,
+        description: updatedDescriptionJson,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq("id", course.id);
+
+    if (colErr) {
+      console.warn("cover_image_url column update failed, saving to description JSON:", colErr.message);
+      await adminClient
+        .from("courses")
+        .update({
+          description: updatedDescriptionJson,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", course.id);
+    }
+  } catch (err: any) {
+    console.warn("Falling back to description JSON update:", err?.message);
+    await adminClient
+      .from("courses")
+      .update({
+        description: updatedDescriptionJson,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", course.id);
+  }
+
+  // 2. Also update cohort_batches for this course
+  try {
+    await adminClient
+      .from("cohort_batches")
+      .update({
+        cover_image_url: coverImageUrl,
+        cover_image_public_id: coverImagePublicId,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq("course_id", course.id);
+  } catch {}
+
+  // 3. Invalidate caches for immediate public propagation
+  try {
+    revalidatePath("/");
+    revalidatePath("/course");
+    revalidatePath(`/course/${course.slug}`);
+    revalidatePath("/course/watercolour-foundation");
+    revalidatePath("/course/watercolour-artistry-foundation");
+    revalidatePath("/admin/batches");
+    revalidatePath("/admin/courses");
+    revalidatePath("/api/cohort-batches/active");
+    revalidatePath("/api/admin/batches");
+  } catch (revalErr) {
+    console.warn("Revalidation warning:", revalErr);
+  }
+
+  return {
+    success: true,
+    coverImageUrl,
+    coverImagePublicId,
+  };
+}
+
+/**
+ * Resets a course cover image back to the default studio artwork.
+ */
+export async function resetCourseCoverImage(
+  courseIdOrSlug: string
+): Promise<{ success: boolean; coverImageUrl: string }> {
+  const adminClient = createAdminClient();
+
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    courseIdOrSlug
+  );
+
+  let query = adminClient.from("courses").select("id, slug, description");
+  if (isUuid) {
+    query = query.eq("id", courseIdOrSlug);
+  } else {
+    query = query.eq("slug", courseIdOrSlug);
+  }
+
+  const { data: course, error: fetchErr } = await query.single();
+  if (fetchErr || !course) {
+    throw new Error(`Course not found for identifier: ${courseIdOrSlug}`);
+  }
+
+  const currentDetails = parseCourseDetails(course.slug, course.description);
+  const { coverImage, coverImagePublicId, ...restDetails } = currentDetails as any;
+  const updatedDescriptionJson = JSON.stringify(restDetails);
+
+  try {
+    await adminClient
+      .from("courses")
+      .update({
+        cover_image_url: null,
+        cover_image_public_id: null,
+        description: updatedDescriptionJson,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq("id", course.id);
+  } catch {
+    await adminClient
+      .from("courses")
+      .update({
+        description: updatedDescriptionJson,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", course.id);
+  }
+
+  try {
+    await adminClient
+      .from("cohort_batches")
+      .update({
+        cover_image_url: null,
+        cover_image_public_id: null,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq("course_id", course.id);
+  } catch {}
+
+  const defaultImage = COURSE_IMAGES[course.slug] || "/images/foundation.jpeg";
+
+  try {
+    revalidatePath("/");
+    revalidatePath("/course");
+    revalidatePath(`/course/${course.slug}`);
+    revalidatePath("/course/watercolour-foundation");
+    revalidatePath("/course/watercolour-artistry-foundation");
+    revalidatePath("/admin/batches");
+    revalidatePath("/admin/courses");
+    revalidatePath("/api/cohort-batches/active");
+    revalidatePath("/api/admin/batches");
+  } catch (revalErr) {
+    console.warn("Revalidation warning:", revalErr);
+  }
+
+  return {
+    success: true,
+    coverImageUrl: defaultImage,
   };
 }

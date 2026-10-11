@@ -11,7 +11,7 @@ import {
   formatBatchTimeIST,
   isRegistrationDeadlineExpired,
 } from "./format";
-import { parseCourseDetails } from "@/lib/courses-admin/details";
+import { parseCourseDetails, COURSE_IMAGES } from "@/lib/courses-admin/details";
 
 export interface SafeBatchScheduleData {
   id: string;
@@ -35,6 +35,8 @@ export interface SafeBatchScheduleData {
   formattedStartDate: string;
   formattedLastRegistrationDate: string;
   formattedTiming: string;
+  coverImageUrl?: string;
+  coverImagePublicId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -147,6 +149,18 @@ export async function getBatchByCourseId(
     status = "closed";
   }
 
+  const coverImageUrl =
+    batchData.cover_image_url ||
+    (course as any)?.cover_image_url ||
+    courseDetails?.coverImage ||
+    (course?.slug ? COURSE_IMAGES[course.slug] : "/images/foundation.jpeg");
+
+  const coverImagePublicId =
+    batchData.cover_image_public_id ||
+    (course as any)?.cover_image_public_id ||
+    courseDetails?.coverImagePublicId ||
+    null;
+
   return {
     id: batchData.id,
     courseId: batchData.course_id,
@@ -169,6 +183,8 @@ export async function getBatchByCourseId(
     formattedStartDate: formatBatchDateIST(batchData.start_date),
     formattedLastRegistrationDate: formatBatchDateIST(lastRegistrationDate),
     formattedTiming: formatBatchTimeIST(batchData.start_time, batchData.end_time),
+    coverImageUrl,
+    coverImagePublicId,
     createdAt: batchData.created_at,
     updatedAt: batchData.updated_at,
   };
@@ -270,6 +286,18 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     status = "closed";
   }
 
+  const coverImageUrl =
+    batchData.cover_image_url ||
+    (course as any)?.cover_image_url ||
+    courseDetails?.coverImage ||
+    (course?.slug ? COURSE_IMAGES[course.slug] : "/images/foundation.jpeg");
+
+  const coverImagePublicId =
+    batchData.cover_image_public_id ||
+    (course as any)?.cover_image_public_id ||
+    courseDetails?.coverImagePublicId ||
+    null;
+
   return {
     id: batchData.id,
     courseId: batchData.course_id,
@@ -292,6 +320,8 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     formattedStartDate: formatBatchDateIST(batchData.start_date),
     formattedLastRegistrationDate: formatBatchDateIST(lastRegistrationDate),
     formattedTiming: formatBatchTimeIST(batchData.start_time, batchData.end_time),
+    coverImageUrl,
+    coverImagePublicId,
     createdAt: batchData.created_at,
     updatedAt: batchData.updated_at,
   };

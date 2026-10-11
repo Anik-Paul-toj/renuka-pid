@@ -14,6 +14,8 @@ export const courseDetailsSchema = z.object({
   cardDescription: z.string().trim().optional(),
   subjects: z.string().trim().optional(),
   cardPriceLabel: z.string().trim().optional(),
+  coverImage: z.string().trim().optional(),
+  coverImagePublicId: z.string().trim().optional(),
 
   // 4. Duration & Session Information
   sessionCountText: z.string().trim().optional(),
