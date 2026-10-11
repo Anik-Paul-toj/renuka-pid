@@ -9,6 +9,7 @@ import { AudienceSection } from "@/components/AudienceSection";
 import { VideoSection } from "@/components/VideoSection";
 import { InstructorStory } from "@/components/InstructorStory";
 import { GallerySection } from "@/components/GallerySection";
+import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { FAQ } from "@/components/FAQ";
 import { FinalCTA } from "@/components/FinalCTA";
 import { Footer } from "@/components/Footer";
@@ -16,11 +17,13 @@ import { StickyBottomBar } from "@/components/StickyBottomBar";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import { GSAPProvider } from "@/components/GSAPProvider";
 import { GalleryItem } from "@/lib/gallery/service";
+import { VideoTestimonial } from "@/lib/testimonials/service";
 
 export function LandingPageClient({
   content,
   initialCourse,
   initialGalleryImages = [],
+  initialTestimonials = [],
 }: {
   content: MasterclassData;
   initialCourse?: {
@@ -29,6 +32,7 @@ export function LandingPageClient({
     durationMinutes?: number;
   } | null;
   initialGalleryImages?: GalleryItem[];
+  initialTestimonials?: VideoTestimonial[];
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -58,10 +62,13 @@ export function LandingPageClient({
             {/* Section 05: Curated Watercolour Gallery */}
             <GallerySection initialImages={initialGalleryImages} />
 
-            {/* Section 06: Frequently Asked Questions */}
+            {/* Section 06: Student Stories & Video Testimonials */}
+            <TestimonialsSection initialTestimonials={initialTestimonials} />
+
+            {/* Section 07: Frequently Asked Questions */}
             <FAQ />
 
-            {/* Section 07: Final Conversion Call to Action */}
+            {/* Section 08: Final Conversion Call to Action */}
             <FinalCTA onOpenModal={handleOpenModal} />
           </main>
 

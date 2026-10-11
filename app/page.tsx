@@ -3,6 +3,7 @@ import { getPublicLandingContent } from "@/lib/cms/public-loader";
 import { LandingPageClient } from "@/components/LandingPageClient";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPublicGalleryImages } from "@/lib/gallery/service";
+import { getPublicVideoTestimonials } from "@/lib/testimonials/service";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +31,11 @@ async function getActivePublicCourse() {
 }
 
 export default async function MasterclassLandingPage() {
-  const [content, activeCourse, galleryImages] = await Promise.all([
+  const [content, activeCourse, galleryImages, testimonials] = await Promise.all([
     getPublicLandingContent(),
     getActivePublicCourse(),
     getPublicGalleryImages(),
+    getPublicVideoTestimonials(),
   ]);
 
   return (
@@ -41,6 +43,7 @@ export default async function MasterclassLandingPage() {
       content={content}
       initialCourse={activeCourse}
       initialGalleryImages={galleryImages}
+      initialTestimonials={testimonials}
     />
   );
 }

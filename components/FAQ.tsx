@@ -27,7 +27,7 @@ export const FAQ: React.FC = () => {
   };
 
   return (
-    <section id="testimonials" className="relative overflow-hidden py-8 sm:py-12 bg-[#F7F4EC]">
+    <section id="faq" className="relative overflow-hidden py-8 sm:py-12 bg-[#F7F4EC]">
       {/* Unique Watercolor Background Artwork */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <Image
