@@ -703,9 +703,5 @@ export const masterclassData: MasterclassData = {
     disclaimer:
       "Renuka Art Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
     handwrittenSignature: "Keep Creating ♡",
-    socialLinks: {
-      instagram: "https://www.instagram.com/renuka_art_educator?obrf=aHE1aXliMWhwbWZ4&utm_source=qr",
-      facebook: "https://www.facebook.com/share/1ccDJzNQHj/?mibextid=wwXIfr",
-    },
   },
 };

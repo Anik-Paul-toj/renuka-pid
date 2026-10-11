@@ -1172,32 +1172,6 @@ export function FooterForm({ value, onChange }: FormProps<any>) {
         </FormField>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FormField label="Instagram Profile URL">
-          <TextInput
-            value={value?.socialLinks?.instagram || ""}
-            onChange={(val) =>
-              onChange({
-                ...value,
-                socialLinks: { ...(value?.socialLinks || {}), instagram: val },
-              })
-            }
-            placeholder="https://www.instagram.com/renuka_art_educator"
-          />
-        </FormField>
-        <FormField label="Facebook Profile / Page URL">
-          <TextInput
-            value={value?.socialLinks?.facebook || ""}
-            onChange={(val) =>
-              onChange({
-                ...value,
-                socialLinks: { ...(value?.socialLinks || {}), facebook: val },
-              })
-            }
-            placeholder="https://www.facebook.com/share/..."
-          />
-        </FormField>
-      </div>
 
       <div className="flex items-center justify-between pt-2">
         <span className="text-xs font-semibold uppercase tracking-wider text-[#464137]">
