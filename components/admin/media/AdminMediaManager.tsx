@@ -15,7 +15,7 @@ import {
   X,
   Search,
 } from "lucide-react";
-import { GalleryItem } from "@/lib/gallery/service";
+import { GalleryItem, GalleryCategory, GALLERY_CATEGORIES } from "@/lib/gallery/service";
 
 interface SystemAsset {
   id: string;
@@ -43,6 +43,7 @@ export function AdminMediaManager({
   // Search and filter
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | GalleryCategory>("all");
 
   // Upload state
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -50,6 +51,7 @@ export function AdminMediaManager({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadAltText, setUploadAltText] = useState("");
+  const [uploadCategory, setUploadCategory] = useState<GalleryCategory>("students_creation");
   const [uploadPublished, setUploadPublished] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +59,7 @@ export function AdminMediaManager({
   // Edit state
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [editCategory, setEditCategory] = useState<GalleryCategory>("students_creation");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Replace state
@@ -145,6 +148,7 @@ export function AdminMediaManager({
       formData.append("file", selectedFile);
       formData.append("title", uploadTitle);
       formData.append("altText", uploadAltText || uploadTitle);
+      formData.append("category", uploadCategory);
       formData.append("displayOrder", "0");
       formData.append("isPublished", uploadPublished.toString());
 
@@ -165,6 +169,7 @@ export function AdminMediaManager({
       setPreviewUrl(null);
       setUploadTitle("");
       setUploadAltText("");
+      setUploadCategory("students_creation");
       setUploadPublished(true);
       await refreshItems();
     } catch (err: any) {
@@ -208,6 +213,7 @@ export function AdminMediaManager({
         body: JSON.stringify({
           title: editTitle,
           altText: editTitle,
+          category: editCategory,
           displayOrder: editingItem.displayOrder,
         }),
       });
@@ -218,7 +224,7 @@ export function AdminMediaManager({
       setGalleryItems((prev) =>
         prev.map((i) =>
           i.id === editingItem.id
-            ? { ...i, title: editTitle, altText: editTitle }
+            ? { ...i, title: editTitle, altText: editTitle, category: editCategory }
             : i
         )
       );
@@ -312,8 +318,11 @@ export function AdminMediaManager({
 
     if (!matchesSearch) return false;
 
-    if (statusFilter === "published") return item.isPublished;
-    if (statusFilter === "draft") return !item.isPublished;
+    if (statusFilter === "published" && !item.isPublished) return false;
+    if (statusFilter === "draft" && item.isPublished) return false;
+
+    if (categoryFilter !== "all" && item.category !== categoryFilter) return false;
+
     return true;
   });
 
@@ -385,9 +394,9 @@ export function AdminMediaManager({
 
       {/* Gallery Management */}
       <div className="space-y-4">
-          {/* Controls Bar: Search & Status Filters */}
-          <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 flex flex-col sm:flex-row gap-3 items-center justify-between">
-            <div className="relative w-full sm:w-72">
+          {/* Controls Bar: Search, Category & Status Filters */}
+          <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="relative w-full md:w-64">
               <Search className="size-3.5 text-[#6F6B61] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -398,22 +407,53 @@ export function AdminMediaManager({
               />
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <span className="text-[0.7rem] uppercase font-bold text-[#6F6B61] tracking-wider">Status:</span>
-              <div className="inline-flex rounded-lg border border-[#464137]/15 p-0.5 bg-white text-xs">
-                {(["all", "published", "draft"] as const).map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setStatusFilter(filter)}
-                    className={`px-3 py-1 rounded-md text-xs font-medium capitalize transition-colors ${
-                      statusFilter === filter
-                        ? "bg-[#68705A] text-white shadow-xs"
-                        : "text-[#6F6B61] hover:text-[#292923]"
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              {/* Category Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[0.68rem] uppercase font-bold text-[#6F6B61] tracking-wider">Category:</span>
+                <div className="inline-flex rounded-lg border border-[#464137]/15 p-0.5 bg-white text-xs">
+                  {(["all", "students_creation", "learning_in_action"] as const).map((cat) => {
+                    const label =
+                      cat === "all"
+                        ? "All"
+                        : cat === "students_creation"
+                        ? "Students' Creation"
+                        : "Learning in Action";
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setCategoryFilter(cat)}
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                          categoryFilter === cat
+                            ? "bg-[#68705A] text-white shadow-xs"
+                            : "text-[#6F6B61] hover:text-[#292923]"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[0.68rem] uppercase font-bold text-[#6F6B61] tracking-wider">Status:</span>
+                <div className="inline-flex rounded-lg border border-[#464137]/15 p-0.5 bg-white text-xs">
+                  {(["all", "published", "draft"] as const).map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setStatusFilter(filter)}
+                      className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize transition-colors ${
+                        statusFilter === filter
+                          ? "bg-[#68705A] text-white shadow-xs"
+                          : "text-[#6F6B61] hover:text-[#292923]"
+                      }`}
+                    >
+                      {filter}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -480,6 +520,17 @@ export function AdminMediaManager({
                       </span>
                     </div>
 
+                    {/* Category Tag Badge */}
+                    <div className="absolute top-2 right-2">
+                      <span className={`px-2 py-0.5 rounded-md text-[0.6rem] font-bold uppercase tracking-wider backdrop-blur-xs shadow-xs ${
+                        item.category === "learning_in_action"
+                          ? "bg-amber-800/85 text-amber-100"
+                          : "bg-[#444C38]/85 text-[#F7F4EC]"
+                      }`}>
+                        {item.category === "learning_in_action" ? "Action" : "Creation"}
+                      </span>
+                    </div>
+
                     {/* Quick Preview Button */}
                     <button
                       onClick={() => setPreviewingItem(item)}
@@ -526,9 +577,10 @@ export function AdminMediaManager({
                         onClick={() => {
                           setEditingItem(item);
                           setEditTitle(item.title);
+                          setEditCategory(item.category);
                         }}
                         className="p-1.5 rounded-lg border border-[#464137]/15 text-[#292923] hover:bg-[#F0EDE6] transition-colors"
-                        title="Edit artwork title"
+                        title="Edit artwork title and category"
                       >
                         <Edit2 className="size-3.5" />
                       </button>
@@ -641,6 +693,50 @@ export function AdminMediaManager({
                 />
               </div>
 
+              {/* Category Selector */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#292923] mb-1.5">
+                  Gallery Section / Category
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setUploadCategory("students_creation")}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      uploadCategory === "students_creation"
+                        ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] shadow-xs ring-1 ring-[#68705A]"
+                        : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
+                    }`}
+                  >
+                    <div className="text-xs font-bold text-[#292923] flex items-center gap-1.5">
+                      <span>🎨</span>
+                      <span>Students&apos; Creation</span>
+                    </div>
+                    <div className="text-[0.65rem] text-[#6F6B61] mt-1 leading-snug">
+                      Artwork, paintings & studies by workshop students
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setUploadCategory("learning_in_action")}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      uploadCategory === "learning_in_action"
+                        ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] shadow-xs ring-1 ring-[#68705A]"
+                        : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
+                    }`}
+                  >
+                    <div className="text-xs font-bold text-[#292923] flex items-center gap-1.5">
+                      <span>📸</span>
+                      <span>Learning in Action</span>
+                    </div>
+                    <div className="text-[0.65rem] text-[#6F6B61] mt-1 leading-snug">
+                      Live demonstrations, studio moments & practice
+                    </div>
+                  </button>
+                </div>
+              </div>
+
               {/* Publication Status */}
               <div className="pt-1">
                 <label className="inline-flex items-center gap-2 cursor-pointer">
@@ -713,6 +809,37 @@ export function AdminMediaManager({
                   onChange={(e) => setEditTitle(e.target.value)}
                   className="w-full px-3 py-2 text-xs bg-white border border-[#464137]/20 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#68705A]"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#292923] mb-1.5">
+                  Category Section
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditCategory("students_creation")}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      editCategory === "students_creation"
+                        ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] ring-1 ring-[#68705A]"
+                        : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
+                    }`}
+                  >
+                    <div className="text-xs font-bold text-[#292923]">🎨 Students&apos; Creation</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditCategory("learning_in_action")}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      editCategory === "learning_in_action"
+                        ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] ring-1 ring-[#68705A]"
+                        : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
+                    }`}
+                  >
+                    <div className="text-xs font-bold text-[#292923]">📸 Learning in Action</div>
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-[#464137]/10">

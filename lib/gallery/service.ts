@@ -9,6 +9,21 @@ import {
   MAX_FILE_SIZE_BYTES,
 } from "@/lib/cloudinary/service";
 
+export type GalleryCategory = "students_creation" | "learning_in_action";
+
+export const GALLERY_CATEGORIES: { id: GalleryCategory; label: string; description: string }[] = [
+  {
+    id: "students_creation",
+    label: "Students' Creation",
+    description: "Original botanical and landscape studies created by students in our workshops and cohorts.",
+  },
+  {
+    id: "learning_in_action",
+    label: "Learning in Action",
+    description: "Behind-the-scenes snapshots, live demonstrations, and hands-on creative practice in the studio.",
+  },
+];
+
 export interface GalleryItem {
   id: string;
   publicId: string;
@@ -20,7 +35,7 @@ export interface GalleryItem {
   fileName: string;
   fileSizeBytes: number;
   mimeType: string;
-  category: string;
+  category: GalleryCategory;
   isPublished: boolean;
   displayOrder: number;
   metadata?: Record<string, any> | null;
@@ -56,6 +71,21 @@ function formatGalleryItem(row: any): GalleryItem {
     quality: "auto",
   });
 
+  // Normalize category to students_creation | learning_in_action
+  let category: GalleryCategory = "students_creation";
+  const rawCat = (row.category || "").toLowerCase();
+  const metaCat = row.metadata?.category || row.metadata?.gallery_category;
+
+  if (
+    rawCat.includes("learning") ||
+    rawCat.includes("action") ||
+    metaCat === "learning_in_action"
+  ) {
+    category = "learning_in_action";
+  } else {
+    category = "students_creation";
+  }
+
   return {
     id: row.id,
     publicId,
@@ -67,7 +97,7 @@ function formatGalleryItem(row: any): GalleryItem {
     fileName: row.file_name || "artwork.jpg",
     fileSizeBytes: Number(row.file_size_bytes) || 0,
     mimeType: row.mime_type || "image/jpeg",
-    category: row.category || "gallery",
+    category,
     isPublished,
     displayOrder,
     metadata: row.metadata || null,
@@ -84,11 +114,11 @@ export async function getPublicGalleryImages(): Promise<GalleryItem[]> {
   try {
     const supabase = createAdminClient();
 
-    // Query media_assets for gallery category items
+    // Query media_assets for all gallery category items
     const { data: rows, error } = await supabase
       .from("media_assets")
       .select("*")
-      .in("category", ["gallery", "gallery_published"])
+      .or("category.eq.gallery,category.ilike.gallery_%")
       .order("created_at", { ascending: false });
 
     if (error || !rows) {
@@ -152,6 +182,7 @@ export async function uploadGalleryImage(
   options: {
     title?: string;
     altText?: string;
+    category?: GalleryCategory;
     isPublished?: boolean;
     displayOrder?: number;
   },
@@ -183,13 +214,17 @@ export async function uploadGalleryImage(
 
   // 3. Persist to Supabase media_assets
   const supabase = createAdminClient();
+  const category: GalleryCategory =
+    options.category === "learning_in_action" ? "learning_in_action" : "students_creation";
   const isPublished = options.isPublished ?? true;
   const displayOrder = options.displayOrder ?? 0;
   const title = options.title?.trim() || file.name.replace(/\.[^/.]+$/, "");
   const altText = options.altText?.trim() || title;
 
-  // Resilient insert: include is_published and display_order if supported,
-  // with category fallback ("gallery" vs "gallery_draft")
+  const dbCategory = isPublished
+    ? `gallery_${category}`
+    : `gallery_${category}_draft`;
+
   const insertPayload: Record<string, any> = {
     bucket: "cloudinary",
     file_path: cloudinaryResult.publicId,
@@ -198,7 +233,7 @@ export async function uploadGalleryImage(
     mime_type: file.type,
     file_size_bytes: cloudinaryResult.bytes,
     alt_text: altText,
-    category: isPublished ? "gallery" : "gallery_draft",
+    category: dbCategory,
     created_by: adminId || null,
   };
 
@@ -210,6 +245,8 @@ export async function uploadGalleryImage(
     height: cloudinaryResult.height,
     format: cloudinaryResult.format,
     title,
+    category,
+    gallery_category: category,
   };
 
   let { data: inserted, error } = await supabase
@@ -259,6 +296,7 @@ export async function updateGalleryImage(
   updates: {
     title?: string;
     altText?: string;
+    category?: GalleryCategory;
     isPublished?: boolean;
     displayOrder?: number;
   }
@@ -290,10 +328,36 @@ export async function updateGalleryImage(
     updatePayload.alt_text = updates.title;
   }
 
+  let currentCategory: GalleryCategory = "students_creation";
+  if (
+    existing.category?.includes("learning") ||
+    existing.metadata?.category === "learning_in_action" ||
+    existing.metadata?.gallery_category === "learning_in_action"
+  ) {
+    currentCategory = "learning_in_action";
+  }
+
+  const targetCategory: GalleryCategory = updates.category || currentCategory;
+  const targetPublished: boolean =
+    updates.isPublished !== undefined
+      ? updates.isPublished
+      : existing.is_published !== undefined && existing.is_published !== null
+      ? Boolean(existing.is_published)
+      : !existing.category?.endsWith("_draft");
+
+  updatePayload.category = targetPublished
+    ? `gallery_${targetCategory}`
+    : `gallery_${targetCategory}_draft`;
+
   if (updates.isPublished !== undefined) {
     updatePayload.is_published = updates.isPublished;
-    updatePayload.category = updates.isPublished ? "gallery" : "gallery_draft";
   }
+
+  updatePayload.metadata = {
+    ...(existing.metadata || {}),
+    category: targetCategory,
+    gallery_category: targetCategory,
+  };
 
   if (updates.displayOrder !== undefined) {
     updatePayload.display_order = updates.displayOrder;

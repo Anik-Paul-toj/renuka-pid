@@ -72,6 +72,8 @@ export async function POST(request: NextRequest) {
 
     const title = (formData.get("title") as string) || "";
     const altText = (formData.get("altText") as string) || title;
+    const categoryRaw = formData.get("category") as string;
+    const category = categoryRaw === "learning_in_action" ? "learning_in_action" : "students_creation";
     const isPublishedRaw = formData.get("isPublished");
     const isPublished = isPublishedRaw === null ? true : isPublishedRaw === "true" || isPublishedRaw === "1";
     const displayOrderRaw = formData.get("displayOrder");
@@ -82,6 +84,7 @@ export async function POST(request: NextRequest) {
       {
         title,
         altText,
+        category,
         isPublished,
         displayOrder,
       },

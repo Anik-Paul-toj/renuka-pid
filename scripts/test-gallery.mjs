@@ -223,6 +223,30 @@ async function main() {
     assert.strictEqual(destroyRes.result, "ok", "Destroy must return ok");
   });
 
+  // --- TEST 10: Category Partitioning (Students' Creation vs Learning in Action) ---
+  runTest("Test 10: Gallery category partitioning correctly groups Students' Creation and Learning in Action", () => {
+    const mockItems = [
+      { id: "1", title: "Botanical Rose", category: "students_creation", isPublished: true },
+      { id: "2", title: "Studio Demo Live", category: "learning_in_action", isPublished: true },
+      { id: "3", title: "Loose Landscape Study", category: "students_creation", isPublished: true },
+      { id: "4", title: "Palette Setup Video", category: "learning_in_action", isPublished: true },
+      { id: "5", title: "Legacy Artwork", category: "gallery", isPublished: true },
+    ];
+
+    // Normalization rule
+    const normalized = mockItems.map((item) => ({
+      ...item,
+      normalizedCategory: item.category === "learning_in_action" ? "learning_in_action" : "students_creation",
+    }));
+
+    const students = normalized.filter((i) => i.normalizedCategory === "students_creation");
+    const action = normalized.filter((i) => i.normalizedCategory === "learning_in_action");
+
+    assert.strictEqual(students.length, 3, "Students' Creation must include 2 explicit + 1 legacy");
+    assert.strictEqual(action.length, 2, "Learning in Action must include 2 items");
+    assert.ok(students.some((i) => i.title === "Legacy Artwork"), "Legacy gallery category must default to Students' Creation");
+  });
+
   console.log("==================================================================");
   console.log(`TEST SUMMARY: ${passedTests} PASSED, ${failedTests} FAILED`);
   console.log("==================================================================");

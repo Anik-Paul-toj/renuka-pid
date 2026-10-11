@@ -10,8 +10,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Brush,
+  Camera,
 } from "lucide-react";
-import { GalleryItem } from "@/lib/gallery/service";
+import { GalleryItem, GalleryCategory } from "@/lib/gallery/service";
 
 interface GallerySectionProps {
   initialImages?: GalleryItem[];
@@ -19,8 +21,13 @@ interface GallerySectionProps {
 
 export function GallerySection({ initialImages = [] }: GallerySectionProps) {
   const [images] = useState<GalleryItem[]>(initialImages);
+  const [activeTab, setActiveTab] = useState<"all" | GalleryCategory>("all");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [failedImageIds, setFailedImageIds] = useState<Set<string>>(new Set());
+
+  // Partition images by category
+  const studentsImages = images.filter((img) => img.category === "students_creation");
+  const actionImages = images.filter((img) => img.category === "learning_in_action");
 
   // Handle ESC key and arrow keys for Lightbox navigation
   useEffect(() => {
@@ -51,6 +58,91 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
   const currentLightboxImage =
     lightboxIndex !== null && images[lightboxIndex] ? images[lightboxIndex] : null;
 
+  // Render individual artwork card
+  const renderCard = (item: GalleryItem) => {
+    const isFailed = failedImageIds.has(item.id);
+    const globalIndex = images.findIndex((img) => img.id === item.id);
+
+    return (
+      <div
+        key={item.id}
+        onClick={() => setLightboxIndex(globalIndex >= 0 ? globalIndex : 0)}
+        className="group relative rounded-2xl bg-[#F7F4EC] border border-[#464137]/12 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-500 cursor-pointer flex flex-col"
+      >
+        {/* Artwork Image Container */}
+        <div className="relative aspect-4/5 w-full bg-[#EEE9DE] overflow-hidden">
+          {isFailed ? (
+            /* Graceful Error Fallback */
+            <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-[#6F6B61] bg-[#F7F4EC] space-y-2">
+              <Palette className="size-8 text-[#68705A]/40" />
+              <span className="font-serif text-xs font-semibold text-[#292923]">
+                {item.title}
+              </span>
+              <span className="text-[0.65rem] text-[#8C877C]">Studio Watercolour Work</span>
+            </div>
+          ) : (
+            <>
+              <Image
+                src={item.thumbnailUrl || item.url}
+                alt={item.altText || item.title}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                className="object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
+                onError={() => handleImageError(item.id)}
+              />
+
+              {/* Category Pill Tag */}
+              <div className="absolute top-3 left-3 z-10">
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[0.62rem] font-bold uppercase tracking-wider backdrop-blur-xs shadow-xs ${
+                    item.category === "learning_in_action"
+                      ? "bg-amber-900/80 text-amber-100 border border-amber-200/30"
+                      : "bg-[#444C38]/85 text-[#F7F4EC] border border-white/20"
+                  }`}
+                >
+                  {item.category === "learning_in_action" ? "Learning in Action" : "Students' Creation"}
+                </span>
+              </div>
+
+              {/* Hover Overlay with Caption & Zoom Icon */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5 text-white">
+                <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 space-y-1">
+                  <span className="text-[0.65rem] tracking-[0.16em] uppercase font-bold text-[#D4A373]">
+                    {item.category === "learning_in_action" ? "Studio Snapshot" : "Student Masterpiece"}
+                  </span>
+                  <h4 className="font-serif text-base font-bold text-white leading-snug drop-shadow-xs">
+                    {item.title}
+                  </h4>
+                </div>
+
+                <div className="absolute top-3 right-3 size-8 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-white/90">
+                  <Maximize2 className="size-3.5" />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Card Title Bar */}
+        <div className="p-4 bg-[#FAF8F2] border-t border-[#464137]/08 flex items-center justify-between">
+          <div className="truncate">
+            <h4 className="font-serif text-sm font-bold text-[#1F1D19] truncate">
+              {item.title}
+            </h4>
+            <p className="text-[0.68rem] text-[#6F6B61] mt-0.5">
+              {item.category === "learning_in_action"
+                ? "Renuka Art Studio • Live Practice"
+                : "Renuka Art Studio • Student Work"}
+            </p>
+          </div>
+          <span className="shrink-0 size-7 rounded-full bg-[#F0EDE6] flex items-center justify-center text-[#68705A] group-hover:bg-[#68705A] group-hover:text-white transition-colors">
+            <Eye className="size-3.5" />
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <section
       id="gallery"
@@ -76,8 +168,8 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
       <div className="absolute bottom-10 left-0 size-80 rounded-full bg-[#D4A373]/15 blur-3xl pointer-events-none -ml-40" />
 
       <div className="max-w-7xl xl:max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-4 mb-14 sm:mb-18">
+        {/* Main Section Header */}
+        <div className="text-center max-w-2xl mx-auto space-y-4 mb-10 sm:mb-14">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-[#555C48] border border-[#68705A]/15 shadow-2xs">
             <Palette className="size-3 text-[#68705A]" />
             <span>Studio Artwork Showcase</span>
@@ -88,13 +180,52 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
           </h2>
 
           <p className="text-sm sm:text-base text-[#6F6B61] leading-relaxed">
-            A curated exhibition of botanical studies, loose landscapes, and demonstration paintings created live in the Renuka Art Studio.
+            A curated exhibition of student breakthroughs and behind-the-scenes studio sessions from Renuka Art Studio.
           </p>
+
+          {/* Category Navigation Pills */}
+          {images.length > 0 && (
+            <div className="pt-2 flex items-center justify-center gap-2 flex-wrap">
+              <button
+                onClick={() => setActiveTab("all")}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all cursor-pointer ${
+                  activeTab === "all"
+                    ? "bg-[#68705A] text-white shadow-xs"
+                    : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
+                }`}
+              >
+                All Works ({images.length})
+              </button>
+
+              <button
+                onClick={() => setActiveTab("students_creation")}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === "students_creation"
+                    ? "bg-[#68705A] text-white shadow-xs"
+                    : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
+                }`}
+              >
+                <Brush className="size-3" />
+                <span>Students&apos; Creation ({studentsImages.length})</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("learning_in_action")}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === "learning_in_action"
+                    ? "bg-[#68705A] text-white shadow-xs"
+                    : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
+                }`}
+              >
+                <Camera className="size-3" />
+                <span>Learning in Action ({actionImages.length})</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Gallery Grid */}
+        {/* Global Empty State */}
         {images.length === 0 ? (
-          /* Empty State */
           <div className="p-12 sm:p-16 rounded-3xl bg-[#F7F4EC] border border-dashed border-[#464137]/20 text-center max-w-xl mx-auto space-y-4 shadow-xs">
             <div className="size-14 rounded-2xl bg-[#C8D1C7]/30 flex items-center justify-center mx-auto text-[#68705A]">
               <Sparkles className="size-7" />
@@ -103,79 +234,84 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
               Curating Fresh Studio Paintings
             </h3>
             <p className="text-xs sm:text-sm text-[#6F6B61] leading-relaxed">
-              Original demonstration works and student project highlights from recent workshops are currently being prepared for exhibition. Check back shortly to explore our newest pieces.
+              Original demonstration works and student creations from recent workshops are currently being prepared for exhibition. Check back shortly to explore our newest pieces.
             </p>
           </div>
         ) : (
-          /* Active Responsive Artwork Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
-            {images.map((item, index) => {
-              const isFailed = failedImageIds.has(item.id);
-
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => setLightboxIndex(index)}
-                  className="group relative rounded-2xl bg-[#F7F4EC] border border-[#464137]/12 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-500 cursor-pointer flex flex-col"
-                >
-                  {/* Artwork Image Container */}
-                  <div className="relative aspect-4/5 w-full bg-[#EEE9DE] overflow-hidden">
-                    {isFailed ? (
-                      /* Graceful Error Fallback */
-                      <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-[#6F6B61] bg-[#F7F4EC] space-y-2">
-                        <Palette className="size-8 text-[#68705A]/40" />
-                        <span className="font-serif text-xs font-semibold text-[#292923]">
-                          {item.title}
-                        </span>
-                        <span className="text-[0.65rem] text-[#8C877C]">Studio Watercolour Work</span>
-                      </div>
-                    ) : (
-                      <>
-                        <Image
-                          src={item.thumbnailUrl || item.url}
-                          alt={item.altText || item.title}
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                          className="object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-                          onError={() => handleImageError(item.id)}
-                        />
-
-                        {/* Hover Overlay with Caption & Zoom Icon */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5 text-white">
-                          <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 space-y-1">
-                            <span className="text-[0.65rem] tracking-[0.16em] uppercase font-bold text-[#D4A373]">
-                              Original Piece
-                            </span>
-                            <h4 className="font-serif text-base font-bold text-white leading-snug drop-shadow-xs">
-                              {item.title}
-                            </h4>
-                          </div>
-
-                          <div className="absolute top-3 right-3 size-8 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center text-white/90">
-                            <Maximize2 className="size-3.5" />
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Card Title Bar (Always visible on mobile/clean) */}
-                  <div className="p-4 bg-[#FAF8F2] border-t border-[#464137]/08 flex items-center justify-between">
-                    <div className="truncate">
-                      <h4 className="font-serif text-sm font-bold text-[#1F1D19] truncate">
-                        {item.title}
-                      </h4>
-                      <p className="text-[0.68rem] text-[#6F6B61] mt-0.5">
-                        Renuka Art Studio Collection
-                      </p>
+          <div className="space-y-16 sm:space-y-20">
+            {/* SECTION 1: STUDENTS' CREATION */}
+            {(activeTab === "all" || activeTab === "students_creation") && (
+              <div className="space-y-6">
+                {/* Section 1 Header */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-4 border-b border-[#464137]/15">
+                  <div>
+                    <div className="inline-flex items-center gap-1 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-[#68705A]">
+                      <Brush className="size-3" />
+                      <span>Section 01</span>
                     </div>
-                    <span className="shrink-0 size-7 rounded-full bg-[#F0EDE6] flex items-center justify-center text-[#68705A] group-hover:bg-[#68705A] group-hover:text-white transition-colors">
-                      <Eye className="size-3.5" />
-                    </span>
+                    <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#1F1D19] mt-0.5">
+                      Students&apos; Creation
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#6F6B61] mt-1 max-w-2xl leading-relaxed">
+                      Original botanical studies, landscapes, and creative wash exercises painted by our students during live sessions.
+                    </p>
                   </div>
+                  <span className="text-xs font-semibold text-[#8C877C] shrink-0">
+                    {studentsImages.length} {studentsImages.length === 1 ? "Artwork" : "Artworks"}
+                  </span>
                 </div>
-              );
-            })}
+
+                {/* Section 1 Grid */}
+                {studentsImages.length === 0 ? (
+                  <div className="p-8 rounded-2xl bg-[#FAF8F2]/70 border border-dashed border-[#464137]/15 text-center">
+                    <p className="text-xs text-[#6F6B61]">
+                      Student paintings are being curated. Upload pieces via the Admin Media panel to display them here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
+                    {studentsImages.map(renderCard)}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 2: LEARNING IN ACTION */}
+            {(activeTab === "all" || activeTab === "learning_in_action") && (
+              <div className="space-y-6">
+                {/* Section 2 Header */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-4 border-b border-[#464137]/15">
+                  <div>
+                    <div className="inline-flex items-center gap-1 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-[#A66E38]">
+                      <Camera className="size-3" />
+                      <span>Section 02</span>
+                    </div>
+                    <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#1F1D19] mt-0.5">
+                      Learning in Action
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#6F6B61] mt-1 max-w-2xl leading-relaxed">
+                      Behind-the-scenes moments, live demonstration classes, palette setups, and interactive creative guidance in the studio.
+                    </p>
+                  </div>
+                  <span className="text-xs font-semibold text-[#8C877C] shrink-0">
+                    {actionImages.length} {actionImages.length === 1 ? "Photo" : "Photos"}
+                  </span>
+                </div>
+
+                {/* Section 2 Grid */}
+                {actionImages.length === 0 ? (
+                  <div className="p-8 rounded-2xl bg-[#FAF8F2]/70 border border-dashed border-[#464137]/15 text-center">
+                    <p className="text-xs text-[#6F6B61]">
+                      Studio session moments are being prepared. Upload Learning in Action snapshots via the Admin Media panel.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
+                    {actionImages.map(renderCard)}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -189,7 +325,7 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
           {/* Close Button */}
           <button
             onClick={() => setLightboxIndex(null)}
-            className="absolute top-5 right-5 z-20 size-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            className="absolute top-5 right-5 z-20 size-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
             title="Close Lightbox (ESC)"
           >
             <X className="size-5" />
@@ -204,7 +340,7 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
                   prev !== null ? (prev > 0 ? prev - 1 : images.length - 1) : null
                 );
               }}
-              className="absolute left-4 sm:left-8 z-20 size-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              className="absolute left-4 sm:left-8 z-20 size-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
               title="Previous artwork"
             >
               <ChevronLeft className="size-6" />
@@ -220,7 +356,7 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
                   prev !== null ? (prev < images.length - 1 ? prev + 1 : 0) : null
                 );
               }}
-              className="absolute right-4 sm:right-8 z-20 size-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              className="absolute right-4 sm:right-8 z-20 size-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
               title="Next artwork"
             >
               <ChevronRight className="size-6" />
@@ -242,6 +378,11 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
 
             {/* Lightbox Caption */}
             <div className="mt-4 text-center text-white space-y-1 px-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[0.62rem] font-bold uppercase tracking-wider bg-white/15 text-white/90">
+                {currentLightboxImage.category === "learning_in_action"
+                  ? "Learning in Action"
+                  : "Students' Creation"}
+              </div>
               <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight">
                 {currentLightboxImage.title}
               </h3>

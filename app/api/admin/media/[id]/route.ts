@@ -35,9 +35,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
 
+    const category =
+      body.category === "learning_in_action" || body.category === "students_creation"
+        ? body.category
+        : undefined;
+
     const updated = await updateGalleryImage(id, {
       title: body.title,
       altText: body.altText,
+      category,
       isPublished: body.isPublished !== undefined ? Boolean(body.isPublished) : undefined,
       displayOrder: typeof body.displayOrder === "number" ? body.displayOrder : undefined,
     });
