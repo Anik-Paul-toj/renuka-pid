@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, CheckCircle2, Calendar, Clock, Sparkles, ArrowRight, AlertCircle } from "lucide-react";
+import { X, CheckCircle2, Calendar, Clock, Sparkles, ArrowRight, AlertCircle, Hourglass } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface RegistrationModalProps {
@@ -17,10 +17,17 @@ interface ActiveBatchInfo {
   id: string;
   batchName: string;
   startDate: string;
+  endDate?: string | null;
+  lastRegistrationDate?: string;
   startTime: string;
   endTime: string;
   isEnrollmentOpen: boolean;
+  isRegistrationClosed?: boolean;
+  isExpired?: boolean;
   isSoldOut: boolean;
+  formattedStartDate?: string;
+  formattedLastRegistrationDate?: string;
+  formattedTiming?: string;
   courseTitle?: string;
   offerPrice?: number;
   offerPricePaise?: number;
@@ -99,10 +106,17 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           id: data.batch.id,
           batchName: data.batch.batchName,
           startDate: data.batch.startDate,
+          endDate: data.batch.endDate,
+          lastRegistrationDate: data.batch.lastRegistrationDate,
           startTime: data.batch.startTime,
           endTime: data.batch.endTime,
           isEnrollmentOpen: Boolean(data.batch.isEnrollmentOpen),
+          isRegistrationClosed: Boolean(data.batch.isRegistrationClosed),
+          isExpired: Boolean(data.batch.isExpired),
           isSoldOut: Boolean(data.batch.isSoldOut),
+          formattedStartDate: data.batch.formattedStartDate,
+          formattedLastRegistrationDate: data.batch.formattedLastRegistrationDate,
+          formattedTiming: data.batch.formattedTiming,
           courseTitle: data.batch.course?.title || courseTitle,
           offerPrice: data.batch.course?.offerPrice ?? coursePrice,
           offerPricePaise: data.batch.course?.offerPricePaise ?? (coursePrice ? coursePrice * 100 : undefined),
@@ -411,8 +425,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       return;
     }
 
-    if (currentBatch && !currentBatch.isEnrollmentOpen) {
-      setErrorMessage("Enrollment is currently closed for this batch.");
+    if (
+      currentBatch?.isRegistrationClosed ||
+      currentBatch?.isExpired ||
+      (currentBatch && !currentBatch.isEnrollmentOpen)
+    ) {
+      setErrorMessage("Registration for this batch has closed as the deadline has passed.");
       setIsLoading(false);
       return;
     }
@@ -538,16 +556,47 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             </p>
 
             {/* Quick Session Details */}
-            <div className="mt-3 rounded-md bg-[#F7F4EC] p-2.5 border border-[#464137]/15 text-[11px] text-[#14120E] flex flex-col gap-1">
-              <div className="flex items-center gap-2 font-semibold">
-                <Calendar className="size-3 text-[#444C38] shrink-0" />
-                <span>{activeBatch?.startDate ? `${activeBatch.batchName} (${activeBatch.startDate})` : hero.date}</span>
+            <div className="mt-3 rounded-md bg-[#F7F4EC] p-2.5 border border-[#464137]/15 text-[11px] text-[#14120E] flex flex-col gap-1.5">
+              <div className="flex items-center justify-between font-semibold">
+                <div className="flex items-center gap-2">
+                  <Calendar className="size-3 text-[#444C38] shrink-0" />
+                  <span>{activeBatch?.startDate ? `${activeBatch.batchName} (${activeBatch.formattedStartDate || activeBatch.startDate})` : hero.date}</span>
+                </div>
+                {activeBatch && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded text-[0.6rem] font-bold uppercase ${
+                      activeBatch.isRegistrationClosed || activeBatch.isExpired || !activeBatch.isEnrollmentOpen
+                        ? "bg-[#6F6B61]/15 text-[#6F6B61]"
+                        : "bg-[#3E522D]/15 text-[#3E522D]"
+                    }`}
+                  >
+                    {activeBatch.isRegistrationClosed || activeBatch.isExpired || !activeBatch.isEnrollmentOpen
+                      ? "Closed"
+                      : "Open"}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2 font-semibold">
                 <Clock className="size-3 text-[#444C38] shrink-0" />
-                <span>{activeBatch?.startTime ? `${activeBatch.startTime} – ${activeBatch.endTime} IST` : `${hero.time} (${hero.duration})`}</span>
+                <span>{activeBatch?.formattedTiming || (activeBatch?.startTime ? `${activeBatch.startTime} – ${activeBatch.endTime} IST` : `${hero.time} (${hero.duration})`)}</span>
               </div>
+              {activeBatch?.lastRegistrationDate && (
+                <div className="text-[10px] text-[#6F6B61] flex items-center gap-1.5">
+                  <Hourglass className="size-2.5 text-[#B93821] shrink-0" />
+                  <span>
+                    Last Registration: <strong>{activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate}</strong>
+                  </span>
+                </div>
+              )}
             </div>
+
+            {/* Registration Closed Alert */}
+            {(activeBatch?.isRegistrationClosed || activeBatch?.isExpired || (activeBatch && !activeBatch.isEnrollmentOpen)) && (
+              <div className="mt-3 flex items-start gap-2 rounded-md border border-[#444C38]/30 bg-[#EEE9DE] p-2.5 text-xs text-[#292923] font-medium">
+                <AlertCircle className="size-4 shrink-0 text-[#68705A] mt-0.5" />
+                <span>Registration is currently closed for this batch as the deadline has passed.</span>
+              </div>
+            )}
 
             {/* Payment Pending Alert */}
             {paymentPending && (
@@ -677,13 +726,26 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
               <button
                 type="submit"
-                disabled={isLoading || (isPaymentLocked && !paymentPending) || activeBatch?.isSoldOut}
+                disabled={
+                  isLoading ||
+                  (isPaymentLocked && !paymentPending) ||
+                  activeBatch?.isSoldOut ||
+                  Boolean(
+                    activeBatch?.isRegistrationClosed ||
+                      activeBatch?.isExpired ||
+                      (activeBatch && !activeBatch.isEnrollmentOpen)
+                  )
+                }
                 className="btn-studio w-full py-3 mt-1.5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <span>Processing...</span>
                 ) : activeBatch?.isSoldOut ? (
                   <span>Cohort Sold Out</span>
+                ) : activeBatch?.isRegistrationClosed ||
+                  activeBatch?.isExpired ||
+                  (activeBatch && !activeBatch.isEnrollmentOpen) ? (
+                  <span>Registration Closed</span>
                 ) : paymentPending ? (
                   <>
                     <span>Retry Payment</span>

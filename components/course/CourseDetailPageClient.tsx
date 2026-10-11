@@ -14,25 +14,17 @@ import {
   Award,
   Layers,
   HelpCircle,
+  Hourglass,
 } from "lucide-react";
 import { AdminCourseData } from "@/lib/courses-admin/service";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
 
 interface CourseDetailPageClientProps {
   course: AdminCourseData;
-  activeBatch: {
-    id: string;
-    batchName: string;
-    startDate: string;
-    startTime: string;
-    endTime: string;
-    totalSeats: number;
-    seatsBooked: number;
-    seatsRemaining: number;
-    isSoldOut: boolean;
-  } | null;
+  activeBatch: any | null;
 }
 
 export function CourseDetailPageClient({
@@ -43,6 +35,15 @@ export function CourseDetailPageClient({
 
   const isFoundation = course.slug === "watercolour-foundation";
   const details = course.details;
+
+  const isRegistrationClosed = Boolean(
+    !activeBatch ||
+      !activeBatch.isEnrollmentOpen ||
+      activeBatch.isExpired ||
+      activeBatch.isSoldOut ||
+      (activeBatch.lastRegistrationDate &&
+        isRegistrationDeadlineExpired(activeBatch.lastRegistrationDate))
+  );
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between selection:bg-[#444C38]/20">
@@ -197,6 +198,100 @@ export function CourseDetailPageClient({
                   </div>
                 </div>
               </div>
+
+              {/* Dynamic Cohort Scheduling Box */}
+              {activeBatch && (
+                <div className="group/sched relative overflow-hidden rounded-xl bg-[#FAF8F2]/95 border border-[#444C38]/30 p-4 sm:p-5 shadow-xs space-y-3">
+                  <div className="pointer-events-none absolute inset-0 z-0">
+                    <Image
+                      src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                      alt=""
+                      fill
+                      sizes="800px"
+                      className="object-cover object-center opacity-15 mix-blend-multiply select-none"
+                    />
+                  </div>
+
+                  <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 border-b border-[#444C38]/15 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2 rounded-full bg-[#444C38] animate-pulse" />
+                      <span className="text-[0.7rem] uppercase tracking-wider font-bold text-[#444C38]">
+                        {activeBatch.batchName || "Upcoming Live Atelier Cohort"}
+                      </span>
+                    </div>
+
+                    <span
+                      className={`px-2.5 py-0.5 rounded text-[0.66rem] font-bold uppercase tracking-wider ${
+                        isRegistrationClosed
+                          ? "bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25"
+                          : "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
+                      }`}
+                    >
+                      {isRegistrationClosed
+                        ? "Registration Closed"
+                        : "Open for Registration"}
+                    </span>
+                  </div>
+
+                  <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex items-start gap-2.5">
+                      <div className="size-8 rounded-lg bg-[#444C38]/12 border border-[#444C38]/20 flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
+                        <Calendar className="size-4" />
+                      </div>
+                      <div>
+                        <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
+                          Batch Starting Date
+                        </span>
+                        <span className="font-bold text-[#14120E] text-xs sm:text-sm block">
+                          {activeBatch.formattedStartDate ||
+                            activeBatch.startDate ||
+                            "To be announced"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2.5">
+                      <div className="size-8 rounded-lg bg-[#B93821]/10 border border-[#B93821]/20 flex items-center justify-center text-[#B93821] shrink-0 mt-0.5">
+                        <Hourglass className="size-4" />
+                      </div>
+                      <div>
+                        <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
+                          Last Date for Registration
+                        </span>
+                        <span
+                          className={`font-bold text-xs sm:text-sm block ${
+                            isRegistrationClosed
+                              ? "text-[#6F6B61] line-through"
+                              : "text-[#B93821]"
+                          }`}
+                        >
+                          {activeBatch.formattedLastRegistrationDate ||
+                            activeBatch.lastRegistrationDate ||
+                            activeBatch.startDate ||
+                            "To be announced"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2.5">
+                      <div className="size-8 rounded-lg bg-[#1E3A5F]/10 border border-[#1E3A5F]/20 flex items-center justify-center text-[#1E3A5F] shrink-0 mt-0.5">
+                        <Clock className="size-4" />
+                      </div>
+                      <div>
+                        <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
+                          Batch Timing
+                        </span>
+                        <span className="font-bold text-[#14120E] text-xs sm:text-sm block">
+                          {activeBatch.formattedTiming ||
+                            (activeBatch.startTime
+                              ? `${activeBatch.startTime} IST`
+                              : "TBA")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* 2. Course Description */}
               {details.fullDescription && (
@@ -388,17 +483,44 @@ export function CourseDetailPageClient({
                         </span>
                       </div>
                       {activeBatch && (
-                        <span className="text-[0.72rem] text-[#353D2A] font-bold block mt-1.5">
-                          ✓ {activeBatch.batchName} ({activeBatch.startDate}) • {activeBatch.seatsRemaining ? `${activeBatch.seatsRemaining} seats left` : "Seats available"}
-                        </span>
+                        <div className="mt-2 text-xs space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-[#353D2A] text-[0.72rem]">
+                              ✓ {activeBatch.batchName} ({activeBatch.formattedStartDate || activeBatch.startDate})
+                            </span>
+                            <span
+                              className={`px-2 py-0.2 rounded text-[0.6rem] font-bold uppercase tracking-wider ${
+                                isRegistrationClosed
+                                  ? "bg-[#6F6B61]/15 text-[#6F6B61]"
+                                  : "bg-[#3E522D]/15 text-[#3E522D]"
+                              }`}
+                            >
+                              {isRegistrationClosed
+                                ? "Registration Closed"
+                                : "Open for Registration"}
+                            </span>
+                          </div>
+                          <div className="text-[0.68rem] text-[#6F6B61] flex flex-wrap gap-x-2.5">
+                            <span>Last Registration: <strong>{activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate}</strong></span>
+                            <span>Timing: <strong>{activeBatch.formattedTiming || activeBatch.startTime}</strong></span>
+                          </div>
+                        </div>
                       )}
                     </div>
 
                     <button
-                      onClick={() => setIsModalOpen(true)}
-                      className="btn-studio px-8 py-4 text-xs sm:text-sm tracking-wider font-bold shadow-md inline-flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                      onClick={() => !isRegistrationClosed && setIsModalOpen(true)}
+                      disabled={isRegistrationClosed}
+                      className="btn-studio px-8 py-4 text-xs sm:text-sm tracking-wider font-bold shadow-md inline-flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span>{details.ctaText || (isFoundation ? "Enrol in Foundation Course" : "Enrol in Artistry Course")}</span>
+                      <span>
+                        {isRegistrationClosed
+                          ? "Registration Closed"
+                          : details.ctaText ||
+                            (isFoundation
+                              ? "Enrol in Foundation Course"
+                              : "Enrol in Artistry Course")}
+                      </span>
                       <ArrowRight className="size-4" />
                     </button>
                   </div>

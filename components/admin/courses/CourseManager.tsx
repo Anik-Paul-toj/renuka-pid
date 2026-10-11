@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { AdminCourseData } from "@/lib/courses-admin/service";
 import { CourseScheduleItem } from "@/lib/validations/course-admin";
+import { AdminBatchScheduleManager } from "@/components/admin/batches/AdminBatchScheduleManager";
 
 interface CourseManagerProps {
   initialCourses: AdminCourseData[];
@@ -58,7 +59,7 @@ export function CourseManager({
 
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "basic" | "listing" | "pricing" | "duration" | "description" | "outcomes" | "schedule" | "cta"
+    "basic" | "batch-schedule" | "listing" | "pricing" | "duration" | "description" | "outcomes" | "schedule" | "cta"
   >("basic");
 
   // Form State initialized from activeCourse
@@ -539,13 +540,14 @@ export function CourseManager({
           <div className="flex border-b border-[#464137]/15 bg-[#FAF8F2] px-4 overflow-x-auto">
             {[
               { id: "basic", label: "1. Basic Info", icon: Info },
-              { id: "listing", label: "2. Listing Card", icon: Layers },
-              { id: "pricing", label: "3. Pricing", icon: IndianRupee },
-              { id: "duration", label: "4. Sessions & Duration", icon: Clock },
-              { id: "description", label: "5. Description", icon: FileText },
-              { id: "outcomes", label: "6. Learning Outcomes", icon: BookOpen },
-              { id: "schedule", label: "7. Schedule", icon: Calendar },
-              { id: "cta", label: "8. Additional & CTA", icon: MousePointerClick },
+              { id: "batch-schedule", label: "2. Batch Schedule", icon: Calendar },
+              { id: "listing", label: "3. Listing Card", icon: Layers },
+              { id: "pricing", label: "4. Pricing", icon: IndianRupee },
+              { id: "duration", label: "5. Sessions & Duration", icon: Clock },
+              { id: "description", label: "6. Description", icon: FileText },
+              { id: "outcomes", label: "7. Learning Outcomes", icon: BookOpen },
+              { id: "schedule", label: "8. Curriculum Schedule", icon: Calendar },
+              { id: "cta", label: "9. Additional & CTA", icon: MousePointerClick },
             ].map((tab) => {
               const Icon = tab.icon;
               const isCurrent = activeTab === tab.id;
@@ -580,9 +582,17 @@ export function CourseManager({
           </div>
         )}
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {isLandingPageWorkshop ? (
+        {/* Section Navigation Tabs Body */}
+        {activeTab === "batch-schedule" && !isLandingPageWorkshop ? (
+          <div className="p-6">
+            <AdminBatchScheduleManager
+              initialCourseId={activeCourse.id}
+              userRole={userRole}
+            />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {isLandingPageWorkshop ? (
             <div className="space-y-6">
               {/* Alert helper */}
               <div className="p-4 rounded-xl bg-[#EEE9DE]/60 border border-[#464137]/15 flex items-start gap-3">
@@ -1736,6 +1746,7 @@ export function CourseManager({
             </div>
           )}
         </form>
+      )}
       </div>
     </div>
   );

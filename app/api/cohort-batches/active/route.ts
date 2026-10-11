@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  formatBatchDateIST,
+  formatBatchTimeIST,
+  isRegistrationDeadlineExpired,
+} from "@/lib/batches-admin/format";
+import { parseCourseDetails } from "@/lib/courses-admin/service";
 
 export const dynamic = "force-dynamic";
 
@@ -28,22 +34,36 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    let batchQuery = supabase
+    // Try selecting with last_registration_date first
+    let batches: any[] | null = null;
+    let { data: bData, error: bErr } = await supabase
       .from("cohort_batches")
       .select(
-        "id, course_id, batch_name, start_date, end_date, start_time, end_time, timezone, total_seats, seats_booked, is_enrollment_open"
+        "id, course_id, batch_name, start_date, end_date, last_registration_date, start_time, end_time, timezone, total_seats, seats_booked, is_enrollment_open"
       )
-      .eq("is_enrollment_open", true);
+      .eq("is_enrollment_open", true)
+      .order("start_date", { ascending: true })
+      .limit(10);
 
-    if (targetCourseId) {
-      batchQuery = batchQuery.eq("course_id", targetCourseId);
+    if (bErr && (bErr.code === "42703" || bErr.message?.includes("last_registration_date"))) {
+      const { data: fallbackData } = await supabase
+        .from("cohort_batches")
+        .select(
+          "id, course_id, batch_name, start_date, end_date, start_time, end_time, timezone, total_seats, seats_booked, is_enrollment_open"
+        )
+        .eq("is_enrollment_open", true)
+        .order("start_date", { ascending: true })
+        .limit(10);
+      batches = fallbackData;
+    } else {
+      batches = bData;
     }
 
-    const { data: batches, error } = await batchQuery
-      .order("start_date", { ascending: true })
-      .limit(1);
+    if (targetCourseId && batches) {
+      batches = batches.filter((b) => b.course_id === targetCourseId);
+    }
 
-    if (error || !batches || batches.length === 0) {
+    if (!batches || batches.length === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -63,6 +83,7 @@ export async function GET(request: NextRequest) {
 
     const batch = batches[0];
     const seatsRemaining = Math.max(0, batch.total_seats - batch.seats_booked);
+    const isSoldOut = seatsRemaining <= 0;
 
     let courseData: any = targetCourse;
     if (!courseData && batch.course_id) {
@@ -76,6 +97,16 @@ export async function GET(request: NextRequest) {
       courseData = c;
     }
 
+    const courseDetails = courseData?.slug
+      ? parseCourseDetails(courseData.slug, courseData.description)
+      : null;
+    const fallbackMetaDeadline = (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
+    const lastRegistrationDate =
+      batch.last_registration_date || fallbackMetaDeadline || batch.start_date;
+
+    const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate);
+    const isRegistrationClosed = !batch.is_enrollment_open || isExpired || isSoldOut;
+
     return NextResponse.json(
       {
         success: true,
@@ -85,14 +116,20 @@ export async function GET(request: NextRequest) {
           batchName: batch.batch_name,
           startDate: batch.start_date,
           endDate: batch.end_date,
+          lastRegistrationDate,
           startTime: batch.start_time,
           endTime: batch.end_time,
-          timezone: batch.timezone,
+          timezone: batch.timezone || "Asia/Kolkata",
           totalSeats: batch.total_seats,
           seatsBooked: batch.seats_booked,
           seatsRemaining,
-          isEnrollmentOpen: batch.is_enrollment_open,
-          isSoldOut: seatsRemaining <= 0,
+          isEnrollmentOpen: batch.is_enrollment_open && !isExpired && !isSoldOut,
+          isRegistrationClosed,
+          isExpired,
+          isSoldOut,
+          formattedStartDate: formatBatchDateIST(batch.start_date),
+          formattedLastRegistrationDate: formatBatchDateIST(lastRegistrationDate),
+          formattedTiming: formatBatchTimeIST(batch.start_time, batch.end_time),
           course: courseData
             ? {
                 id: courseData.id,
@@ -116,6 +153,7 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (err: any) {
+    console.error("API /api/cohort-batches/active error:", err);
     return NextResponse.json(
       {
         success: false,

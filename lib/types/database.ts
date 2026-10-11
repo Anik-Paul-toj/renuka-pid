@@ -93,6 +93,7 @@ export interface Database {
           batch_name: string;
           start_date: string;
           end_date: string | null;
+          last_registration_date?: string | null;
           start_time: string;
           end_time: string;
           timezone: string;
@@ -110,6 +111,7 @@ export interface Database {
           batch_name: string;
           start_date: string;
           end_date?: string | null;
+          last_registration_date?: string | null;
           start_time: string;
           end_time: string;
           timezone?: string;
@@ -127,6 +129,7 @@ export interface Database {
           batch_name?: string;
           start_date?: string;
           end_date?: string | null;
+          last_registration_date?: string | null;
           start_time?: string;
           end_time?: string;
           timezone?: string;
@@ -564,6 +567,7 @@ export interface Database {
           batch_name: string;
           start_date: string;
           end_date: string | null;
+          last_registration_date?: string | null;
           start_time: string;
           end_time: string;
           timezone: string;

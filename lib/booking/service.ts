@@ -2,6 +2,8 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateBookingInput } from "@/lib/validations/booking";
 import { verifyCreditVerificationToken } from "@/lib/course-credit/identity";
+import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
+import { parseCourseDetails } from "@/lib/courses-admin/service";
 import crypto from "crypto";
 
 export interface SafeBookingDetails {
@@ -70,7 +72,8 @@ export async function processBooking(
   const adminClient = createAdminClient();
 
   // 1. Authoritative Batch & Course Verification
-  const { data: batchData, error: batchErr } = await adminClient
+  let batchData: any = null;
+  const { data: primaryBatch, error: batchErr } = await adminClient
     .from("cohort_batches")
     .select(
       `
@@ -78,6 +81,8 @@ export async function processBooking(
       course_id,
       batch_name,
       start_date,
+      end_date,
+      last_registration_date,
       start_time,
       end_time,
       timezone,
@@ -87,6 +92,8 @@ export async function processBooking(
       courses (
         id,
         title,
+        slug,
+        description,
         offer_price_paise,
         currency,
         is_active
@@ -96,7 +103,41 @@ export async function processBooking(
     .eq("id", input.batchId)
     .maybeSingle();
 
-  if (batchErr || !batchData) {
+  if (!batchErr && primaryBatch) {
+    batchData = primaryBatch;
+  } else if (batchErr && (batchErr.code === "42703" || batchErr.message?.includes("last_registration_date"))) {
+    const { data: fallbackBatch } = await adminClient
+      .from("cohort_batches")
+      .select(
+        `
+        id,
+        course_id,
+        batch_name,
+        start_date,
+        end_date,
+        start_time,
+        end_time,
+        timezone,
+        total_seats,
+        seats_booked,
+        is_enrollment_open,
+        courses (
+          id,
+          title,
+          slug,
+          description,
+          offer_price_paise,
+          currency,
+          is_active
+        )
+      `
+      )
+      .eq("id", input.batchId)
+      .maybeSingle();
+    batchData = fallbackBatch;
+  }
+
+  if (!batchData) {
     return {
       success: false,
       error: {
@@ -125,6 +166,26 @@ export async function processBooking(
       error: {
         code: "ENROLLMENT_CLOSED",
         message: "Enrollment is currently closed for this batch.",
+        statusCode: 400,
+      },
+    };
+  }
+
+  // Authoritatively enforce registration deadline
+  const courseDetails = course?.slug
+    ? parseCourseDetails(course.slug, course.description)
+    : null;
+  const lastRegDate =
+    batchData.last_registration_date ||
+    (courseDetails as any)?.batchSchedule?.lastRegistrationDate ||
+    batchData.start_date;
+
+  if (isRegistrationDeadlineExpired(lastRegDate)) {
+    return {
+      success: false,
+      error: {
+        code: "ENROLLMENT_CLOSED",
+        message: "Registration for this batch has closed as the deadline has passed.",
         statusCode: 400,
       },
     };
