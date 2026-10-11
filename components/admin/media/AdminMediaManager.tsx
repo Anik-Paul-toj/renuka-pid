@@ -42,7 +42,6 @@ export function AdminMediaManager({
 
   // Search and filter
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
   const [categoryFilter, setCategoryFilter] = useState<"all" | GalleryCategory>("all");
 
   // Upload state
@@ -52,7 +51,6 @@ export function AdminMediaManager({
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadAltText, setUploadAltText] = useState("");
   const [uploadCategory, setUploadCategory] = useState<GalleryCategory>("students_creation");
-  const [uploadPublished, setUploadPublished] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -150,7 +148,7 @@ export function AdminMediaManager({
       formData.append("altText", uploadAltText || uploadTitle);
       formData.append("category", uploadCategory);
       formData.append("displayOrder", "0");
-      formData.append("isPublished", uploadPublished.toString());
+      formData.append("isPublished", "true");
 
       const res = await fetch("/api/admin/media", {
         method: "POST",
@@ -163,14 +161,13 @@ export function AdminMediaManager({
         throw new Error(data.error || "Upload failed.");
       }
 
-      setSuccessMessage(`"${uploadTitle || selectedFile.name}" uploaded successfully to Cloudinary!`);
+      setSuccessMessage(`"${uploadTitle || selectedFile.name}" uploaded and published to gallery!`);
       setIsUploadOpen(false);
       setSelectedFile(null);
       setPreviewUrl(null);
       setUploadTitle("");
       setUploadAltText("");
       setUploadCategory("students_creation");
-      setUploadPublished(true);
       await refreshItems();
     } catch (err: any) {
       setError(err.message || "Failed to upload image.");
@@ -318,9 +315,6 @@ export function AdminMediaManager({
 
     if (!matchesSearch) return false;
 
-    if (statusFilter === "published" && !item.isPublished) return false;
-    if (statusFilter === "draft" && item.isPublished) return false;
-
     if (categoryFilter !== "all" && item.category !== categoryFilter) return false;
 
     return true;
@@ -435,26 +429,6 @@ export function AdminMediaManager({
                   })}
                 </div>
               </div>
-
-              {/* Status Filter */}
-              <div className="flex items-center gap-1.5">
-                <span className="text-[0.68rem] uppercase font-bold text-[#6F6B61] tracking-wider">Status:</span>
-                <div className="inline-flex rounded-lg border border-[#464137]/15 p-0.5 bg-white text-xs">
-                  {(["all", "published", "draft"] as const).map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setStatusFilter(filter)}
-                      className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize transition-colors ${
-                        statusFilter === filter
-                          ? "bg-[#68705A] text-white shadow-xs"
-                          : "text-[#6F6B61] hover:text-[#292923]"
-                      }`}
-                    >
-                      {filter}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
 
@@ -464,8 +438,8 @@ export function AdminMediaManager({
               <ImageIcon className="size-10 text-[#68705A]/40 mx-auto" />
               <h3 className="font-serif text-lg font-bold text-[#292923]">No gallery artworks found</h3>
               <p className="text-xs text-[#6F6B61] max-w-md mx-auto">
-                {searchQuery || statusFilter !== "all"
-                  ? "No images match your filter criteria. Try clearing search or status filters."
+                {searchQuery
+                  ? "No images match your search criteria. Try clearing the search."
                   : "Start curating your landing page gallery by uploading high-resolution watercolor artwork."}
               </p>
               <button
@@ -499,24 +473,9 @@ export function AdminMediaManager({
 
                     {/* Status Badge */}
                     <div className="absolute top-2 left-2">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold tracking-wide shadow-xs ${
-                          item.isPublished
-                            ? "bg-emerald-600 text-white"
-                            : "bg-amber-500 text-white"
-                        }`}
-                      >
-                        {item.isPublished ? (
-                          <>
-                            <Eye className="size-2.5" />
-                            <span>Published</span>
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff className="size-2.5" />
-                            <span>Draft</span>
-                          </>
-                        )}
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.62rem] font-bold tracking-wide shadow-xs bg-emerald-700/90 text-white">
+                        <Eye className="size-2.5" />
+                        <span>Live in Gallery</span>
                       </span>
                     </div>
 
@@ -558,19 +517,7 @@ export function AdminMediaManager({
                     </div>
 
                     {/* Action Bar */}
-                    <div className="pt-2.5 border-t border-[#464137]/10 flex items-center justify-between gap-1">
-                      {/* Publish Toggle Button */}
-                      <button
-                        onClick={() => handleTogglePublish(item)}
-                        className={`p-1.5 rounded-lg border text-xs transition-colors ${
-                          item.isPublished
-                            ? "border-amber-200 text-amber-700 hover:bg-amber-50"
-                            : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                        }`}
-                        title={item.isPublished ? "Unpublish (Move to draft)" : "Publish to public gallery"}
-                      >
-                        {item.isPublished ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-                      </button>
+                    <div className="pt-2.5 border-t border-[#464137]/10 flex items-center justify-end gap-1">
 
                       {/* Edit Details */}
                       <button
@@ -737,19 +684,6 @@ export function AdminMediaManager({
                 </div>
               </div>
 
-              {/* Publication Status */}
-              <div className="pt-1">
-                <label className="inline-flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={uploadPublished}
-                    onChange={(e) => setUploadPublished(e.target.checked)}
-                    className="rounded border-[#464137]/30 text-[#68705A] focus:ring-[#68705A]"
-                  />
-                  <span className="text-xs font-medium text-[#292923]">Publish immediately to website gallery</span>
-                </label>
-              </div>
-
               {/* Actions */}
               <div className="flex justify-end gap-2 pt-3 border-t border-[#464137]/10">
                 <button
@@ -769,12 +703,12 @@ export function AdminMediaManager({
                   {isUploading ? (
                     <>
                       <RefreshCw className="size-3.5 animate-spin" />
-                      <span>Uploading to Cloudinary...</span>
+                      <span>Uploading & Publishing...</span>
                     </>
                   ) : (
                     <>
                       <UploadCloud className="size-4" />
-                      <span>Upload & Save</span>
+                      <span>Upload to Landing Page</span>
                     </>
                   )}
                 </button>

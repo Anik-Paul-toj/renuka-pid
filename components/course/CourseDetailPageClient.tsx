@@ -191,7 +191,7 @@ export function CourseDetailPageClient({
                         Platform
                       </span>
                       <span className="inline-flex items-center font-bold text-[#132A45] bg-[#1E3A5F]/15 border border-[#1E3A5F]/30 px-2 py-0.5 rounded text-[0.78rem] leading-none">
-                        Zoom Atelier
+                        Zoom
                       </span>
                     </div>
                   </div>
