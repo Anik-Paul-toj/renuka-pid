@@ -46,7 +46,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
   { name: "Messages", href: "/admin/messages", icon: Mail },
   { name: "Broadcast", href: "/admin/broadcast", icon: Radio },
-  { name: "Notifications / Logs", href: "/admin/notifications", icon: Bell },
+  { name: "Notifications", href: "/admin/notifications", icon: Bell },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

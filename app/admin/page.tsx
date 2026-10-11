@@ -134,7 +134,7 @@ export default async function AdminDashboardPage() {
               {formatPaiseToINR(metrics.totalCapturedRevenuePaise)}
             </div>
             <p className="text-[0.7rem] text-[#6F6B61] mt-0.5">
-              Strict integer paise Razorpay reconciliation
+              Total verified payments received
             </p>
           </div>
         </div>

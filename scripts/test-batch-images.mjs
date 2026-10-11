@@ -121,8 +121,8 @@ runTest("Test 6: AdminBatchScheduleManager includes cover image preview and uplo
   const content = fs.readFileSync(managerPath, "utf-8");
 
   assert.ok(
-    content.includes("Course Cover Image (Cloudinary)"),
-    "Must include Cloudinary cover image section header"
+    content.includes("Course Cover Image"),
+    "Must include cover image section header"
   );
   assert.ok(
     content.includes("Upload New Image") || content.includes("Replace Image"),
@@ -137,7 +137,7 @@ runTest("Test 6: AdminBatchScheduleManager includes cover image preview and uplo
     "Must include file change handler"
   );
   assert.ok(
-    content.includes("Uploading to Cloudinary"),
+    content.includes("Uploading image") || content.includes("Uploading to Cloudinary"),
     "Must include upload progress indicator"
   );
 });

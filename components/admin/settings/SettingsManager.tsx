@@ -93,7 +93,7 @@ export function SettingsManager({
         setLastUpdatedBy(data.settings.updatedBy);
       }
     } catch (err: any) {
-      setErrorMessage("Network error occurred while saving settings.");
+      setErrorMessage("Could not save settings. Please check your connection and try again.");
     } finally {
       setIsSaving(false);
     }

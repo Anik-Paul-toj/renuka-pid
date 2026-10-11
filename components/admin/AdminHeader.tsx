@@ -25,7 +25,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "/admin/payments": "Payments & Orders",
   "/admin/messages": "Message Templates",
   "/admin/broadcast": "Broadcast Announcements",
-  "/admin/notifications": "Notifications & Logs",
+  "/admin/notifications": "Notifications",
   "/admin/settings": "Admin & Studio Settings",
 };
 

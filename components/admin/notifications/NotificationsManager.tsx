@@ -161,10 +161,10 @@ export function NotificationsManager({
       {/* Header */}
       <div>
         <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight">
-          Notifications &amp; Delivery Logs
+          Notifications
         </h1>
         <p className="text-sm text-stone-500 mt-1">
-          Audit delivery attempts, inspect failure reasons, and safely retry failed notifications.
+          View message delivery history and retry failed notifications.
         </p>
       </div>
 
@@ -546,7 +546,7 @@ export function NotificationsManager({
 
                 <div className="bg-stone-50 rounded-xl p-3 border border-stone-200/80">
                   <span className="font-bold uppercase tracking-wider text-stone-400 block mb-0.5">
-                    Sent Timestamp
+                    Date &amp; Time
                   </span>
                   <span className="text-stone-800">
                     {formatNotificationDate(selectedLog.sentAt)}
@@ -585,10 +585,10 @@ export function NotificationsManager({
                 </div>
               )}
 
-              {/* Provider Identifier if Available */}
+              {/* Delivery Reference if Available */}
               {selectedLog.providerMessageId && (
                 <div className="text-xs text-stone-500">
-                  <span className="font-medium text-stone-600">Provider Message ID: </span>
+                  <span className="font-medium text-stone-600">Delivery Reference: </span>
                   <span className="font-mono">{selectedLog.providerMessageId}</span>
                 </div>
               )}

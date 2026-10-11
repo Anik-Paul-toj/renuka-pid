@@ -141,7 +141,7 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
   const handleCancelBooking = async () => {
     if (!bookingDetail) return;
     const confirmAction = window.confirm(
-      `Are you sure you want to cancel booking ${bookingDetail.bookingReference}? This will atomically release the seat hold.`
+      `Are you sure you want to cancel booking ${bookingDetail.bookingReference}? This will release the reserved seat.`
     );
     if (!confirmAction) return;
 
@@ -524,7 +524,7 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
             <div className="flex items-start justify-between border-b border-[#464137]/10 pb-4">
               <div>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-[#68705A]">
-                  Reservation Audit Record
+                  Booking Details
                 </span>
                 <h2 className="font-serif text-2xl font-bold text-[#292923] mt-1 font-mono">
                   {bookingDetail?.bookingReference || "Booking Details"}
@@ -649,9 +649,9 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                         </span>
                       </div>
                       <div>
-                        <span className="block text-[#6F6B61] text-[0.68rem]">Seat Hold Status:</span>
+                        <span className="block text-[#6F6B61] text-[0.68rem]">Seat Status:</span>
                         <span className="font-semibold text-[#292923]">
-                          {bookingDetail.seatReleased ? "Released / Inactive" : "Active Hold"}
+                          {bookingDetail.seatReleased ? "Released" : "Reserved"}
                         </span>
                       </div>
                     </div>
@@ -716,10 +716,10 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                     <div className="space-y-0.5">
                       <div className="font-bold text-amber-900 flex items-center gap-1.5">
                         <AlertTriangle className="size-4 text-amber-700" />
-                        <span>Administrative Seat Release</span>
+                        <span>Cancel Booking</span>
                       </div>
                       <p className="text-[0.7rem] text-amber-800">
-                        Cancelling this reservation will execute an atomic seat release, decrementing booked seats back to the batch pool.
+                        Cancelling this reservation will release the seat so it becomes available for other students.
                       </p>
                     </div>
 
@@ -728,7 +728,7 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                       disabled={isCancelling}
                       className="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-colors shrink-0 disabled:opacity-50"
                     >
-                      {isCancelling ? "Releasing..." : "Cancel & Release Seat"}
+                      {isCancelling ? "Cancelling..." : "Cancel & Release Seat"}
                     </button>
                   </div>
                 )}

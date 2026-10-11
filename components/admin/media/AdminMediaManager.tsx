@@ -272,7 +272,7 @@ export function AdminMediaManager({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Replacement failed.");
 
-      setSuccessMessage("Image replaced successfully on Cloudinary CDN.");
+      setSuccessMessage("Image replaced successfully.");
       setReplacingItem(null);
       setReplacementFile(null);
       setReplacementPreview(null);
@@ -298,7 +298,7 @@ export function AdminMediaManager({
       if (!res.ok) throw new Error(data.error || "Delete failed.");
 
       setGalleryItems((prev) => prev.filter((i) => i.id !== deletingItem.id));
-      setSuccessMessage("Image deleted from Cloudinary CDN and database.");
+      setSuccessMessage("Image deleted successfully.");
       setDeletingItem(null);
     } catch (err: any) {
       setError(err.message || "Failed to delete image.");
@@ -327,11 +327,11 @@ export function AdminMediaManager({
         <div>
           <div className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-0.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#68705A] mb-2">
             <ImageIcon className="size-3" />
-            <span>Cloudinary Asset Library</span>
+            <span>Media Library</span>
           </div>
           <h1 className="font-serif text-2xl font-bold text-[#292923]">Gallery & Media Management</h1>
           <p className="text-xs text-[#6F6B61] mt-1 max-w-xl">
-            Upload, curate, and optimize watercolor exhibition artworks for the public landing page gallery. Powered by Cloudinary CDN.
+            Upload, curate, and organize artwork for the public landing page gallery.
           </p>
         </div>
 
@@ -540,7 +540,7 @@ export function AdminMediaManager({
                           setReplacementPreview(null);
                         }}
                         className="p-1.5 rounded-lg border border-[#464137]/15 text-[#292923] hover:bg-[#F0EDE6] transition-colors"
-                        title="Replace image file on Cloudinary"
+                        title="Replace image file"
                       >
                         <RefreshCw className="size-3.5" />
                       </button>
@@ -815,7 +815,7 @@ export function AdminMediaManager({
             </div>
 
             <p className="text-xs text-[#6F6B61]">
-              Replace <strong>{replacingItem.title}</strong> with a new image. The previous file will be safely deleted from Cloudinary CDN.
+              Replace <strong>{replacingItem.title}</strong> with a new image. The previous image will be removed.
             </p>
 
             <input
@@ -877,7 +877,7 @@ export function AdminMediaManager({
                 disabled={isReplacing || !replacementFile}
                 className="px-5 py-2 text-xs font-semibold rounded-xl bg-[#68705A] text-white hover:bg-[#575E4B] transition-colors flex items-center gap-2 disabled:opacity-50"
               >
-                {isReplacing ? "Replacing on CDN..." : "Confirm Replacement"}
+                {isReplacing ? "Replacing image..." : "Confirm Replacement"}
               </button>
             </div>
           </div>
@@ -894,7 +894,7 @@ export function AdminMediaManager({
             </div>
 
             <p className="text-xs text-[#6F6B61]">
-              Are you sure you want to permanently delete <strong>{deletingItem.title}</strong>? This will remove the image from Cloudinary CDN and the public gallery.
+              Are you sure you want to permanently delete <strong>{deletingItem.title}</strong>? This will remove the image from the public gallery.
             </p>
 
             <div className="flex justify-end gap-2 pt-2">

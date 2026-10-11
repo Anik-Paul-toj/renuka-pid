@@ -241,7 +241,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
               Payments & Orders
             </h1>
             <p className="text-xs text-[#6F6B61] mt-1">
-              Read-only transaction ledger, Razorpay verification audit, capture reconciliation, and state consistency checks.
+              View transaction history, payment statuses, and order records.
             </p>
           </div>
           <button
@@ -268,7 +268,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
             <span className="text-xl font-bold text-[#292923]">
               {formatPaiseToInr(summary.totalCapturedAmountPaise)}
             </span>
-            <span className="block text-[0.65rem] text-[#6F6B61] mt-0.5">Authoritative captured sum</span>
+            <span className="block text-[0.65rem] text-[#6F6B61] mt-0.5">Total completed payments</span>
           </div>
         </div>
 
@@ -292,7 +292,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
           </div>
           <div className="mt-2">
             <span className="text-xl font-bold text-[#292923]">{summary.totalCount}</span>
-            <span className="block text-[0.65rem] text-[#6F6B61] mt-0.5">All payment intents</span>
+            <span className="block text-[0.65rem] text-[#6F6B61] mt-0.5">All payment attempts</span>
           </div>
         </div>
 
@@ -790,7 +790,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
                   <div className="p-4 rounded-xl bg-white/70 border border-[#464137]/10 space-y-3">
                     <div className="text-[0.68rem] font-bold uppercase tracking-wider text-[#68705A] flex items-center gap-1.5">
                       <ShieldCheck className="size-3.5" />
-                      <span>Diagnostics & Acquirer Data</span>
+                      <span>Payment & Gateway Details</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -821,7 +821,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
 
                       {paymentDetail.failureReason && (
                         <div className="col-span-2 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800">
-                          <span className="block font-semibold text-[0.68rem]">Failure Diagnostic:</span>
+                          <span className="block font-semibold text-[0.68rem]">Failure Reason:</span>
                           <span className="text-xs">{paymentDetail.failureReason}</span>
                         </div>
                       )}
@@ -888,7 +888,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
 
                   {/* Read-Only Audit Footnote */}
                   <div className="p-3 rounded-lg bg-[#EEE9DE]/60 border border-[#464137]/10 text-[0.7rem] text-[#6F6B61]">
-                    🔒 <strong>Financial Audit Record:</strong> Payment ledger entries are immutable audit records. Direct state manipulation, manual captures, and manual status changes are prohibited to prevent payment gateway drift.
+                    🔒 <strong>Payment Record:</strong> Payment entries are read-only records updated automatically by the payment gateway to ensure accurate financial records.
                   </div>
                 </>
               ) : null}

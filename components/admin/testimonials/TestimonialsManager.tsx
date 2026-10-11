@@ -271,9 +271,9 @@ export function TestimonialsManager({
         <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3">
           <AlertCircle className="size-5 shrink-0 text-amber-600 mt-0.5" />
           <div className="text-xs space-y-1">
-            <p className="font-bold">Database Setup Notice: Migration Ready</p>
+            <p className="font-bold">Testimonials Storage Notice</p>
             <p className="text-amber-800">
-              The <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-[0.7rem]">video_testimonials</code> table has been prepared in migration file <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-[0.7rem]">supabase/migrations/20261011000001_video_testimonials.sql</code>. Execute this migration in your Supabase SQL editor to enable persistent storage.
+              Testimonials are currently using sample preview data. Please contact your administrator to enable permanent testimonial storage.
             </p>
           </div>
         </div>

@@ -435,7 +435,7 @@ export function BroadcastManager({
             <div>
               <p className="font-semibold text-amber-900">WhatsApp is not configured</p>
               <p className="mt-0.5 text-amber-700">
-                Add the required server-side WhatsApp Business API configuration before sending.
+                Please configure WhatsApp settings before sending broadcasts.
               </p>
             </div>
           </div>

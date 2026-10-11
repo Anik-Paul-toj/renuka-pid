@@ -122,13 +122,13 @@ export function CMSManager({
       setIsDirty(false);
       setStatusMessage({
         type: "success",
-        text: `Draft (v${data.data.version}) saved successfully. Live site remains unchanged.`,
+        text: "Draft saved successfully. The live website remains unchanged.",
       });
     } catch (err) {
       console.error("Save draft error:", err);
       setStatusMessage({
         type: "error",
-        text: "Network error occurred while saving draft.",
+        text: "Could not save draft. Please check your connection and try again.",
       });
     } finally {
       setIsSaving(false);
@@ -188,13 +188,13 @@ export function CMSManager({
       setIsDirty(false);
       setStatusMessage({
         type: "success",
-        text: `Section published live (v${data.data.version})! Changes are atomically recorded.`,
+        text: "Section published successfully! Changes are now live.",
       });
     } catch (err) {
       console.error("Publish error:", err);
       setStatusMessage({
         type: "error",
-        text: "Network error occurred while publishing.",
+        text: "Could not publish section. Please check your connection and try again.",
       });
     } finally {
       setIsPublishing(false);

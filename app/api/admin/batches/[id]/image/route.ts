@@ -123,7 +123,7 @@ export async function POST(
       success: true,
       coverImageUrl: updateResult.coverImageUrl,
       coverImagePublicId: updateResult.coverImagePublicId,
-      message: "Course cover image uploaded and updated successfully via Cloudinary.",
+      message: "Course cover image updated successfully.",
     });
   } catch (error: any) {
     console.error("POST /api/admin/batches/[id]/image error:", error);

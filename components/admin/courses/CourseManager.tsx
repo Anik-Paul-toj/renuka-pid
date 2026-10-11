@@ -361,8 +361,8 @@ export function CourseManager({
 
       setSuccessMessage(
         isLandingPageWorkshop
-          ? "Landing page masterclass details and pricing updated successfully! Live hero workshop box updated."
-          : "Course content, pricing, and discount rules updated successfully! Public listing and detail pages updated."
+          ? "Masterclass details and pricing updated successfully!"
+          : "Course details, pricing, and discount rules updated successfully!"
       );
       setIsEditing(false);
 
@@ -394,10 +394,9 @@ export function CourseManager({
               Course / Workshop Management
             </h1>
             <p className="text-xs text-[#6F6B61] mt-1 max-w-2xl leading-relaxed">
-              Manage the 2 watercolour courses: Listing card content, detail
-              page syllabus, schedule, descriptions, and authoritative prices.
-              Changes persist independently and reflect immediately on the
-              public site.
+              Manage watercolour courses and masterclasses: listing cards,
+              curriculum, schedule, descriptions, and pricing. Changes update
+              immediately on the public website.
             </p>
           </div>
 

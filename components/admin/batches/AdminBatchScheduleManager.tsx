@@ -193,7 +193,7 @@ export function AdminBatchScheduleManager({
         setCoverImagePublicId(null);
       }
     } catch {
-      setErrorMessage("Failed to load batch schedule from database.");
+      setErrorMessage("Failed to load batch schedule. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -280,17 +280,17 @@ export function AdminBatchScheduleManager({
       const result = await res.json();
 
       if (!res.ok || !result.success) {
-        throw new Error(result.error || "Failed to upload image to Cloudinary.");
+        throw new Error(result.error || "Failed to upload image. Please try again.");
       }
 
       setCoverImageUrl(result.coverImageUrl);
       setCoverImagePublicId(result.coverImagePublicId || null);
       setImageUploadMessage(
-        `Cover image for ${activeCourse.title} updated successfully via Cloudinary! Live on public /course page.`
+        `Cover image for ${activeCourse.title} updated successfully.`
       );
     } catch (err: any) {
       setImageErrorMessage(
-        err.message || "Failed to upload cover image to Cloudinary."
+        err.message || "Failed to upload cover image. Please try again."
       );
     } finally {
       setIsUploadingImage(false);
@@ -449,15 +449,14 @@ export function AdminBatchScheduleManager({
             <div>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-3 py-0.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#68705A] mb-2">
                 <Calendar className="size-3" />
-                <span>Cohort Scheduling Engine</span>
+                <span>Batch Scheduling</span>
               </div>
               <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#292923]">
-                Dynamic Batch & Schedule Management
+                Batch & Schedule Management
               </h2>
               <p className="text-xs text-[#6F6B61] mt-1 max-w-2xl">
-                Configure live workshop start dates, registration deadlines,
-                atelier batch timings, and custom Cloudinary cover images. Changes
-                persist authoritatively in Supabase and reflect instantly on
+                Configure workshop start dates, registration deadlines,
+                timings, and cover images. Changes update immediately on
                 public course cards.
               </p>
             </div>
@@ -510,7 +509,7 @@ export function AdminBatchScheduleManager({
               <div className="flex items-center gap-2">
                 <ImageIcon className="size-4 text-[#68705A]" />
                 <h3 className="font-serif text-base font-bold text-[#292923]">
-                  Course Cover Image (Cloudinary)
+                  Course Cover Image
                 </h3>
               </div>
               <span
@@ -521,16 +520,14 @@ export function AdminBatchScheduleManager({
                 }`}
               >
                 {isCloudinaryActive
-                  ? "Cloudinary CDN Active"
+                  ? "Custom Image Active"
                   : "Default Studio Artwork"}
               </span>
             </div>
 
             <p className="text-xs text-[#6F6B61]">
-              Manage the cover image displayed on the horizontal course card for{" "}
-              <strong>{activeCourse.title}</strong>. Images are optimized and
-              served via Cloudinary CDN (
-              <code>renuka-art-studio/course-covers/</code>).
+              Manage the cover image displayed on the course card for{" "}
+              <strong>{activeCourse.title}</strong>.
             </p>
 
             {/* Image Preview & Upload Controls */}
@@ -571,7 +568,7 @@ export function AdminBatchScheduleManager({
                     <Upload className="size-3.5" />
                     <span>
                       {isUploadingImage
-                        ? "Uploading to Cloudinary..."
+                        ? "Uploading image..."
                         : isCloudinaryActive
                         ? "Replace Image"
                         : "Upload New Image"}
@@ -1026,7 +1023,7 @@ export function AdminBatchScheduleManager({
             </span>
             <ul className="list-disc list-inside space-y-1 text-[0.72rem]">
               <li>
-                Cover images are uploaded to Cloudinary (<code>course-covers/</code>) and served via global CDN.
+                Cover images update immediately on the public course page.
               </li>
               <li>
                 The registration deadline must not be earlier than the batch start date.
