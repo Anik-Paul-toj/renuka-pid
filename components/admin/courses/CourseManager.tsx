@@ -518,8 +518,8 @@ export function CourseManager({
               <span className="text-[0.65rem] uppercase tracking-wider font-bold text-[#6F6B61] block">
                 Current Price
               </span>
-              <span className="font-serif text-lg font-bold text-[#B93821]">
-                ₹{activeCourse?.offerPrice}
+              <span className="font-price tabular-nums text-xl font-extrabold text-[#B93821]">
+                ₹{activeCourse?.offerPrice?.toLocaleString("en-IN")}
               </span>
             </div>
             <a
@@ -737,16 +737,16 @@ export function CourseManager({
                           }
                           className="w-full rounded-md border border-[#B93821]/40 bg-[#F7F4EC] px-3.5 py-2.5 text-xs sm:text-sm text-[#B93821] font-bold outline-none focus:border-[#B93821] disabled:opacity-75 disabled:cursor-not-allowed"
                         />
-                        <p className="text-[0.66rem] text-[#6F6B61] mt-1">
-                          Amount charged: ₹{formData.offerPrice} ({internalPaise} paise)
+                        <p className="text-[0.66rem] text-[#6F6B61] mt-1 font-price">
+                          Amount charged: <strong className="text-[#B93821]">₹{Number(formData.offerPrice).toLocaleString("en-IN")}</strong> ({internalPaise.toLocaleString("en-IN")} paise)
                         </p>
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-[#EEE9DE]/60 border border-[#464137]/15 flex items-center justify-between text-xs">
+                    <div className="p-3 rounded-lg bg-[#EEE9DE]/60 border border-[#464137]/15 flex items-center justify-between text-xs font-price">
                       <span className="text-[#6F6B61]">Learner Savings:</span>
-                      <span className="font-bold text-emerald-800">
-                        ₹{discountAmount} saved ({discountPercent}% OFF)
+                      <span className="font-bold text-emerald-800 tabular-nums">
+                        ₹{discountAmount.toLocaleString("en-IN")} saved ({discountPercent}% OFF)
                       </span>
                     </div>
                   </div>
@@ -906,12 +906,12 @@ export function CourseManager({
                             {formData.cardPriceLabel || "Complete Live Atelier Access"}
                           </span>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="line-through text-[#6F6B61] text-xs sm:text-sm font-semibold">
-                            ₹{formData.originalPrice}
+                        <div className="flex items-baseline gap-2 font-price">
+                          <span className="line-through text-[#6F6B61] text-xs sm:text-sm font-semibold tabular-nums">
+                            ₹{Number(formData.originalPrice).toLocaleString("en-IN")}
                           </span>
-                          <span className="font-serif text-2xl sm:text-[1.85rem] font-extrabold text-[#B93821] tracking-tight">
-                            ₹{formData.offerPrice}
+                          <span className="text-2xl sm:text-[1.85rem] font-extrabold text-[#B93821] tracking-tight tabular-nums">
+                            ₹{Number(formData.offerPrice).toLocaleString("en-IN")}
                           </span>
                           <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2 py-0.5 rounded-sm">
                             SPECIAL OFFER
@@ -1172,24 +1172,24 @@ export function CourseManager({
                   <span className="text-[0.65rem] uppercase tracking-wider text-[#6F6B61] block">
                     Customer Pays
                   </span>
-                  <span className="font-serif text-lg font-bold text-[#B93821]">
-                    ₹{offer}
+                  <span className="font-price tabular-nums text-xl font-extrabold text-[#B93821]">
+                    ₹{offer.toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div>
                   <span className="text-[0.65rem] uppercase tracking-wider text-[#6F6B61] block">
                     Original Price
                   </span>
-                  <span className="line-through text-xs font-medium text-[#6F6B61]">
-                    ₹{original}
+                  <span className="font-price tabular-nums line-through text-xs font-semibold text-[#6F6B61]">
+                    ₹{original.toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div>
                   <span className="text-[0.65rem] uppercase tracking-wider text-[#6F6B61] block">
                     Discount
                   </span>
-                  <span className="text-xs font-bold text-emerald-700">
-                    {discountPercent}% OFF (Save ₹{discountAmount})
+                  <span className="font-price tabular-nums text-xs font-bold text-emerald-700">
+                    {discountPercent}% OFF (Save ₹{discountAmount.toLocaleString("en-IN")})
                   </span>
                 </div>
                 <div>

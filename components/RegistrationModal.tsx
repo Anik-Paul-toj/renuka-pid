@@ -666,7 +666,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               {isArtistry && (
                 <div className="rounded-lg border border-[#444C38]/20 bg-[#F7F4EC] p-3 text-xs space-y-1.5">
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#444C38]">
-                    Foundation Booking Reference (To claim ₹990 Credit)
+                    Foundation Booking Reference (To claim <span className="font-price font-semibold tabular-nums">₹990</span> Credit)
                   </label>
                   <input
                     type="text"
@@ -701,19 +701,19 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 >
                   <div className="flex items-center justify-between text-[#6F6B61]">
                     <span>Course price:</span>
-                    <span className="font-semibold line-through">
+                    <span className="font-price tabular-nums font-semibold line-through">
                       ₹{(creditInfo.originalAmountPaise / 100).toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[#3E522D] font-bold">
                     <span>Foundation credit:</span>
-                    <span>
+                    <span className="font-price tabular-nums font-bold">
                       −₹{(creditInfo.creditAmountPaise / 100).toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm font-extrabold text-[#14120E] border-t border-[#464137]/15 pt-1.5">
                     <span>Amount payable:</span>
-                    <span className="text-[#B93821]">
+                    <span className="font-price tabular-nums font-extrabold text-base text-[#B93821]">
                       ₹{(creditInfo.payableAmountPaise / 100).toLocaleString("en-IN")}
                     </span>
                   </div>
@@ -753,7 +753,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </>
                 ) : activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0 ? (
                   <>
-                    <span>
+                    <span className="font-price tabular-nums">
                       Proceed to Payment • ₹
                       {creditInfo?.eligible
                         ? (creditInfo.payableAmountPaise / 100).toLocaleString("en-IN")

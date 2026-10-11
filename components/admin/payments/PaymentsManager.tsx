@@ -265,7 +265,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
             <IndianRupee className="size-4" />
           </div>
           <div className="mt-2">
-            <span className="text-xl font-bold text-[#292923]">
+            <span className="text-xl sm:text-2xl font-extrabold text-[#292923] font-price tabular-nums">
               {formatPaiseToInr(summary.totalCapturedAmountPaise)}
             </span>
             <span className="block text-[0.65rem] text-[#6F6B61] mt-0.5">Total completed payments</span>
@@ -570,7 +570,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
 
                     {/* Amount */}
                     <td className="py-3 px-4 whitespace-nowrap">
-                      <span className="font-bold text-[#292923]">
+                      <span className="font-bold text-[#292923] font-price tabular-nums text-sm">
                         {formatPaiseToInr(p.amountPaise)}
                       </span>
                       <span className="block text-[0.65rem] text-[#6F6B61]">
@@ -762,7 +762,7 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
                       </div>
                       <div>
                         <span className="block text-[0.68rem] text-[#6F6B61]">Amount</span>
-                        <span className="text-sm font-bold text-[#292923]">
+                        <span className="text-base font-bold text-[#292923] font-price tabular-nums">
                           {formatPaiseToInr(paymentDetail.amountPaise)}
                         </span>
                         <span className="text-[0.65rem] text-[#6F6B61] ml-1">

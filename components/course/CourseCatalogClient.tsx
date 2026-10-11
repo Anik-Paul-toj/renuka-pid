@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { AdminCourseData } from "@/lib/courses-admin/service";
 import { RegistrationModal } from "@/components/RegistrationModal";
+import { PriceDisplay } from "@/components/ui/PriceDisplay";
 
 interface CourseCatalogClientProps {
   courses: AdminCourseData[];
@@ -233,23 +234,18 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
                     Course Fees
                   </span>
-                  <div className="flex flex-wrap items-baseline gap-2.5 mt-1.5">
-                    <span className="font-serif text-2xl sm:text-3xl font-extrabold text-[#B93821] tracking-tight">
-                      ₹{foundationCourse.offerPrice}/-
-                    </span>
-                    {foundationCourse.originalPrice >
-                      foundationCourse.offerPrice && (
-                      <span className="line-through text-xs sm:text-sm font-semibold text-[#6F6B61]">
-                        ₹{foundationCourse.originalPrice}/-
-                      </span>
-                    )}
-                    <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/10 border border-[#B93821]/25 px-2 py-0.5 rounded-sm">
-                      Special Offer
-                    </span>
+                  <div className="mt-1.5">
+                    <PriceDisplay
+                      amount={foundationCourse.offerPrice}
+                      originalAmount={foundationCourse.originalPrice}
+                      size="2xl"
+                      showSuffix
+                      badgeText="Special Offer"
+                    />
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 text-[0.7rem] text-[#3E522D] font-bold">
                     <Sparkles className="size-3 text-[#B93821] shrink-0" />
-                    <span>Includes ₹990 credit toward subsequent Artistry course</span>
+                    <span>Includes <span className="font-price font-semibold tabular-nums">₹990</span> credit toward subsequent Artistry course</span>
                   </div>
                 </div>
 
@@ -380,23 +376,18 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
                     Course Fees
                   </span>
-                  <div className="flex flex-wrap items-baseline gap-2.5 mt-1.5">
-                    <span className="font-serif text-2xl sm:text-3xl font-extrabold text-[#B93821] tracking-tight">
-                      ₹{artistryCourse.offerPrice.toLocaleString()}/-
-                    </span>
-                    {artistryCourse.originalPrice >
-                      artistryCourse.offerPrice && (
-                      <span className="line-through text-xs sm:text-sm font-semibold text-[#6F6B61]">
-                        ₹{artistryCourse.originalPrice.toLocaleString()}/-
-                      </span>
-                    )}
-                    <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/10 border border-[#B93821]/25 px-2 py-0.5 rounded-sm">
-                      Special Offer
-                    </span>
+                  <div className="mt-1.5">
+                    <PriceDisplay
+                      amount={artistryCourse.offerPrice}
+                      originalAmount={artistryCourse.originalPrice}
+                      size="2xl"
+                      showSuffix
+                      badgeText="Special Offer"
+                    />
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 text-[0.7rem] text-[#3E522D] font-bold">
                     <Sparkles className="size-3 text-[#B93821] shrink-0" />
-                    <span>Foundation Alumni: ₹990 Credit applied (Pay ₹9,000)</span>
+                    <span>Foundation Alumni: <span className="font-price font-semibold tabular-nums">₹990</span> Credit applied (Pay <span className="font-price font-bold tabular-nums">₹9,000</span>)</span>
                   </div>
                 </div>
 

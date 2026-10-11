@@ -130,7 +130,7 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
           <div>
-            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#292923]">
+            <div className="font-price tabular-nums text-2xl sm:text-3xl font-extrabold text-[#292923]">
               {formatPaiseToINR(metrics.totalCapturedRevenuePaise)}
             </div>
             <p className="text-[0.7rem] text-[#6F6B61] mt-0.5">
@@ -222,7 +222,7 @@ export default async function AdminDashboardPage() {
                     <div className="text-[0.7rem] text-[#6F6B61]">{b.customerName} ({b.customerEmail})</div>
                   </div>
                   <div className="text-right space-y-0.5">
-                    <div className="font-bold text-[#292923]">{formatPaiseToINR(b.amountPaise)}</div>
+                    <div className="font-bold text-[#292923] font-price tabular-nums">{formatPaiseToINR(b.amountPaise)}</div>
                     <span
                       className={`inline-block text-[0.65rem] font-bold px-2 py-0.5 rounded capitalize ${
                         b.status === "confirmed"
@@ -273,7 +273,7 @@ export default async function AdminDashboardPage() {
                     <div className="text-[0.7rem] text-[#6F6B61]">Ref: {p.bookingReference}</div>
                   </div>
                   <div className="text-right space-y-0.5">
-                    <div className="font-bold text-[#292923]">{formatPaiseToINR(p.amountPaise)}</div>
+                    <div className="font-bold text-[#292923] font-price tabular-nums">{formatPaiseToINR(p.amountPaise)}</div>
                     <span
                       className={`inline-block text-[0.65rem] font-bold px-2 py-0.5 rounded capitalize ${
                         p.status === "captured"

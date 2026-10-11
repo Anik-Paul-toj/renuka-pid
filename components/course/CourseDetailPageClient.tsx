@@ -21,6 +21,7 @@ import { RegistrationModal } from "@/components/RegistrationModal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
+import { PriceDisplay } from "@/components/ui/PriceDisplay";
 
 interface CourseDetailPageClientProps {
   course: AdminCourseData;
@@ -459,27 +460,25 @@ export function CourseDetailPageClient({
                   <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#3E3A32] block leading-none">
-                        {details.cardPriceLabel || (isFoundation ? "Course Fee" : "Course Fee: ₹9,990/-")}
+                        Course Fee
                       </span>
-                      <div className="flex items-baseline gap-2.5 mt-1.5">
-                        <span className="font-serif text-3xl sm:text-4xl font-extrabold text-[#B93821] tracking-tight drop-shadow-2xs">
-                          ₹{course.offerPrice.toLocaleString()}/-
-                        </span>
-                        {course.originalPrice > course.offerPrice && (
-                          <span className="line-through text-sm font-semibold text-[#6F6B61]">
-                            ₹{course.originalPrice.toLocaleString()}/-
-                          </span>
-                        )}
-                        <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2.5 py-0.5 rounded-sm">
-                          Special Offer
-                        </span>
+                      <div className="mt-1.5">
+                        <PriceDisplay
+                          amount={course.offerPrice}
+                          originalAmount={course.originalPrice}
+                          size="3xl"
+                          showSuffix
+                          badgeText="Special Offer"
+                        />
                       </div>
                       <div className="mt-2 flex items-center gap-1.5 text-[0.72rem] text-[#3E522D] font-bold">
                         <Sparkles className="size-3.5 text-[#B93821] shrink-0" />
                         <span>
-                          {isFoundation
-                            ? "Includes ₹990 credit toward subsequent Artistry + Foundation course"
-                            : "Foundation Students: ₹990 Credit automatically applied at checkout (Pay ₹9,000)"}
+                          {isFoundation ? (
+                            <>Includes <span className="font-price font-semibold tabular-nums">₹990</span> credit toward subsequent Artistry + Foundation course</>
+                          ) : (
+                            <>Foundation Students: <span className="font-price font-semibold tabular-nums">₹990</span> Credit automatically applied at checkout (Pay <span className="font-price font-bold tabular-nums">₹9,000</span>)</>
+                          )}
                         </span>
                       </div>
                       {activeBatch && (

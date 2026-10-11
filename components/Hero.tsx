@@ -6,6 +6,7 @@ import { Calendar, Clock, Globe, Hourglass, Video } from "lucide-react";
 import { workshopData, MasterclassData } from "@/data/content";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { useLandingContent } from "@/components/LandingContentProvider";
+import { PriceDisplay } from "@/components/ui/PriceDisplay";
 
 interface HeroProps {
   onOpenModal: () => void;
@@ -227,17 +228,12 @@ export const Hero: React.FC<HeroProps> = ({
                       Complete Live Atelier Access
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="line-through text-[#6F6B61] text-xs sm:text-sm font-semibold">
-                      ₹{displayOriginalPrice}
-                    </span>
-                    <span className="font-serif text-2xl sm:text-[2rem] font-extrabold text-[#B93821] tracking-tight drop-shadow-2xs">
-                      ₹{displayOfferPrice}
-                    </span>
-                    <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#8E2515] bg-[#B93821]/12 border border-[#B93821]/30 px-2.5 py-0.5 rounded-sm">
-                      Special Offer
-                    </span>
-                  </div>
+                  <PriceDisplay
+                    amount={displayOfferPrice}
+                    originalAmount={displayOriginalPrice}
+                    size="2xl"
+                    badgeText="Special Offer"
+                  />
                 </div>
               </div>
             </div>

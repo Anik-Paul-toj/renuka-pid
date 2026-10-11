@@ -400,10 +400,10 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                     </td>
 
                     {/* Amount */}
-                    <td className="px-5 py-4 font-bold text-[#292923]">
+                    <td className="px-5 py-4 font-bold text-[#292923] font-price tabular-nums text-sm">
                       {booking.amountPaise === 0
                         ? "Complimentary"
-                        : `₹${(booking.amountPaise / 100).toFixed(0)}`}
+                        : `₹${(booking.amountPaise / 100).toLocaleString("en-IN")}`}
                     </td>
 
                     {/* Payment Status */}
@@ -615,10 +615,10 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                       </div>
                       <div className="text-left sm:text-right">
                         <span className="block text-[#6F6B61] text-[0.7rem]">Amount</span>
-                        <span className="font-bold text-sm text-[#292923]">
+                        <span className="font-bold text-sm text-[#292923] font-price tabular-nums">
                           {bookingDetail.amountPaise === 0
                             ? "Complimentary"
-                            : `₹${(bookingDetail.amountPaise / 100).toFixed(0)}`}
+                            : `₹${(bookingDetail.amountPaise / 100).toLocaleString("en-IN")}`}
                         </span>
                       </div>
                     </div>
@@ -700,8 +700,8 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                             >
                               {pmt.status}
                             </span>
-                            <span className="font-bold text-sm text-[#292923]">
-                              ₹{(pmt.amountPaise / 100).toFixed(0)}
+                            <span className="font-bold text-sm text-[#292923] font-price tabular-nums">
+                              ₹{(pmt.amountPaise / 100).toLocaleString("en-IN")}
                             </span>
                           </div>
                         </div>

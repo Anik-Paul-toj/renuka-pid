@@ -595,25 +595,25 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                       <td className="px-5 py-4">
                         <div className="flex flex-col">
                           {student.totalPaidAmountPaise > 0 ? (
-                            <div className="flex items-center gap-1">
-                              <span className="font-bold text-[#292923] text-xs">
-                                ₹{(student.totalPaidAmountPaise / 100).toLocaleString()}
+                            <div className="flex items-center gap-1 font-price">
+                              <span className="font-bold text-[#292923] text-xs tabular-nums">
+                                ₹{(student.totalPaidAmountPaise / 100).toLocaleString("en-IN")}
                               </span>
                               <span className="text-[0.6rem] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
                                 Paid
                               </span>
                             </div>
                           ) : student.latestAmountPaise > 0 ? (
-                            <span className="font-bold text-[#292923] text-xs">
-                              ₹{(student.latestAmountPaise / 100).toLocaleString()}
+                            <span className="font-bold text-[#292923] text-xs font-price tabular-nums">
+                              ₹{(student.latestAmountPaise / 100).toLocaleString("en-IN")}
                             </span>
                           ) : (
-                            <span className="text-[#6F6B61] text-xs font-medium">₹0</span>
+                            <span className="text-[#6F6B61] text-xs font-medium font-price tabular-nums">₹0</span>
                           )}
 
                           {student.pendingAmountPaise && student.pendingAmountPaise > 0 && student.totalPaidAmountPaise > 0 ? (
-                            <span className="text-[0.65rem] text-amber-800 font-medium mt-0.5">
-                              +₹{(student.pendingAmountPaise / 100).toLocaleString()} pending
+                            <span className="text-[0.65rem] text-amber-800 font-medium mt-0.5 font-price tabular-nums">
+                              +₹{(student.pendingAmountPaise / 100).toLocaleString("en-IN")} pending
                             </span>
                           ) : null}
                         </div>
@@ -819,10 +819,10 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                             </div>
 
                             <div className="text-left sm:text-right">
-                              <span className="block text-sm font-bold text-[#292923]">
+                              <span className="block text-sm font-bold text-[#292923] font-price tabular-nums">
                                 {booking.amountPaise === 0
                                   ? "Complimentary"
-                                  : `₹${(booking.amountPaise / 100).toFixed(0)}`}
+                                  : `₹${(booking.amountPaise / 100).toLocaleString("en-IN")}`}
                               </span>
                               <span className="text-[0.68rem] text-[#6F6B61]">
                                 {new Date(booking.createdAt).toLocaleDateString("en-IN", {
@@ -887,8 +887,8 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                                       >
                                         {pmt.status}
                                       </span>
-                                      <span className="font-semibold text-[#292923]">
-                                        ₹{(pmt.amountPaise / 100).toFixed(0)}
+                                      <span className="font-semibold text-[#292923] font-price tabular-nums">
+                                        ₹{(pmt.amountPaise / 100).toLocaleString("en-IN")}
                                       </span>
                                     </div>
                                   </div>

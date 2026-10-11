@@ -42,6 +42,7 @@
   --font-serif: var(--font-serif), Georgia, serif;
   --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-script: var(--font-script), "Brush Script MT", cursive;
+  --font-price: var(--font-price), var(--font-sans), system-ui, sans-serif;
 
   --color-background: var(--background);
   --color-background-secondary: var(--background-secondary);
@@ -168,4 +169,17 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Professional Price Typography System */
+.font-price {
+  font-family: var(--font-price);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "cv05" 1;
+}
+
+.price-tabular {
+  font-family: var(--font-price);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }

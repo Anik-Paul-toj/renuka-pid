@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans, Caveat } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans, Caveat, Manrope } from "next/font/google";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -20,6 +20,13 @@ const caveat = Caveat({
   variable: "--font-script",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const manrope = Manrope({
+  variable: "--font-price",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -61,7 +68,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${cormorant.variable} ${jakarta.variable} ${caveat.variable} scroll-smooth antialiased`}
+      className={`${cormorant.variable} ${jakarta.variable} ${caveat.variable} ${manrope.variable} scroll-smooth antialiased`}
     >
       <body
         suppressHydrationWarning
