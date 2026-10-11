@@ -63,7 +63,7 @@ export const Hero: React.FC<HeroProps> = ({
   const displayDuration = coursePricing?.duration ?? workshopData.duration;
 
   return (
-    <section className="relative overflow-hidden bg-[#F7F4EC] -mt-14 sm:-mt-16 pt-[4.5rem] sm:pt-[5.5rem] lg:pt-[5.75rem] pb-8 sm:pb-10 lg:pb-12">
+    <section id="home" className="relative overflow-hidden bg-[#F7F4EC] -mt-14 sm:-mt-16 pt-[4.5rem] sm:pt-[5.5rem] lg:pt-[5.75rem] pb-8 sm:pb-10 lg:pb-12">
       {/* Botanical Watercolor Background Art */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <Image
