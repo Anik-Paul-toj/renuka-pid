@@ -180,6 +180,12 @@ export interface MasterclassData {
     copyrightYear: number;
     disclaimer: string;
     handwrittenSignature: string;
+    socialLinks?: {
+      instagram?: string;
+      facebook?: string;
+      youtube?: string;
+      linkedin?: string;
+    };
   };
 }
 
@@ -678,7 +684,7 @@ export const masterclassData: MasterclassData = {
     handwrittenPhrase: "Create. Pause. Breathe. Heal.",
     ctaText: "EXPLORE COURSES",
     dateInfo: "Live on Saturday, 28 October 2026 at 6:30 PM IST",
-    subNote: "100% Free Registration • Instant Email Confirmation • Suitable for all levels",
+    subNote: "Instant Email Confirmation • Suitable for all levels",
   },
   footer: {
     brandDescription:
@@ -697,5 +703,9 @@ export const masterclassData: MasterclassData = {
     disclaimer:
       "Renuka Art Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",
     handwrittenSignature: "Keep Creating ♡",
+    socialLinks: {
+      instagram: "https://www.instagram.com/renuka_art_educator?obrf=aHE1aXliMWhwbWZ4&utm_source=qr",
+      facebook: "https://www.facebook.com/share/1ccDJzNQHj/?mibextid=wwXIfr",
+    },
   },
 };

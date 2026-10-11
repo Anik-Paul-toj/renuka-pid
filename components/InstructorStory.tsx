@@ -102,6 +102,37 @@ export const InstructorStory: React.FC = () => {
           ))}
         </div>
 
+        {/* Social Connect Badges */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="https://www.instagram.com/renuka_art_educator?obrf=aHE1aXliMWhwbWZ4&utm_source=qr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-[#444C38]/25 bg-[#FAF8F2] px-3.5 py-1.5 text-xs font-semibold text-[#444C38] transition-all duration-200 hover:border-[#444C38]/60 hover:bg-[#EBE7DC] hover:text-[#14120E] hover:shadow-2xs group"
+            aria-label="Follow Renuka on Instagram @renuka_art_educator"
+          >
+            <svg className="size-3.5 fill-none stroke-current stroke-[1.8] transition-transform duration-200 group-hover:scale-110" viewBox="0 0 24 24">
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+            </svg>
+            <span>Instagram: @renuka_art_educator</span>
+          </a>
+
+          <a
+            href="https://www.facebook.com/share/1ccDJzNQHj/?mibextid=wwXIfr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-[#444C38]/25 bg-[#FAF8F2] px-3.5 py-1.5 text-xs font-semibold text-[#444C38] transition-all duration-200 hover:border-[#444C38]/60 hover:bg-[#EBE7DC] hover:text-[#14120E] hover:shadow-2xs group"
+            aria-label="Connect with Renuka on Facebook"
+          >
+            <svg className="size-3.5 fill-none stroke-current stroke-[1.8] transition-transform duration-200 group-hover:scale-110" viewBox="0 0 24 24">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+            </svg>
+            <span>Facebook Community</span>
+          </a>
+        </div>
+
         {/* Credentials Cards: 3 columns on desktop, 1 on mobile */}
         <div className="no-gsap mx-auto mt-8 sm:mt-10 max-w-3xl sm:max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-5 text-left">
           {credentialBadges.map((badge, idx) => (

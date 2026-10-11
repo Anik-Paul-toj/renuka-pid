@@ -227,6 +227,14 @@ export const footerSectionSchema = z.object({
   copyrightYear: z.number().int().min(2020),
   disclaimer: z.string().min(1),
   handwrittenSignature: z.string().min(1),
+  socialLinks: z
+    .object({
+      instagram: z.string().optional(),
+      facebook: z.string().optional(),
+      youtube: z.string().optional(),
+      linkedin: z.string().optional(),
+    })
+    .optional(),
 });
 
 // Unified Schema Map by Section Key
