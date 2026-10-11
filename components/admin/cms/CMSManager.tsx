@@ -6,7 +6,6 @@ import {
   Save,
   Send,
   RotateCcw,
-  Code,
   CheckCircle2,
   AlertCircle,
   Clock,
@@ -63,7 +62,6 @@ export function CMSManager({
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [showJsonInspector, setShowJsonInspector] = useState(false);
 
   const activeSection = sections.find((s) => s.section_key === activeKey);
 
@@ -271,17 +269,6 @@ export function CMSManager({
             Manage, draft, validate, and publish all 18 sections of the masterclass landing page without code edits.
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowJsonInspector(!showJsonInspector)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#464137]/15 bg-[#F7F4EC] text-xs font-semibold text-[#464137] hover:border-[#68705A] transition-all"
-          >
-            <Code className="size-3.5 text-[#68705A]" />
-            <span>{showJsonInspector ? "Hide JSON" : "Inspect JSON"}</span>
-          </button>
-        </div>
       </div>
 
       {/* Main CMS Layout (Section Selector + Form Editor) */}
@@ -441,19 +428,6 @@ export function CMSManager({
               </div>
             )}
           </div>
-
-          {/* Developer JSON Inspector Modal / Accordion */}
-          {showJsonInspector && formData && (
-            <div className="p-5 rounded-xl bg-[#292923] text-[#FAF8F2] font-mono text-xs shadow-lg space-y-2">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2 text-[0.7rem] text-[#C8D1C7]">
-                <span>Raw Database JSON Snapshot ({activeKey})</span>
-                <span className="text-[0.65rem] uppercase">JSON Inspection Mode</span>
-              </div>
-              <pre className="max-h-72 overflow-y-auto p-2 bg-black/30 rounded text-[0.7rem] leading-relaxed text-[#EEE9DE]">
-                {JSON.stringify(formData, null, 2)}
-              </pre>
-            </div>
-          )}
         </div>
       </div>
     </div>
