@@ -465,23 +465,13 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
               </thead>
               <tbody className="divide-y divide-[#464137]/10">
                 {students.map((student) => {
-                  const coursesToShow =
-                    student.enrolledCourses.length > 0
-                      ? student.enrolledCourses
-                      : [
-                          {
-                            courseId: "",
-                            courseSlug: "",
-                            courseTitle: student.latestCourseTitle || "Workshop Course",
-                            batchName: "Upcoming Batch",
-                            bookingReference: student.latestBookingReference || "—",
-                            bookingStatus: (student.latestBookingStatus as any) || "pending",
-                            paymentStatus: student.latestPaymentStatus,
-                            amountPaise: student.latestAmountPaise,
-                            currency: student.latestCurrency || "INR",
-                            createdAt: student.createdAt,
-                          },
-                        ];
+                  const validCourses = student.enrolledCourses.filter(
+                    (c) => c.bookingStatus !== "cancelled"
+                  );
+                  // Deduplicate by course title so duplicate badges are not shown
+                  const coursesToShow = validCourses.filter(
+                    (c, index, self) => index === self.findIndex((t) => t.courseTitle === c.courseTitle)
+                  );
 
                   return (
                     <tr
@@ -525,17 +515,23 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                       {/* Course Enrolled (Badges) */}
                       <td className="px-5 py-4">
                         <div className="flex flex-col gap-1 max-w-[210px]">
-                          {coursesToShow.map((c, idx) => (
-                            <span
-                              key={idx}
-                              className={`inline-block px-2.5 py-0.5 rounded-md text-[0.68rem] font-bold border truncate ${getCourseBadgeColor(
-                                c.courseTitle
-                              )}`}
-                              title={c.courseTitle}
-                            >
-                              {c.courseTitle}
+                          {coursesToShow.length > 0 ? (
+                            coursesToShow.map((c, idx) => (
+                              <span
+                                key={idx}
+                                className={`inline-block px-2.5 py-0.5 rounded-md text-[0.68rem] font-bold border truncate ${getCourseBadgeColor(
+                                  c.courseTitle
+                                )}`}
+                                title={c.courseTitle}
+                              >
+                                {c.courseTitle}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-[0.72rem] text-[#6F6B61] italic">
+                              No active courses
                             </span>
-                          ))}
+                          )}
                         </div>
                       </td>
 
@@ -749,26 +745,33 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
 
                 {/* Enrollment & Booking History */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#68705A]">
-                      Enrollment & Booking History ({studentDetail.bookings.length})
-                    </h3>
-                    <span className="text-[0.7rem] font-semibold text-[#68705A]">
-                      {studentDetail.confirmedBookings} Confirmed
-                    </span>
-                  </div>
+                  {(() => {
+                    const activeBookings = (studentDetail.bookings || []).filter(
+                      (b) => b.status !== "cancelled"
+                    );
 
-                  {studentDetail.bookings.length === 0 ? (
-                    <div className="p-6 text-center text-xs text-[#6F6B61] bg-[#F7F4EC] rounded-lg border border-[#464137]/10">
-                      No bookings recorded for this student.
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {studentDetail.bookings.map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="rounded-lg bg-[#FFFFFF] p-4 border border-[#464137]/15 shadow-xs space-y-3"
-                        >
+                    return (
+                      <>
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-[#68705A]">
+                            Enrollment & Booking History ({activeBookings.length})
+                          </h3>
+                          <span className="text-[0.7rem] font-semibold text-[#68705A]">
+                            {studentDetail.confirmedBookings} Confirmed
+                          </span>
+                        </div>
+
+                        {activeBookings.length === 0 ? (
+                          <div className="p-6 text-center text-xs text-[#6F6B61] bg-[#F7F4EC] rounded-lg border border-[#464137]/10">
+                            No active bookings recorded for this student.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {activeBookings.map((booking) => (
+                              <div
+                                key={booking.id}
+                                className="rounded-lg bg-[#FFFFFF] p-4 border border-[#464137]/15 shadow-xs space-y-3"
+                              >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#464137]/10 pb-2.5">
                             <div>
                               <div className="flex items-center gap-2">
@@ -873,8 +876,11 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                       ))}
                     </div>
                   )}
-                </div>
-              </div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
             ) : null}
           </div>
         </div>

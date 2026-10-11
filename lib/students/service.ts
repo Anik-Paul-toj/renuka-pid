@@ -126,7 +126,10 @@ export async function getStudentsList(
     // 2. Fetch overall customers count and booking enrollments to calculate summary counts
     const [{ count: totalCustomerCount }, { data: allEnrollments }] = await Promise.all([
       adminClient.from("customers").select("*", { count: "exact", head: true }),
-      adminClient.from("bookings").select("customer_id, cohort_batches(course_id)")
+      adminClient
+        .from("bookings")
+        .select("customer_id, cohort_batches(course_id)")
+        .neq("status", "cancelled"),
     ]);
 
     const courseCustomerMap: Record<string, Set<string>> = {};
@@ -285,18 +288,34 @@ export async function getStudentsList(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
 
-      const enrolledCourses: EnrolledCourseInfo[] = rawBookings.map((b: any) => {
+      // Only non-cancelled bookings count towards active enrollments unless specifically filtering by cancelled
+      const activeBookings =
+        status === "cancelled"
+          ? rawBookings
+          : rawBookings.filter((b: any) => b.status !== "cancelled");
+
+      // Deduplicate courses so a student does not get duplicate badges for the same course, nor cancelled ones
+      const seenCourseTitles = new Set<string>();
+      const enrolledCourses: EnrolledCourseInfo[] = [];
+
+      for (const b of activeBookings) {
         const course = b.batch?.course;
+        const title = course?.title || b.batch?.batch_name || "Workshop Course";
+        if (seenCourseTitles.has(title)) {
+          continue;
+        }
+        seenCourseTitles.add(title);
+
         const paymentsList = Array.isArray(b.payments) ? [...b.payments] : [];
         paymentsList.sort(
           (p1, p2) => new Date(p2.created_at).getTime() - new Date(p1.created_at).getTime()
         );
         const latestPaymentStatus = paymentsList[0]?.status || null;
 
-        return {
+        enrolledCourses.push({
           courseId: course?.id || b.batch?.course_id || "",
           courseSlug: course?.slug || "",
-          courseTitle: course?.title || b.batch?.batch_name || "Workshop Course",
+          courseTitle: title,
           batchName: b.batch?.batch_name || "Upcoming Batch",
           bookingReference: b.booking_reference,
           bookingStatus: b.status,
@@ -304,10 +323,11 @@ export async function getStudentsList(
           amountPaise: b.amount_paise,
           currency: b.currency || "INR",
           createdAt: b.created_at,
-        };
-      });
+        });
+      }
 
-      const latestBooking = rawBookings[0] || null;
+      // Pick latest active booking for row summary (or latest overall if specifically filtering cancelled)
+      const latestBooking = activeBookings[0] || null;
       const latestCourse = latestBooking?.batch?.course;
       let latestPaymentStatus: string | null = null;
 
@@ -318,8 +338,8 @@ export async function getStudentsList(
         latestPaymentStatus = sortedPayments[0]?.status || null;
       }
 
-      const totalBookings = rawBookings.length;
-      const confirmedBookings = rawBookings.filter((b) => b.status === "confirmed").length;
+      const totalBookings = activeBookings.length;
+      const confirmedBookings = activeBookings.filter((b) => b.status === "confirmed").length;
 
       return {
         id: row.id,
@@ -460,7 +480,10 @@ export async function getStudentById(
       (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
-    const formattedBookings: StudentBookingDetail[] = rawBookings.map((b: any) => {
+    // Filter out cancelled bookings so they do not show in student history
+    const activeBookings = rawBookings.filter((b: any) => b.status !== "cancelled");
+
+    const formattedBookings: StudentBookingDetail[] = activeBookings.map((b: any) => {
       const batch = b.cohort_batches;
       const course = batch?.courses;
       const paymentsList = Array.isArray(b.payments) ? [...b.payments] : [];
