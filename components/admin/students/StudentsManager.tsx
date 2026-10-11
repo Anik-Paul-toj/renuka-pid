@@ -549,17 +549,24 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                       {/* Booking Status */}
                       <td className="px-5 py-4">
                         {student.latestBookingStatus ? (
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider ${
-                              student.latestBookingStatus === "confirmed"
-                                ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                : student.latestBookingStatus === "pending"
-                                ? "bg-amber-100 text-amber-800 border border-amber-200"
-                                : "bg-zinc-100 text-zinc-700 border border-zinc-200"
-                            }`}
-                          >
-                            {student.latestBookingStatus}
-                          </span>
+                          <div>
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider ${
+                                student.latestBookingStatus === "confirmed"
+                                  ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                  : student.latestBookingStatus === "pending"
+                                  ? "bg-amber-100 text-amber-800 border border-amber-200"
+                                  : "bg-zinc-100 text-zinc-700 border border-zinc-200"
+                              }`}
+                            >
+                              {student.latestBookingStatus}
+                            </span>
+                            {student.confirmedBookings > 0 && student.totalBookings > student.confirmedBookings && (
+                              <span className="block text-[0.63rem] text-amber-800 font-semibold mt-0.5">
+                                +{student.totalBookings - student.confirmedBookings} pending
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-[#6F6B61] text-[0.7rem]">—</span>
                         )}
@@ -586,13 +593,30 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
 
                       {/* Amount */}
                       <td className="px-5 py-4">
-                        {student.latestAmountPaise > 0 ? (
-                          <span className="font-bold text-[#292923] text-xs">
-                            ₹{(student.latestAmountPaise / 100).toLocaleString()}
-                          </span>
-                        ) : (
-                          <span className="text-[#6F6B61] text-xs font-medium">₹0</span>
-                        )}
+                        <div className="flex flex-col">
+                          {student.totalPaidAmountPaise > 0 ? (
+                            <div className="flex items-center gap-1">
+                              <span className="font-bold text-[#292923] text-xs">
+                                ₹{(student.totalPaidAmountPaise / 100).toLocaleString()}
+                              </span>
+                              <span className="text-[0.6rem] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                Paid
+                              </span>
+                            </div>
+                          ) : student.latestAmountPaise > 0 ? (
+                            <span className="font-bold text-[#292923] text-xs">
+                              ₹{(student.latestAmountPaise / 100).toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-[#6F6B61] text-xs font-medium">₹0</span>
+                          )}
+
+                          {student.pendingAmountPaise && student.pendingAmountPaise > 0 && student.totalPaidAmountPaise > 0 ? (
+                            <span className="text-[0.65rem] text-amber-800 font-medium mt-0.5">
+                              +₹{(student.pendingAmountPaise / 100).toLocaleString()} pending
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
 
                       {/* Actions */}

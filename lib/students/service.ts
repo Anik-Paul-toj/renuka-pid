@@ -23,6 +23,8 @@ export interface StudentListItem {
   whatsappPhone: string | null;
   totalBookings: number;
   confirmedBookings: number;
+  totalPaidAmountPaise: number;
+  pendingAmountPaise?: number;
   enrolledCourses: EnrolledCourseInfo[];
   latestCourseTitle: string | null;
   latestBookingReference: string | null;
@@ -326,20 +328,42 @@ export async function getStudentsList(
         });
       }
 
-      // Pick latest active booking for row summary (or latest overall if specifically filtering cancelled)
-      const latestBooking = activeBookings[0] || null;
-      const latestCourse = latestBooking?.batch?.course;
-      let latestPaymentStatus: string | null = null;
+      // Separate confirmed bookings vs pending bookings
+      const confirmedList = activeBookings.filter((b: any) => b.status === "confirmed");
+      const pendingList = activeBookings.filter((b: any) => b.status === "pending");
 
-      if (latestBooking && Array.isArray(latestBooking.payments) && latestBooking.payments.length > 0) {
-        const sortedPayments = [...latestBooking.payments].sort(
+      // Prioritize confirmed/paid booking over uncompleted pending test attempts!
+      // If a student has paid and is enrolled, their confirmed booking is the primary record.
+      const primaryBooking =
+        confirmedList[0] ||
+        pendingList[0] ||
+        activeBookings[0] ||
+        null;
+
+      const primaryCourse = primaryBooking?.batch?.course;
+      let primaryPaymentStatus: string | null = null;
+
+      if (primaryBooking && Array.isArray(primaryBooking.payments) && primaryBooking.payments.length > 0) {
+        const sortedPayments = [...primaryBooking.payments].sort(
           (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
-        latestPaymentStatus = sortedPayments[0]?.status || null;
+        primaryPaymentStatus = sortedPayments[0]?.status || null;
+      }
+
+      // Calculate total paid and pending amounts for the student
+      let totalPaidAmountPaise = 0;
+      let pendingAmountPaise = 0;
+
+      for (const b of activeBookings) {
+        if (b.status === "confirmed") {
+          totalPaidAmountPaise += b.amount_paise || 0;
+        } else if (b.status === "pending") {
+          pendingAmountPaise += b.amount_paise || 0;
+        }
       }
 
       const totalBookings = activeBookings.length;
-      const confirmedBookings = activeBookings.filter((b) => b.status === "confirmed").length;
+      const confirmedBookings = confirmedList.length;
 
       return {
         id: row.id,
@@ -349,14 +373,16 @@ export async function getStudentsList(
         whatsappPhone: row.whatsapp_phone || null,
         totalBookings,
         confirmedBookings,
+        totalPaidAmountPaise,
+        pendingAmountPaise,
         enrolledCourses,
-        latestCourseTitle: latestCourse?.title || null,
-        latestBookingReference: latestBooking?.booking_reference || null,
-        latestBookingStatus: latestBooking?.status || null,
-        latestPaymentStatus,
-        latestAmountPaise: latestBooking?.amount_paise || 0,
-        latestCurrency: latestBooking?.currency || "INR",
-        latestBookingDate: latestBooking?.created_at || null,
+        latestCourseTitle: primaryCourse?.title || null,
+        latestBookingReference: primaryBooking?.booking_reference || null,
+        latestBookingStatus: primaryBooking?.status || null,
+        latestPaymentStatus: primaryPaymentStatus,
+        latestAmountPaise: primaryBooking?.amount_paise || 0,
+        latestCurrency: primaryBooking?.currency || "INR",
+        latestBookingDate: primaryBooking?.created_at || null,
         createdAt: row.created_at,
       };
     });
@@ -475,13 +501,15 @@ export async function getStudentById(
 
     const rawBookings = Array.isArray(customer.bookings) ? [...customer.bookings] : [];
 
-    // Sort bookings descending by creation date
-    rawBookings.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-
     // Filter out cancelled bookings so they do not show in student history
     const activeBookings = rawBookings.filter((b: any) => b.status !== "cancelled");
+
+    // Sort bookings: Confirmed/paid enrollments first, then by date descending
+    activeBookings.sort((a: any, b: any) => {
+      if (a.status === "confirmed" && b.status !== "confirmed") return -1;
+      if (b.status === "confirmed" && a.status !== "confirmed") return 1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
     const formattedBookings: StudentBookingDetail[] = activeBookings.map((b: any) => {
       const batch = b.cohort_batches;
