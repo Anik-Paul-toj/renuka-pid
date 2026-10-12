@@ -34,6 +34,9 @@ export function CourseDetailPageClient({
 }: CourseDetailPageClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const isWorkshop =
+    course.slug === "the-watercolour" ||
+    course.slug === "the-watercolour-roadmap";
   const isFoundation = course.slug === "watercolour-foundation";
   const details = course.details;
 
@@ -91,17 +94,39 @@ export function CourseDetailPageClient({
         </div>
 
         {/* ONE SINGLE COMPREHENSIVE COURSE CARD */}
-        <div className="mx-auto max-w-4xl rounded-2xl bg-[#FAF8F2] border border-[#464137]/20 shadow-[0_12px_45px_rgba(40,36,28,0.08)] overflow-hidden">
+        <div className="mx-auto max-w-4xl rounded-2xl bg-[#FAF8F2] border border-[#444C38]/20 shadow-[0_12px_45px_rgba(40,36,28,0.08)] overflow-hidden">
           {/* Card Top Banner / Course Image */}
           <div className="relative aspect-[16/8.5] sm:aspect-[16/7.5] w-full overflow-hidden bg-[#EBE7DC]">
-            <Image
-              src={course.imagePath}
-              alt={course.title}
-              fill
-              sizes="(max-width: 1024px) 100vw, 900px"
-              className="object-cover object-center select-none"
-              priority
-            />
+            {course.imagePath ? (
+              <Image
+                src={course.imagePath}
+                alt={course.title}
+                fill
+                sizes="(max-width: 1024px) 100vw, 900px"
+                className="object-cover object-center select-none"
+                priority
+              />
+            ) : (
+              <div className="relative w-full h-full bg-gradient-to-br from-[#EFECE4] via-[#E8E3D5] to-[#DFD8C6] flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden">
+                <div className="pointer-events-none absolute inset-0 z-0 opacity-35 mix-blend-multiply">
+                  <Image
+                    src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                    alt=""
+                    fill
+                    sizes="600px"
+                    className="object-cover object-center"
+                  />
+                </div>
+                <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-[#444C38]/60">
+                  <div className="size-12 rounded-full bg-[#FAF8F2]/80 border border-[#444C38]/15 flex items-center justify-center shadow-2xs backdrop-blur-xs">
+                    <Sparkles className="size-5 text-[#444C38]/70" />
+                  </div>
+                  <span className="font-serif italic text-xs tracking-wider text-[#444C38]/80 font-medium">
+                    Live Atelier Experience
+                  </span>
+                </div>
+              </div>
+            )}
             {/* Subtle Atelier Dark Gradient for Text Contrast */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#14120E]/85 via-[#14120E]/30 to-transparent" />
 
@@ -111,14 +136,23 @@ export function CourseDetailPageClient({
             {/* Top Badges */}
             <div className="absolute top-4 left-4 flex items-center gap-2">
               <span className="rounded-md bg-[#FAF8F2]/95 backdrop-blur-xs px-3 py-1 text-[0.68rem] font-bold uppercase tracking-widest text-[#444C38] border border-[#444C38]/20 shadow-xs">
-                {isFoundation ? "Foundation Workshop" : "3-Month Intensive Program"}
+                {isWorkshop
+                  ? "One-Day Masterclass"
+                  : isFoundation
+                  ? "Foundation Workshop"
+                  : "3-Month Intensive Program"}
               </span>
             </div>
 
             {/* Bottom Title on Image Banner */}
             <div className="absolute bottom-5 left-4 right-4 sm:bottom-7 sm:left-6 sm:right-6 text-[#FAF8F2] drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
               <span className="text-[0.72rem] font-bold uppercase tracking-wider text-[#FAF8F2]/90 block mb-1">
-                {details.subjects || (isFoundation ? "Materials • Techniques • Colour Mixing • Wash" : "Landscape • Floral • Still Life")}
+                {details.subjects ||
+                  (isWorkshop
+                    ? "Watercolour Essentials • Live Demonstration"
+                    : isFoundation
+                    ? "Materials • Techniques • Colour Mixing • Wash"
+                    : "Landscape • Floral • Still Life")}
               </span>
               <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#FAF8F2] leading-tight">
                 {course.title}

@@ -35,7 +35,12 @@ export async function GET(request: NextRequest) {
     const { data: courses } = await supabase
       .from("courses")
       .select("id, slug, title")
-      .in("slug", ["watercolour-foundation", "watercolour-artistry-foundation"])
+      .in("slug", [
+        "the-watercolour",
+        "the-watercolour-roadmap",
+        "watercolour-foundation",
+        "watercolour-artistry-foundation",
+      ])
       .order("created_at", { ascending: true });
 
     const batches = [];

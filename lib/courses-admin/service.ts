@@ -32,6 +32,7 @@ import {
   COURSE_IMAGES,
   DEFAULT_FOUNDATION_DETAILS,
   DEFAULT_ARTISTRY_DETAILS,
+  DEFAULT_WORKSHOP_DETAILS,
 } from "./details";
 export * from "./details";
 import { getBatchByCourseId, SafeBatchScheduleData } from "@/lib/batches-admin/service";
@@ -78,8 +79,11 @@ export async function getAdminCourses(): Promise<AdminCourseData[]> {
     const coverImage = (c as any).cover_image_url || details.coverImage;
     const coverImagePublicId =
       (c as any).cover_image_public_id || details.coverImagePublicId || null;
+    const isWorkshop = c.slug === "the-watercolour" || c.slug === "the-watercolour-roadmap";
     const imagePath =
-      coverImage || COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
+      coverImage ||
+      COURSE_IMAGES[c.slug] ||
+      (isWorkshop ? "" : "/images/foundation.jpeg");
 
     return {
       id: c.id,
@@ -141,8 +145,11 @@ export async function getAdminCourseById(
   const coverImage = (c as any).cover_image_url || details.coverImage;
   const coverImagePublicId =
     (c as any).cover_image_public_id || details.coverImagePublicId || null;
+  const isWorkshop = c.slug === "the-watercolour" || c.slug === "the-watercolour-roadmap";
   const imagePath =
-    coverImage || COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
+    coverImage ||
+    COURSE_IMAGES[c.slug] ||
+    (isWorkshop ? "" : "/images/foundation.jpeg");
 
   return {
     id: c.id,
@@ -253,7 +260,10 @@ export async function updateAdminCourse(
 }
 
 /**
- * Retrieves the two primary courses for the public /course catalog.
+ * Retrieves the courses for the public /course catalog:
+ * 1. The WATERCOLOUR Roadmap: One-Day Masterclass
+ * 2. WATERCOLOUR FOUNDATION
+ * 3. WATERCOLOUR ARTISTRY + FOUNDATION COURSE
  */
 export async function getPublicCourses(): Promise<AdminCourseData[]> {
   const adminClient = createAdminClient();
@@ -270,10 +280,14 @@ export async function getPublicCourses(): Promise<AdminCourseData[]> {
       currency,
       duration_minutes,
       is_active,
+      cover_image_url,
+      cover_image_public_id,
       created_at,
       updated_at
     `)
     .in("slug", [
+      "the-watercolour",
+      "the-watercolour-roadmap",
       "watercolour-foundation",
       "watercolour-artistry-foundation",
     ])
@@ -282,6 +296,23 @@ export async function getPublicCourses(): Promise<AdminCourseData[]> {
   if (error || !courses || courses.length === 0) {
     // Return baseline mock objects if DB query fails
     return [
+      {
+        id: "11111111-1111-1111-1111-111111111111",
+        slug: "the-watercolour",
+        title: "The WATERCOLOUR Roadmap: One-Day Masterclass",
+        description: null,
+        originalPricePaise: 59900,
+        offerPricePaise: 9900,
+        originalPrice: 599,
+        offerPrice: 99,
+        currency: "INR",
+        durationMinutes: 120,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        imagePath: "",
+        details: DEFAULT_WORKSHOP_DETAILS,
+      },
       {
         id: "e1111111-2222-3333-4444-555555555555",
         slug: "watercolour-foundation",
@@ -319,24 +350,38 @@ export async function getPublicCourses(): Promise<AdminCourseData[]> {
     ];
   }
 
-  // Ensure deterministic order: Foundation first, Artistry second
+  // Ensure deterministic order: 1. Masterclass, 2. Foundation, 3. Artistry
   const order = [
+    "the-watercolour",
+    "the-watercolour-roadmap",
     "watercolour-foundation",
     "watercolour-artistry-foundation",
   ];
 
-  const sortedCourses = [...courses].sort(
+  // If both "the-watercolour" and "the-watercolour-roadmap" exist, deduplicate to only keep one
+  const dedupedCourses = courses.filter((c, idx, arr) => {
+    if (c.slug === "the-watercolour-roadmap") {
+      return !arr.some((other) => other.slug === "the-watercolour");
+    }
+    return true;
+  });
+
+  const sortedCourses = [...dedupedCourses].sort(
     (a, b) => order.indexOf(a.slug) - order.indexOf(b.slug)
   );
 
   const coursesWithBatches = await Promise.all(
     sortedCourses.map(async (c) => {
       const details = parseCourseDetails(c.slug, c.description);
+      const isWorkshop =
+        c.slug === "the-watercolour" || c.slug === "the-watercolour-roadmap";
       const coverImage = (c as any).cover_image_url || details.coverImage;
       const coverImagePublicId =
         (c as any).cover_image_public_id || details.coverImagePublicId || null;
       const imagePath =
-        coverImage || COURSE_IMAGES[c.slug] || "/images/foundation.jpeg";
+        coverImage ||
+        COURSE_IMAGES[c.slug] ||
+        (isWorkshop ? "" : "/images/foundation.jpeg");
       const activeBatch = await getBatchByCourseId(c.id);
 
       return {
@@ -386,6 +431,8 @@ export async function getPublicCourseBySlug(
       currency,
       duration_minutes,
       is_active,
+      cover_image_url,
+      cover_image_public_id,
       created_at,
       updated_at
     `)
@@ -465,8 +512,13 @@ export async function getPublicCourseBySlug(
   const coverImage = (course as any).cover_image_url || details.coverImage;
   const coverImagePublicId =
     (course as any).cover_image_public_id || details.coverImagePublicId || null;
+  const isWorkshop =
+    course.slug === "the-watercolour" ||
+    course.slug === "the-watercolour-roadmap";
   const imagePath =
-    coverImage || COURSE_IMAGES[course.slug] || "/images/foundation.jpeg";
+    coverImage ||
+    COURSE_IMAGES[course.slug] ||
+    (isWorkshop ? "" : "/images/foundation.jpeg");
 
   return {
     course: {
@@ -653,7 +705,11 @@ export async function resetCourseCoverImage(
       .eq("course_id", course.id);
   } catch {}
 
-  const defaultImage = COURSE_IMAGES[course.slug] || "/images/foundation.jpeg";
+  const isWorkshop =
+    course.slug === "the-watercolour" ||
+    course.slug === "the-watercolour-roadmap";
+  const defaultImage =
+    COURSE_IMAGES[course.slug] || (isWorkshop ? "" : "/images/foundation.jpeg");
 
   try {
     revalidatePath("/");

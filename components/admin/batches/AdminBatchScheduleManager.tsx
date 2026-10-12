@@ -59,8 +59,16 @@ export function AdminBatchScheduleManager({
   const isReadOnly = userRole === "editor";
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // The two core watercolor courses
+  // Courses eligible for batch schedule and cover image management
   const COURSES = [
+    {
+      id: "11111111-1111-1111-1111-111111111111",
+      title: "The WATERCOLOUR Roadmap: One-Day Masterclass",
+      slug: "the-watercolour",
+      defaultTiming: "6:30 PM",
+      defaultEndTime: "8:30 PM",
+      defaultImage: "",
+    },
     {
       id: "e1111111-2222-3333-4444-555555555555",
       title: "WATERCOLOUR FOUNDATION",
@@ -516,12 +524,16 @@ export function AdminBatchScheduleManager({
                 className={`text-[0.62rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                   isCloudinaryActive
                     ? "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
-                    : "bg-[#464137]/10 text-[#464137] border border-[#464137]/20"
+                    : coverImageUrl || activeCourse.defaultImage
+                    ? "bg-[#464137]/10 text-[#464137] border border-[#464137]/20"
+                    : "bg-[#B93821]/10 text-[#B93821] border border-[#B93821]/20"
                 }`}
               >
                 {isCloudinaryActive
                   ? "Custom Image Active"
-                  : "Default Studio Artwork"}
+                  : coverImageUrl || activeCourse.defaultImage
+                  ? "Default Studio Artwork"
+                  : "Blank Placeholder (No Image)"}
               </span>
             </div>
 
@@ -532,14 +544,26 @@ export function AdminBatchScheduleManager({
 
             {/* Image Preview & Upload Controls */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
-              <div className="relative w-full sm:w-44 aspect-[16/10] rounded-lg overflow-hidden bg-[#EBE7DC] border border-[#464137]/25 shrink-0 shadow-2xs">
-                <Image
-                  src={coverImageUrl || activeCourse.defaultImage}
-                  alt={activeCourse.title}
-                  fill
-                  sizes="200px"
-                  className="object-cover object-center"
-                />
+              <div className="relative w-full sm:w-44 aspect-[16/10] rounded-lg overflow-hidden bg-[#EBE7DC] border border-[#464137]/25 shrink-0 shadow-2xs flex items-center justify-center">
+                {coverImageUrl || activeCourse.defaultImage ? (
+                  <Image
+                    src={coverImageUrl || activeCourse.defaultImage}
+                    alt={activeCourse.title}
+                    fill
+                    sizes="200px"
+                    className="object-cover object-center"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center bg-[#EBE7DC] text-[#6F6B61]">
+                    <ImageIcon className="size-6 stroke-[1.5] text-[#444C38]/40 mb-1" />
+                    <span className="text-[0.68rem] font-bold uppercase tracking-wider text-[#444C38]">
+                      Blank Placeholder
+                    </span>
+                    <span className="text-[0.6rem] text-[#6F6B61] mt-0.5">
+                      Upload an image for this course
+                    </span>
+                  </div>
+                )}
                 {isUploadingImage && (
                   <div className="absolute inset-0 bg-[#14120E]/60 flex items-center justify-center text-[#FAF8F2]">
                     <div className="size-5 border-2 border-[#FAF8F2] border-t-transparent rounded-full animate-spin" />
@@ -908,14 +932,26 @@ export function AdminBatchScheduleManager({
             {/* Rendered Preview with Dynamic Cover Image */}
             <div className="group/sched relative overflow-hidden rounded-xl bg-[#FAF8F2] border border-[#444C38]/30 p-4 shadow-2xs space-y-3">
               {/* Cover Image in Preview */}
-              <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-[#EBE7DC] border border-[#444C38]/20">
-                <Image
-                  src={coverImageUrl || activeCourse.defaultImage}
-                  alt={activeCourse.title}
-                  fill
-                  sizes="400px"
-                  className="object-cover object-center"
-                />
+              <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-[#EBE7DC] border border-[#444C38]/20 flex items-center justify-center">
+                {coverImageUrl || activeCourse.defaultImage ? (
+                  <Image
+                    src={coverImageUrl || activeCourse.defaultImage}
+                    alt={activeCourse.title}
+                    fill
+                    sizes="400px"
+                    className="object-cover object-center"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-[#EFECE4] via-[#E8E3D5] to-[#DFD8C6]">
+                    <Sparkles className="size-6 stroke-[1.5] text-[#444C38]/50 mb-1" />
+                    <span className="text-xs font-bold text-[#444C38]">
+                      Blank Placeholder Area
+                    </span>
+                    <span className="text-[0.66rem] text-[#6F6B61] mt-0.5">
+                      Displays subtle atelier canvas until an image is uploaded
+                    </span>
+                  </div>
+                )}
                 <div className="absolute top-2 left-2">
                   <span className="rounded bg-[#FAF8F2]/90 backdrop-blur-xs px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-[#444C38] border border-[#444C38]/20">
                     {activeCourse.title}

@@ -568,21 +568,34 @@ export function CourseManager({
             })}
           </div>
         ) : (
-          <div className="border-b border-[#464137]/15 bg-[#FAF8F2] px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="size-4 text-[#68705A]" />
-              <span className="text-xs font-bold text-[#14120E] uppercase tracking-wider">
-                Landing Page Workshop Box Settings
-              </span>
-            </div>
-            <span className="text-[0.68rem] text-[#6F6B61] italic">
-              Controls the Workshop Box directly on the main landing page
-            </span>
+          <div className="flex border-b border-[#464137]/15 bg-[#FAF8F2] px-4 overflow-x-auto">
+            {[
+              { id: "basic", label: "1. Workshop Settings & Pricing", icon: Sparkles },
+              { id: "batch-schedule", label: "2. Batch Schedule & Cover Image", icon: Calendar },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isCurrent = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 py-3 px-3.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
+                    isCurrent
+                      ? "border-[#68705A] text-[#14120E] font-bold"
+                      : "border-transparent text-[#6F6B61] hover:text-[#292923]"
+                  }`}
+                >
+                  <Icon className="size-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
         )}
 
         {/* Section Navigation Tabs Body */}
-        {activeTab === "batch-schedule" && !isLandingPageWorkshop ? (
+        {activeTab === "batch-schedule" ? (
           <div className="p-6">
             <AdminBatchScheduleManager
               key={activeCourse.id}

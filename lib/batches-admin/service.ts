@@ -149,11 +149,16 @@ export async function getBatchByCourseId(
     status = "closed";
   }
 
+  const isWorkshop =
+    course?.slug === "the-watercolour" ||
+    course?.slug === "the-watercolour-roadmap";
+
   const coverImageUrl =
     batchData.cover_image_url ||
     (course as any)?.cover_image_url ||
     courseDetails?.coverImage ||
-    (course?.slug ? COURSE_IMAGES[course.slug] : "/images/foundation.jpeg");
+    (course?.slug && COURSE_IMAGES[course.slug]) ||
+    (isWorkshop ? null : "/images/foundation.jpeg");
 
   const coverImagePublicId =
     batchData.cover_image_public_id ||
@@ -286,11 +291,16 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     status = "closed";
   }
 
+  const isWorkshop =
+    course?.slug === "the-watercolour" ||
+    course?.slug === "the-watercolour-roadmap";
+
   const coverImageUrl =
     batchData.cover_image_url ||
     (course as any)?.cover_image_url ||
     courseDetails?.coverImage ||
-    (course?.slug ? COURSE_IMAGES[course.slug] : "/images/foundation.jpeg");
+    (course?.slug && COURSE_IMAGES[course.slug]) ||
+    (isWorkshop ? null : "/images/foundation.jpeg");
 
   const coverImagePublicId =
     batchData.cover_image_public_id ||

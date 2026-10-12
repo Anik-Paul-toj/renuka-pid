@@ -24,6 +24,9 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
     useState<AdminCourseData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const masterclassCourse = courses.find(
+    (c) => c.slug === "the-watercolour" || c.slug === "the-watercolour-roadmap"
+  );
   const foundationCourse =
     courses.find((c) => c.slug === "watercolour-foundation") || courses[0];
   const artistryCourse =
@@ -139,6 +142,192 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
   return (
     <>
       <div className="flex flex-col gap-10 sm:gap-12">
+        {/* ============================================================== */}
+        {/* COURSE 1: THE WATERCOLOUR ROADMAP — ONE-DAY MASTERCLASS        */}
+        {/* ============================================================== */}
+        {masterclassCourse && (
+          <div className="group relative flex flex-col md:flex-row overflow-hidden rounded-2xl bg-[#FAF8F2]/95 backdrop-blur-md border border-[#444C38]/30 shadow-[0_6px_28px_rgba(40,36,28,0.06)] hover:border-[#444C38]/50 hover:shadow-[0_12px_40px_rgba(40,36,28,0.1)] transition-all duration-300">
+            {/* Left Side: Course Image or Blank Clean Placeholder (~40% on Desktop/Tablet) */}
+            <div className="relative w-full md:w-[38%] lg:w-[40%] min-h-[260px] sm:min-h-[320px] md:min-h-full overflow-hidden bg-gradient-to-br from-[#EFECE4] via-[#EAE5D8] to-[#DFD8C6] shrink-0 border-b md:border-b-0 md:border-r border-[#444C38]/20 flex flex-col items-center justify-center">
+              {masterclassCourse.imagePath && !masterclassCourse.imagePath.includes("placeholder") ? (
+                <>
+                  <Image
+                    src={masterclassCourse.imagePath}
+                    alt={masterclassCourse.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 500px"
+                    className="object-cover object-center group-hover:scale-102 transition-transform duration-500"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#14120E]/50 via-transparent to-transparent md:hidden" />
+                </>
+              ) : (
+                /* Blank, Clean Atelier Placeholder Area with Subtle Watercolor Neutral Aesthetics */
+                <div className="relative w-full h-full min-h-[260px] sm:min-h-[320px] flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden">
+                  {/* Subtle botanical watercolor texture backdrop */}
+                  <div className="pointer-events-none absolute inset-0 z-0 opacity-35 mix-blend-multiply">
+                    <Image
+                      src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                      alt=""
+                      fill
+                      sizes="400px"
+                      className="object-cover object-center"
+                    />
+                  </div>
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#FAF8F2]/30 via-transparent to-[#FAF8F2]/50" />
+
+                  {/* Soft ambient center wash */}
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute size-44 rounded-full bg-[#C8D1C7]/30 blur-2xl"
+                  />
+
+                  {/* Refined subtle atelier watermark */}
+                  <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-[#444C38]/50">
+                    <div className="size-12 rounded-full bg-[#FAF8F2]/80 border border-[#444C38]/15 flex items-center justify-center shadow-2xs backdrop-blur-xs">
+                      <Sparkles className="size-5 text-[#444C38]/60" />
+                    </div>
+                    <span className="font-serif italic text-xs tracking-wider text-[#444C38]/70 font-medium mt-1">
+                      Live Atelier Experience
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Badge in top-left */}
+              <div className="absolute top-4 left-4 z-10">
+                <span className="rounded-md bg-[#FAF8F2]/95 backdrop-blur-xs px-3 py-1 text-[0.66rem] font-bold uppercase tracking-widest text-[#444C38] border border-[#444C38]/20 shadow-xs">
+                  One-Day Masterclass
+                </span>
+              </div>
+            </div>
+
+            {/* Right Side: Course Details (~60% on Desktop/Tablet) */}
+            <div className="relative w-full md:w-[62%] lg:w-[60%] p-6 sm:p-8 lg:p-9 flex flex-col justify-between space-y-5 overflow-hidden">
+              {/* Soft Watercolor Paper Texture Background */}
+              <div className="pointer-events-none absolute inset-0 z-0">
+                <Image
+                  src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 100vw, 700px"
+                  className="object-cover object-center opacity-25 mix-blend-multiply group-hover:opacity-30 transition-opacity duration-300 select-none"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F2] via-transparent to-[#FAF8F2]/80" />
+              </div>
+
+              <div className="relative z-10 space-y-4">
+                {/* Course Header */}
+                <div>
+                  <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#14120E] uppercase leading-tight">
+                    {masterclassCourse.title}
+                  </h2>
+                  <div className="mt-2.5 h-0.5 w-16 bg-[#444C38]/35" />
+
+                  {/* Subtitle */}
+                  <p className="mt-2.5 text-sm sm:text-base font-serif italic text-[#444C38] font-medium leading-relaxed">
+                    “I Can’t Paint” to “I Painted This Myself.”
+                  </p>
+
+                  {/* Sessions, Duration & Language */}
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-[#2C2A24] font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <span className="size-1.5 rounded-full bg-[#444C38]" />
+                      One-Day Masterclass
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="size-1.5 rounded-full bg-[#444C38]" />
+                      {masterclassCourse.durationMinutes || 120} Minutes
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="size-1.5 rounded-full bg-[#444C38]" />
+                      HINGLISH
+                    </span>
+                  </div>
+                </div>
+
+                {/* Dynamic Supabase Batch Schedule Box */}
+                {renderScheduleBadge(masterclassCourse)}
+
+                {/* Course Focus Section */}
+                <div className="space-y-2">
+                  <h3 className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-[#444C38]">
+                    Masterclass Focus
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#2C2A24] font-medium">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-4 text-[#444C38] shrink-0" />
+                      <span>Fix Fundamentals & Overcome Mistakes</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-4 text-[#444C38] shrink-0" />
+                      <span>Live Interactive Demonstration on Zoom</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-4 text-[#444C38] shrink-0" />
+                      <span>Step-by-Step Mindful Painting Flow</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-4 text-[#444C38] shrink-0" />
+                      <span>Direct Live Guidance & Creative Q&A</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Section: Course Fees & Action Buttons */}
+              <div className="relative z-10 pt-4 border-t border-[#444C38]/20 space-y-4">
+                {/* Fees */}
+                <div>
+                  <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none">
+                    Course Fees
+                  </span>
+                  <div className="mt-1.5">
+                    <PriceDisplay
+                      amount={masterclassCourse.offerPrice}
+                      originalAmount={masterclassCourse.originalPrice}
+                      size="2xl"
+                      showSuffix
+                      badgeText="Special Offer"
+                    />
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-[0.7rem] text-[#3E522D] font-bold">
+                    <Sparkles className="size-3 text-[#B93821] shrink-0" />
+                    <span>Complete Live Atelier Access • Zoom Interactive</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <Link
+                    href={`/course/${masterclassCourse.slug}`}
+                    className="flex-1 sm:flex-none border border-[#444C38]/40 hover:bg-[#EBE7DC] px-5 py-2.5 rounded-md text-xs font-bold text-[#444C38] transition-colors text-center inline-flex items-center justify-center gap-2"
+                  >
+                    <span>Learn More</span>
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+
+                  <button
+                    onClick={() => handleOpenBooking(masterclassCourse)}
+                    disabled={
+                      masterclassCourse.activeBatch?.isExpired ||
+                      !masterclassCourse.activeBatch?.isEnrollmentOpen ||
+                      masterclassCourse.activeBatch?.isSoldOut
+                    }
+                    className="btn-studio flex-1 sm:flex-none px-6 py-2.5 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm text-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <span>
+                      {masterclassCourse.activeBatch?.isExpired ||
+                      !masterclassCourse.activeBatch?.isEnrollmentOpen
+                        ? "Registration Closed"
+                        : "Enrol Now"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {/* ============================================================== */}
         {/* COURSE 1: WATERCOLOUR FOUNDATION (HORIZONTAL SIDE-BY-SIDE)    */}
         {/* ============================================================== */}
