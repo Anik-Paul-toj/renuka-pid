@@ -24,12 +24,18 @@ export async function POST(request: NextRequest) {
     const validationResult = createBookingSchema.safeParse(body);
     if (!validationResult.success) {
       const issue = validationResult.error.issues[0];
+      const message =
+        issue?.path.includes("agreeTerms")
+          ? issue.message
+          : issue
+          ? `${issue.path.join(".")}: ${issue.message}`
+          : "Validation failed.";
       return NextResponse.json(
         {
           success: false,
           error: {
             code: "INVALID_INPUT",
-            message: issue ? `${issue.path.join(".")}: ${issue.message}` : "Validation failed.",
+            message,
           },
         },
         { status: 400 }

@@ -696,6 +696,7 @@ export const masterclassData: MasterclassData = {
       { label: "Testimonials", href: "#testimonials" },
       { label: "Blog", href: "#blog" },
       { label: "Contact", href: "#contact" },
+      { label: "Terms & Conditions", href: "/terms-and-conditions" },
       { label: "Privacy Policy", href: "#privacy" },
     ],
     contactEmail: "hello@renukaartstudio.com",

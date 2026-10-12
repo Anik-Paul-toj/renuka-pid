@@ -31,6 +31,7 @@ export const Footer: React.FC = () => {
               let href = link.href;
               if (l === "home") href = "/";
               else if (l === "courses") href = "/course";
+              else if (l.includes("terms")) href = "/terms-and-conditions";
               else if (href.startsWith("#")) href = `/${href}`;
 
               return (
@@ -43,6 +44,14 @@ export const Footer: React.FC = () => {
                 </Link>
               );
             })}
+            {!footer.links.some((l) => l.label.toLowerCase().includes("terms")) && (
+              <Link
+                href="/terms-and-conditions"
+                className="hover:text-[#14120E] transition-colors"
+              >
+                Terms &amp; Conditions
+              </Link>
+            )}
           </nav>
         </div>
 
@@ -53,9 +62,18 @@ export const Footer: React.FC = () => {
           </p>
         </div>
 
-        {/* Bottom Row: Copyright & Handwritten Signoff */}
+        {/* Bottom Row: Copyright, Terms & Handwritten Signoff */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-[#464137]/15 text-xs text-[#3E3A32]">
-          <p className="font-medium">© {footer.copyrightYear} {brand.name}. All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p className="font-medium">© {footer.copyrightYear} {brand.name}. All rights reserved.</p>
+            <span className="text-[#464137]/30 hidden sm:inline">•</span>
+            <Link
+              href="/terms-and-conditions"
+              className="hover:text-[#14120E] underline underline-offset-2 transition-colors font-medium"
+            >
+              Terms &amp; Conditions
+            </Link>
+          </div>
 
           <p className="font-script text-2xl text-[#444C38] select-none font-bold">
             {footer.handwrittenSignature}

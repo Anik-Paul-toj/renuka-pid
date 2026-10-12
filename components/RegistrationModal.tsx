@@ -72,6 +72,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
   const [activeBatch, setActiveBatch] = useState<ActiveBatchInfo | null>(null);
   const [bookingInfo, setBookingInfo] = useState<ConfirmedBookingInfo | null>(null);
   const [paymentPending, setPaymentPending] = useState(false);
@@ -148,6 +150,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     setPaymentPending(false);
     setPendingBookingRef(null);
     setIsPaymentLocked(false);
+    setAgreeTerms(false);
+    setTermsError(false);
     setFoundationBookingRef("");
     setCreditInfo(null);
     setIsCheckingCredit(false);
@@ -390,6 +394,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     if (isLoading || (isPaymentLocked && !paymentPending)) return;
     if (!email || !name) return;
 
+    if (!agreeTerms) {
+      setTermsError(true);
+      setErrorMessage("Please read and agree to the Terms & Conditions before proceeding.");
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage(null);
 
@@ -450,6 +460,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           phone: phone.trim() || undefined,
           batchId: resolvedBatchId,
           creditVerificationToken: creditInfo?.eligible ? creditInfo.creditVerificationToken : undefined,
+          agreeTerms: true,
         }),
       });
 
@@ -723,6 +734,51 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Terms & Conditions Agreement Checkbox */}
+              <div className="pt-1.5 pb-0.5">
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#2C2A24] select-none">
+                  <input
+                    type="checkbox"
+                    id="agree-terms"
+                    name="agreeTerms"
+                    checked={agreeTerms}
+                    disabled={isPaymentLocked}
+                    onChange={(e) => {
+                      setAgreeTerms(e.target.checked);
+                      if (e.target.checked) {
+                        setTermsError(false);
+                        if (errorMessage?.includes("Terms & Conditions")) {
+                          setErrorMessage(null);
+                        }
+                      }
+                    }}
+                    className={`mt-0.5 size-4 shrink-0 rounded border cursor-pointer accent-[#444C38] transition-colors ${
+                      termsError
+                        ? "border-[#B93821] ring-1 ring-[#B93821]"
+                        : "border-[#464137]/30 text-[#444C38] focus:ring-1 focus:ring-[#444C38]"
+                    }`}
+                  />
+                  <span className="leading-snug">
+                    I have read and agree to the{" "}
+                    <a
+                      href="/terms-and-conditions"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-[#444C38] underline underline-offset-2 hover:text-[#14120E] transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Terms &amp; Conditions
+                    </a>
+                    . <span className="text-[#B93821] font-bold">*</span>
+                  </span>
+                </label>
+                {termsError && (
+                  <p className="text-[11px] font-medium text-[#B93821] mt-1 pl-6.5">
+                    You must agree to the Terms &amp; Conditions to complete your enrollment.
+                  </p>
+                )}
+              </div>
 
               <button
                 type="submit"

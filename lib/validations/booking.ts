@@ -26,6 +26,13 @@ export const createBookingSchema = z.object({
       "Invalid batch ID format"
     ),
   creditVerificationToken: z.string().trim().optional(),
+  agreeTerms: z
+    .boolean({
+      message: "You must agree to the Terms & Conditions to proceed.",
+    })
+    .refine((val) => val === true, {
+      message: "You must agree to the Terms & Conditions to proceed.",
+    }),
 });
 
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
