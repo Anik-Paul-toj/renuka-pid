@@ -280,8 +280,6 @@ export async function getPublicCourses(): Promise<AdminCourseData[]> {
       currency,
       duration_minutes,
       is_active,
-      cover_image_url,
-      cover_image_public_id,
       created_at,
       updated_at
     `)
@@ -431,8 +429,6 @@ export async function getPublicCourseBySlug(
       currency,
       duration_minutes,
       is_active,
-      cover_image_url,
-      cover_image_public_id,
       created_at,
       updated_at
     `)

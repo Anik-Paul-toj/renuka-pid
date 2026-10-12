@@ -53,8 +53,16 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
       );
     }
 
-    const isClosed =
-      !batch.isEnrollmentOpen || batch.isExpired || batch.isSoldOut;
+    const isSoldOut = Boolean(
+      batch.isSoldOut ||
+        (batch.seatsRemaining !== undefined && batch.seatsRemaining <= 0)
+    );
+    const isClosed = !batch.isEnrollmentOpen || batch.isExpired || isSoldOut;
+    const statusLabel = isSoldOut
+      ? "Batch Full / Sold Out"
+      : isClosed
+      ? "Registration Closed"
+      : "Open for Registration";
 
     return (
       <div className="relative overflow-hidden rounded-xl bg-[#FAF8F2]/90 border border-[#444C38]/25 p-3.5 sm:p-4 shadow-2xs space-y-2.5">
@@ -70,15 +78,24 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
             </span>
           </div>
 
-          <span
-            className={`px-2 py-0.5 rounded text-[0.64rem] font-bold uppercase tracking-wider ${
-              isClosed
-                ? "bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25"
-                : "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
-            }`}
-          >
-            {isClosed ? "Registration Closed" : "Open for Registration"}
-          </span>
+          <div className="flex items-center gap-2">
+            {batch.seatsRemaining !== undefined && batch.seatsRemaining > 0 && !isClosed && (
+              <span className="hidden sm:inline-block text-[0.62rem] font-semibold text-[#6F6B61]">
+                {batch.seatsRemaining} seats available
+              </span>
+            )}
+            <span
+              className={`px-2 py-0.5 rounded text-[0.64rem] font-bold uppercase tracking-wider ${
+                isSoldOut
+                  ? "bg-[#B93821]/15 text-[#B93821] border border-[#B93821]/30"
+                  : isClosed
+                  ? "bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25"
+                  : "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
+              }`}
+            >
+              {statusLabel}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
@@ -453,13 +470,19 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     disabled={
                       foundationCourse.activeBatch?.isExpired ||
                       !foundationCourse.activeBatch?.isEnrollmentOpen ||
-                      foundationCourse.activeBatch?.isSoldOut
+                      foundationCourse.activeBatch?.isSoldOut ||
+                      (foundationCourse.activeBatch?.seatsRemaining !== undefined &&
+                        foundationCourse.activeBatch.seatsRemaining <= 0)
                     }
-                    className="btn-studio flex-1 sm:flex-none px-6 py-2.5 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-studio flex-1 sm:flex-none px-6 py-2.5 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm text-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <span>
-                      {foundationCourse.activeBatch?.isExpired ||
-                      !foundationCourse.activeBatch?.isEnrollmentOpen
+                      {foundationCourse.activeBatch?.isSoldOut ||
+                      (foundationCourse.activeBatch?.seatsRemaining !== undefined &&
+                        foundationCourse.activeBatch.seatsRemaining <= 0)
+                        ? "Batch Full"
+                        : foundationCourse.activeBatch?.isExpired ||
+                          !foundationCourse.activeBatch?.isEnrollmentOpen
                         ? "Registration Closed"
                         : "Enrol Now"}
                     </span>
@@ -595,13 +618,19 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     disabled={
                       artistryCourse.activeBatch?.isExpired ||
                       !artistryCourse.activeBatch?.isEnrollmentOpen ||
-                      artistryCourse.activeBatch?.isSoldOut
+                      artistryCourse.activeBatch?.isSoldOut ||
+                      (artistryCourse.activeBatch?.seatsRemaining !== undefined &&
+                        artistryCourse.activeBatch.seatsRemaining <= 0)
                     }
-                    className="btn-studio flex-1 sm:flex-none px-6 py-2.5 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-studio flex-1 sm:flex-none px-6 py-2.5 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm text-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <span>
-                      {artistryCourse.activeBatch?.isExpired ||
-                      !artistryCourse.activeBatch?.isEnrollmentOpen
+                      {artistryCourse.activeBatch?.isSoldOut ||
+                      (artistryCourse.activeBatch?.seatsRemaining !== undefined &&
+                        artistryCourse.activeBatch.seatsRemaining <= 0)
+                        ? "Batch Full"
+                        : artistryCourse.activeBatch?.isExpired ||
+                          !artistryCourse.activeBatch?.isEnrollmentOpen
                         ? "Registration Closed"
                         : "Enrol Now"}
                     </span>
