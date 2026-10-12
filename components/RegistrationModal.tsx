@@ -751,13 +751,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <span>Retry Payment</span>
                     <ArrowRight className="size-4" />
                   </>
-                ) : activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0 ? (
+                ) : (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0) || (coursePrice && coursePrice > 0) ? (
                   <>
                     <span className="font-price tabular-nums">
                       Proceed to Payment • ₹
                       {creditInfo?.eligible
                         ? (creditInfo.payableAmountPaise / 100).toLocaleString("en-IN")
-                        : activeBatch.offerPrice?.toLocaleString("en-IN")}
+                        : (activeBatch?.offerPrice ?? coursePrice)?.toLocaleString("en-IN")}
                     </span>
                     <ArrowRight className="size-4" />
                   </>

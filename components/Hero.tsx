@@ -12,6 +12,9 @@ interface HeroProps {
   onOpenModal: () => void;
   content?: MasterclassData["hero"];
   initialCourse?: {
+    id?: string;
+    title?: string;
+    slug?: string;
     originalPrice: number;
     offerPrice: number;
     durationMinutes?: number;
@@ -44,7 +47,10 @@ export const Hero: React.FC<HeroProps> = ({
   const heroContent = content || contextHero;
 
   useEffect(() => {
-    fetch("/api/cohort-batches/active", { cache: "no-store" })
+    const slug = initialCourse?.slug || "the-watercolour";
+    fetch(`/api/cohort-batches/active?courseSlug=${encodeURIComponent(slug)}`, {
+      cache: "no-store",
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data?.success && data?.batch?.course) {
@@ -57,7 +63,7 @@ export const Hero: React.FC<HeroProps> = ({
         }
       })
       .catch(() => {});
-  }, []);
+  }, [initialCourse?.slug]);
 
   const displayOriginalPrice = coursePricing?.originalPrice ?? workshopData.originalPrice;
   const displayOfferPrice = coursePricing?.offerPrice ?? workshopData.offerPrice;

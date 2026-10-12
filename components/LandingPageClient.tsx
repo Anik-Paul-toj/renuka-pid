@@ -27,6 +27,9 @@ export function LandingPageClient({
 }: {
   content: MasterclassData;
   initialCourse?: {
+    id?: string;
+    title?: string;
+    slug?: string;
     originalPrice: number;
     offerPrice: number;
     durationMinutes?: number;
@@ -79,7 +82,13 @@ export function LandingPageClient({
           <StickyBottomBar onOpenModal={handleOpenModal} />
 
           {/* Interactive Registration Modal Drawer */}
-          <RegistrationModal isOpen={isModalOpen} onClose={handleCloseModal} />
+          <RegistrationModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            courseSlug={initialCourse?.slug || "the-watercolour"}
+            courseTitle={initialCourse?.title}
+            coursePrice={initialCourse?.offerPrice}
+          />
         </div>
       </GSAPProvider>
     </LandingContentProvider>

@@ -61,6 +61,16 @@ export async function GET(request: NextRequest) {
 
     if (targetCourseId && batches) {
       batches = batches.filter((b) => b.course_id === targetCourseId);
+    } else if (!targetCourseId && batches && batches.length > 0) {
+      const masterclassBatch = batches.find(
+        (b) => b.course_id === "11111111-1111-1111-1111-111111111111"
+      );
+      if (masterclassBatch) {
+        batches = [
+          masterclassBatch,
+          ...batches.filter((b) => b.id !== masterclassBatch.id),
+        ];
+      }
     }
 
     if (!batches || batches.length === 0) {
