@@ -9,18 +9,20 @@ import {
   MAX_FILE_SIZE_BYTES,
 } from "@/lib/cloudinary/service";
 
-export type GalleryCategory = "students_creation" | "learning_in_action";
+export type GalleryCategory = "artist_gallery" | "students_gallery";
+// Backward-compatible type for legacy category references
+export type LegacyGalleryCategory = "students_creation" | "learning_in_action";
 
 export const GALLERY_CATEGORIES: { id: GalleryCategory; label: string; description: string }[] = [
   {
-    id: "students_creation",
-    label: "Students' Creation",
-    description: "Original botanical and landscape studies created by students in our workshops and cohorts.",
+    id: "artist_gallery",
+    label: "Artist Gallery",
+    description: "Original watercolor artwork created by Renuka Aggarwal / studio artist.",
   },
   {
-    id: "learning_in_action",
-    label: "Learning in Action",
-    description: "Behind-the-scenes snapshots, live demonstrations, and hands-on creative practice in the studio.",
+    id: "students_gallery",
+    label: "Students Gallery",
+    description: "Original watercolor studies and paintings created by our workshop and cohort students.",
   },
 ];
 
@@ -41,6 +43,77 @@ export interface GalleryItem {
   metadata?: Record<string, any> | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Safely normalize gallery category strings (including legacy "students_creation" and "learning_in_action").
+ */
+export function normalizeGalleryCategory(
+  rawCategory?: string | null,
+  metadata?: Record<string, any> | null,
+  titleOrAlt?: string | null
+): GalleryCategory {
+  const rawCat = (rawCategory || "").toLowerCase();
+  const metaCat = String(
+    metadata?.category ||
+    metadata?.gallery_category ||
+    ""
+  ).toLowerCase();
+  const text = (titleOrAlt || "").toLowerCase();
+
+  // 1. Explicit new category matches
+  if (
+    metaCat === "artist_gallery" ||
+    rawCat === "gallery_artist_gallery" ||
+    rawCat === "gallery_artist_gallery_draft" ||
+    metaCat === "artist" ||
+    rawCat.includes("artist")
+  ) {
+    return "artist_gallery";
+  }
+
+  if (
+    metaCat === "students_gallery" ||
+    rawCat === "gallery_students_gallery" ||
+    rawCat === "gallery_students_gallery_draft" ||
+    metaCat === "student" ||
+    rawCat.includes("students_gallery")
+  ) {
+    return "students_gallery";
+  }
+
+  // 2. Safe mapping of legacy categories:
+  // "learning_in_action" -> artwork created by Renuka Aggarwal / studio artist -> "artist_gallery"
+  if (
+    metaCat === "learning_in_action" ||
+    rawCat.includes("learning") ||
+    rawCat.includes("action")
+  ) {
+    return "artist_gallery";
+  }
+
+  // "students_creation" -> artwork created by students -> "students_gallery"
+  if (
+    metaCat === "students_creation" ||
+    rawCat.includes("students_creation") ||
+    rawCat.includes("creation")
+  ) {
+    return "students_gallery";
+  }
+
+  // 3. Fallback heuristics based on metadata title / alt text
+  if (
+    text.includes("renuka") ||
+    text.includes("aggarwal") ||
+    text.includes("artist") ||
+    text.includes("demo") ||
+    text.includes("demonstration")
+  ) {
+    return "artist_gallery";
+  }
+
+  // Default fallback for legacy general "gallery" assets
+  return "students_gallery";
 }
 
 /**
@@ -71,20 +144,12 @@ function formatGalleryItem(row: any): GalleryItem {
     quality: "auto",
   });
 
-  // Normalize category to students_creation | learning_in_action
-  let category: GalleryCategory = "students_creation";
-  const rawCat = (row.category || "").toLowerCase();
-  const metaCat = row.metadata?.category || row.metadata?.gallery_category;
-
-  if (
-    rawCat.includes("learning") ||
-    rawCat.includes("action") ||
-    metaCat === "learning_in_action"
-  ) {
-    category = "learning_in_action";
-  } else {
-    category = "students_creation";
-  }
+  // Normalize category to artist_gallery | students_gallery safely
+  const category = normalizeGalleryCategory(
+    row.category,
+    row.metadata,
+    row.alt_text || row.file_name
+  );
 
   return {
     id: row.id,
@@ -215,7 +280,9 @@ export async function uploadGalleryImage(
   // 3. Persist to Supabase media_assets
   const supabase = createAdminClient();
   const category: GalleryCategory =
-    options.category === "learning_in_action" ? "learning_in_action" : "students_creation";
+    options.category === "artist_gallery" || (options.category as any) === "learning_in_action"
+      ? "artist_gallery"
+      : "students_gallery";
   const isPublished = options.isPublished ?? true;
   const displayOrder = options.displayOrder ?? 0;
   const title = options.title?.trim() || file.name.replace(/\.[^/.]+$/, "");
@@ -328,16 +395,20 @@ export async function updateGalleryImage(
     updatePayload.alt_text = updates.title;
   }
 
-  let currentCategory: GalleryCategory = "students_creation";
-  if (
-    existing.category?.includes("learning") ||
-    existing.metadata?.category === "learning_in_action" ||
-    existing.metadata?.gallery_category === "learning_in_action"
-  ) {
-    currentCategory = "learning_in_action";
+  const currentCategory: GalleryCategory = normalizeGalleryCategory(
+    existing.category,
+    existing.metadata,
+    existing.alt_text || existing.file_name
+  );
+
+  let targetCategory: GalleryCategory = currentCategory;
+  if (updates.category) {
+    targetCategory =
+      updates.category === "artist_gallery" || (updates.category as any) === "learning_in_action"
+        ? "artist_gallery"
+        : "students_gallery";
   }
 
-  const targetCategory: GalleryCategory = updates.category || currentCategory;
   const targetPublished: boolean =
     updates.isPublished !== undefined
       ? updates.isPublished

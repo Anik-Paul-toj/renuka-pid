@@ -82,7 +82,7 @@ export function TestimonialsSection({
                 href="#gallery"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#68705A] hover:bg-[#525946] text-[#FAF8F2] text-xs font-bold shadow-sm transition-colors"
               >
-                <span>View Students' Creation Gallery</span>
+                <span>View Students Gallery</span>
                 <ArrowRight className="size-3.5" />
               </a>
             </div>

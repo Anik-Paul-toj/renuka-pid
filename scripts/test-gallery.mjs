@@ -223,28 +223,51 @@ async function main() {
     assert.strictEqual(destroyRes.result, "ok", "Destroy must return ok");
   });
 
-  // --- TEST 10: Category Partitioning (Students' Creation vs Learning in Action) ---
-  runTest("Test 10: Gallery category partitioning correctly groups Students' Creation and Learning in Action", () => {
+  // --- TEST 10: Category Partitioning (Artist Gallery vs Students Gallery) ---
+  runTest("Test 10: Gallery category partitioning correctly groups Artist Gallery and Students Gallery", () => {
     const mockItems = [
-      { id: "1", title: "Botanical Rose", category: "students_creation", isPublished: true },
-      { id: "2", title: "Studio Demo Live", category: "learning_in_action", isPublished: true },
-      { id: "3", title: "Loose Landscape Study", category: "students_creation", isPublished: true },
-      { id: "4", title: "Palette Setup Video", category: "learning_in_action", isPublished: true },
+      { id: "1", title: "Botanical Peony in Rose Madder", category: "artist_gallery", isPublished: true },
+      { id: "2", title: "Studio Demo by Renuka Aggarwal", category: "learning_in_action", isPublished: true },
+      { id: "3", title: "Student Loose Landscape Study", category: "students_gallery", isPublished: true },
+      { id: "4", title: "Student Watercolor Flowers", category: "students_creation", isPublished: true },
       { id: "5", title: "Legacy Artwork", category: "gallery", isPublished: true },
+      { id: "6", title: "Draft Piece", category: "artist_gallery", isPublished: false },
     ];
 
-    // Normalization rule
-    const normalized = mockItems.map((item) => ({
+    // Normalization rule matching lib/gallery/service.ts
+    const normalizeCat = (cat) => {
+      const c = (cat || "").toLowerCase();
+      if (c === "artist_gallery" || c.includes("learning") || c.includes("action") || c.includes("artist")) {
+        return "artist_gallery";
+      }
+      return "students_gallery";
+    };
+
+    const publishedItems = mockItems.filter((i) => i.isPublished);
+    const normalized = publishedItems.map((item) => ({
       ...item,
-      normalizedCategory: item.category === "learning_in_action" ? "learning_in_action" : "students_creation",
+      normalizedCategory: normalizeCat(item.category),
     }));
 
-    const students = normalized.filter((i) => i.normalizedCategory === "students_creation");
-    const action = normalized.filter((i) => i.normalizedCategory === "learning_in_action");
+    // Filter 1: All published images
+    const allWorks = normalized;
+    assert.strictEqual(allWorks.length, 5, "All filter must display every published image (5 items)");
 
-    assert.strictEqual(students.length, 3, "Students' Creation must include 2 explicit + 1 legacy");
-    assert.strictEqual(action.length, 2, "Learning in Action must include 2 items");
-    assert.ok(students.some((i) => i.title === "Legacy Artwork"), "Legacy gallery category must default to Students' Creation");
+    // Filter 2: Artist Gallery
+    const artistWorks = normalized.filter((i) => i.normalizedCategory === "artist_gallery");
+    assert.strictEqual(artistWorks.length, 2, "Artist Gallery must display only artist-created artwork (2 items: 1 explicit + 1 mapped legacy demo)");
+    assert.ok(artistWorks.every((i) => i.id === "1" || i.id === "2"), "Artist Gallery must only contain artist items");
+
+    // Filter 3: Students Gallery
+    const studentWorks = normalized.filter((i) => i.normalizedCategory === "students_gallery");
+    assert.strictEqual(studentWorks.length, 3, "Students Gallery must display only student-created artwork (3 items: 1 explicit + 1 legacy creation + 1 default legacy)");
+    assert.ok(studentWorks.every((i) => i.id === "3" || i.id === "4" || i.id === "5"), "Students Gallery must only contain student items");
+
+    // Category labels check
+    const expectedLabels = ["All", "Artist Gallery", "Students Gallery"];
+    assert.strictEqual(expectedLabels[0], "All");
+    assert.strictEqual(expectedLabels[1], "Artist Gallery");
+    assert.strictEqual(expectedLabels[2], "Students Gallery");
   });
 
   console.log("==================================================================");

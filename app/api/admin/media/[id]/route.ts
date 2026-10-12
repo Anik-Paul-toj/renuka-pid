@@ -36,8 +36,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json().catch(() => ({}));
 
     const category =
-      body.category === "learning_in_action" || body.category === "students_creation"
-        ? body.category
+      body.category === "artist_gallery" || body.category === "learning_in_action"
+        ? "artist_gallery"
+        : body.category === "students_gallery" || body.category === "students_creation"
+        ? "students_gallery"
         : undefined;
 
     const updated = await updateGalleryImage(id, {

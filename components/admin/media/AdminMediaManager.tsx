@@ -50,14 +50,14 @@ export function AdminMediaManager({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadAltText, setUploadAltText] = useState("");
-  const [uploadCategory, setUploadCategory] = useState<GalleryCategory>("students_creation");
+  const [uploadCategory, setUploadCategory] = useState<GalleryCategory>("artist_gallery");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Edit state
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [editCategory, setEditCategory] = useState<GalleryCategory>("students_creation");
+  const [editCategory, setEditCategory] = useState<GalleryCategory>("artist_gallery");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Replace state
@@ -167,7 +167,7 @@ export function AdminMediaManager({
       setPreviewUrl(null);
       setUploadTitle("");
       setUploadAltText("");
-      setUploadCategory("students_creation");
+      setUploadCategory("artist_gallery");
       await refreshItems();
     } catch (err: any) {
       setError(err.message || "Failed to upload image.");
@@ -406,13 +406,13 @@ export function AdminMediaManager({
               <div className="flex items-center gap-1.5">
                 <span className="text-[0.68rem] uppercase font-bold text-[#6F6B61] tracking-wider">Category:</span>
                 <div className="inline-flex rounded-lg border border-[#464137]/15 p-0.5 bg-white text-xs">
-                  {(["all", "students_creation", "learning_in_action"] as const).map((cat) => {
+                  {(["all", "artist_gallery", "students_gallery"] as const).map((cat) => {
                     const label =
                       cat === "all"
                         ? "All"
-                        : cat === "students_creation"
-                        ? "Students' Creation"
-                        : "Learning in Action";
+                        : cat === "artist_gallery"
+                        ? "Artist Gallery"
+                        : "Students Gallery";
                     return (
                       <button
                         key={cat}
@@ -482,11 +482,11 @@ export function AdminMediaManager({
                     {/* Category Tag Badge */}
                     <div className="absolute top-2 right-2">
                       <span className={`px-2 py-0.5 rounded-md text-[0.6rem] font-bold uppercase tracking-wider backdrop-blur-xs shadow-xs ${
-                        item.category === "learning_in_action"
+                        item.category === "artist_gallery"
                           ? "bg-amber-800/85 text-amber-100"
                           : "bg-[#444C38]/85 text-[#F7F4EC]"
                       }`}>
-                        {item.category === "learning_in_action" ? "Action" : "Creation"}
+                        {item.category === "artist_gallery" ? "Artist" : "Students"}
                       </span>
                     </div>
 
@@ -648,37 +648,37 @@ export function AdminMediaManager({
                 <div className="grid grid-cols-2 gap-2.5">
                   <button
                     type="button"
-                    onClick={() => setUploadCategory("students_creation")}
+                    onClick={() => setUploadCategory("artist_gallery")}
                     className={`p-3 rounded-xl border text-left transition-all ${
-                      uploadCategory === "students_creation"
+                      uploadCategory === "artist_gallery"
+                        ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] shadow-xs ring-1 ring-[#68705A]"
+                        : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
+                    }`}
+                  >
+                    <div className="text-xs font-bold text-[#292923] flex items-center gap-1.5">
+                      <span>🖌️</span>
+                      <span>Artist Gallery</span>
+                    </div>
+                    <div className="text-[0.65rem] text-[#6F6B61] mt-1 leading-snug">
+                      Original artwork created by Renuka Aggarwal / studio artist
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setUploadCategory("students_gallery")}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      uploadCategory === "students_gallery"
                         ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] shadow-xs ring-1 ring-[#68705A]"
                         : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
                     }`}
                   >
                     <div className="text-xs font-bold text-[#292923] flex items-center gap-1.5">
                       <span>🎨</span>
-                      <span>Students&apos; Creation</span>
+                      <span>Students Gallery</span>
                     </div>
                     <div className="text-[0.65rem] text-[#6F6B61] mt-1 leading-snug">
-                      Artwork, paintings & studies by workshop students
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setUploadCategory("learning_in_action")}
-                    className={`p-3 rounded-xl border text-left transition-all ${
-                      uploadCategory === "learning_in_action"
-                        ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] shadow-xs ring-1 ring-[#68705A]"
-                        : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
-                    }`}
-                  >
-                    <div className="text-xs font-bold text-[#292923] flex items-center gap-1.5">
-                      <span>📸</span>
-                      <span>Learning in Action</span>
-                    </div>
-                    <div className="text-[0.65rem] text-[#6F6B61] mt-1 leading-snug">
-                      Live demonstrations, studio moments & practice
+                      Artwork, paintings & studies created by workshop students
                     </div>
                   </button>
                 </div>
@@ -752,26 +752,26 @@ export function AdminMediaManager({
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setEditCategory("students_creation")}
+                    onClick={() => setEditCategory("artist_gallery")}
                     className={`p-2.5 rounded-xl border text-left transition-all ${
-                      editCategory === "students_creation"
+                      editCategory === "artist_gallery"
                         ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] ring-1 ring-[#68705A]"
                         : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
                     }`}
                   >
-                    <div className="text-xs font-bold text-[#292923]">🎨 Students&apos; Creation</div>
+                    <div className="text-xs font-bold text-[#292923]">🖌️ Artist Gallery</div>
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => setEditCategory("learning_in_action")}
+                    onClick={() => setEditCategory("students_gallery")}
                     className={`p-2.5 rounded-xl border text-left transition-all ${
-                      editCategory === "learning_in_action"
+                      editCategory === "students_gallery"
                         ? "border-[#68705A] bg-[#68705A]/10 text-[#292923] ring-1 ring-[#68705A]"
                         : "border-[#464137]/20 bg-white text-[#6F6B61] hover:bg-[#F0EDE6]"
                     }`}
                   >
-                    <div className="text-xs font-bold text-[#292923]">📸 Learning in Action</div>
+                    <div className="text-xs font-bold text-[#292923]">🎨 Students Gallery</div>
                   </button>
                 </div>
               </div>
