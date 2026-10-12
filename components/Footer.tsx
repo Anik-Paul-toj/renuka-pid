@@ -7,8 +7,14 @@ import { useLandingContent } from "@/components/LandingContentProvider";
 
 export const Footer: React.FC = () => {
   const { brand, footer } = useLandingContent();
-  const contactEmail = footer.contactEmail || "renuka.art.studio25@gmail.com";
-  const contactPhone = footer.contactPhone || "+91 95991 09200";
+  const contactEmail =
+    footer.contactEmail && !footer.contactEmail.includes("hello@renukaartstudio.com") && !footer.contactEmail.includes("contact@renukaartstudio.com")
+      ? footer.contactEmail
+      : "renuka.art.studio25@gmail.com";
+  const contactPhone =
+    footer.contactPhone && !footer.contactPhone.includes("98765")
+      ? footer.contactPhone
+      : "+91 95991 09200";
 
   return (
     <footer id="contact" className="border-t border-[#464137]/10 bg-[#F7F4EC] py-14 pb-28 sm:pb-32">
