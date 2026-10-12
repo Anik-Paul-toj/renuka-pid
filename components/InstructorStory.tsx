@@ -48,7 +48,13 @@ function formatBioParagraph(text: string): React.ReactNode {
 }
 
 export const InstructorStory: React.FC = () => {
-  const { instructorStory } = useLandingContent();
+  const { instructorStory, aboutArtist } = useLandingContent();
+
+  const headingText = aboutArtist?.heading || `${instructorStory.headline}${instructorStory.name}`;
+  const roleText = aboutArtist?.role || instructorStory.subtitle;
+  const paragraphsList = (aboutArtist?.bio && aboutArtist.bio.length > 0)
+    ? [aboutArtist.introduction, ...aboutArtist.bio].filter(Boolean)
+    : instructorStory.paragraphs;
 
   return (
     <section id="about" className="relative overflow-hidden py-12 sm:py-16 lg:py-20 bg-[#F7F4EC]">
@@ -70,13 +76,12 @@ export const InstructorStory: React.FC = () => {
       <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 text-center">
         {/* Heading */}
         <h2 className="font-serif text-3xl sm:text-4xl lg:text-[2.75rem] font-medium tracking-tight text-[#14120E] leading-tight">
-          <span>{instructorStory.headline}</span>
-          <span className="font-bold text-[#14120E]">{instructorStory.name}</span>
+          <span>{headingText}</span>
         </h2>
 
         {/* Role */}
         <p className="mt-2 text-xs sm:text-sm tracking-[0.2em] uppercase font-bold text-[#444C38]">
-          {instructorStory.subtitle}
+          {roleText}
         </p>
 
         {/* Decorative Divider */}
@@ -88,7 +93,7 @@ export const InstructorStory: React.FC = () => {
 
         {/* Description Paragraphs */}
         <div className="mx-auto max-w-2xl sm:max-w-3xl space-y-4 text-center text-sm sm:text-base lg:text-[1.03rem] leading-relaxed text-[#2C2A24] font-medium">
-          {instructorStory.paragraphs.map((p, idx) => (
+          {paragraphsList.map((p, idx) => (
             <p key={idx}>{formatBioParagraph(p)}</p>
           ))}
         </div>

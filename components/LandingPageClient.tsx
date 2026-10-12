@@ -7,7 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { AudienceSection } from "@/components/AudienceSection";
 import { VideoSection } from "@/components/VideoSection";
-import { InstructorStory } from "@/components/InstructorStory";
+import { InstructorIntro } from "@/components/InstructorIntro";
 import { GallerySection } from "@/components/GallerySection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { FAQ } from "@/components/FAQ";
@@ -54,7 +54,7 @@ export function LandingPageClient({
             <Hero onOpenModal={handleOpenModal} initialCourse={initialCourse} />
 
             {/* Section 02: About Renuka (Instructor Story & Credentials) */}
-            <InstructorStory />
+            <InstructorIntro />
 
             {/* Section 03: Who This Is For (Target Audience) */}
             <AudienceSection />
