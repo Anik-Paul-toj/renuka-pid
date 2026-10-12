@@ -224,6 +224,7 @@ export const footerSectionSchema = z.object({
   brandDescription: z.string().min(1),
   links: z.array(footerLinkSchema).min(1),
   contactEmail: z.string().email(),
+  contactPhone: z.string().optional(),
   copyrightYear: z.number().int().min(2020),
   disclaimer: z.string().min(1),
   handwrittenSignature: z.string().min(1),

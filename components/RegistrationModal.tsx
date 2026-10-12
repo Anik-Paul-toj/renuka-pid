@@ -362,14 +362,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               setIsSubmitted(true);
             } else {
               setErrorMessage(
-                verifyResult?.error?.message || "Payment verification failed. Please contact support."
+                verifyResult?.error?.message || "Payment verification failed. Please contact support at renuka.art.studio25@gmail.com or 9599109200."
               );
               setPaymentPending(true);
               setPendingBookingRef(bookingRef);
             }
           } catch {
             setErrorMessage(
-              `Network error confirming payment. Your reservation reference is: ${bookingRef}`
+              `Network error confirming payment. Please contact renuka.art.studio25@gmail.com or 9599109200 with reservation reference: ${bookingRef}`
             );
             setPaymentPending(true);
             setPendingBookingRef(bookingRef);
@@ -864,6 +864,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               </p>
               <p className="text-[#2C2A24] font-medium">
                 3. Your booking is registered under reference <span className="font-mono font-bold text-[#14120E]">{bookingInfo?.bookingReference}</span>.
+              </p>
+              <p className="text-[11px] text-[#6F6B61] pt-1 border-t border-[#464137]/10">
+                Need help? Contact us at <a href="mailto:renuka.art.studio25@gmail.com" className="underline font-semibold text-[#444C38]">renuka.art.studio25@gmail.com</a> or <a href="tel:+919599109200" className="underline font-semibold text-[#444C38]">+91 9599109200</a>.
               </p>
             </div>
 

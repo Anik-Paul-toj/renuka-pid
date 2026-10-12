@@ -29,12 +29,12 @@ export const DEFAULT_SETTINGS: SettingsData = {
   studioName: "Renuka Art Studio",
   instructorName: "Renuka Aggarwal",
   websiteUrl: "https://renukaartstudio.com",
-  contactEmail: "contact@renukaartstudio.com",
-  contactPhone: "+91 98765 43210",
-  supportWhatsapp: "+91 98765 43210",
+  contactEmail: "renuka.art.studio25@gmail.com",
+  contactPhone: "+91 95991 09200",
+  supportWhatsapp: "+91 95991 09200",
   defaultSenderName: "Renuka Art Studio",
-  replyToEmail: "contact@renukaartstudio.com",
-  updatedAt: "2026-09-25T12:00:00.000Z",
+  replyToEmail: "renuka.art.studio25@gmail.com",
+  updatedAt: "2026-10-12T12:00:00.000Z",
   updatedBy: "system",
 };
 

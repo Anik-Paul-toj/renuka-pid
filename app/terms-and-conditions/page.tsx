@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Mail,
+  Phone,
   ShieldCheck,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
@@ -242,11 +243,18 @@ export default function TermsAndConditionsPage() {
             </div>
             <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
               <a
-                href="mailto:hello@renukaartstudio.com"
+                href="mailto:renuka.art.studio25@gmail.com"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#444C38] text-[#FAF8F2] text-xs font-bold hover:bg-[#353B2C] transition-colors shadow-xs"
               >
                 <Mail className="size-3.5" />
-                <span>hello@renukaartstudio.com</span>
+                <span>renuka.art.studio25@gmail.com</span>
+              </a>
+              <a
+                href="tel:+919599109200"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#444C38]/20 bg-white/80 text-[#14120E] text-xs font-bold hover:bg-white hover:border-[#444C38]/40 transition-colors shadow-2xs"
+              >
+                <Phone className="size-3.5 text-[#444C38]" />
+                <span>+91 9599109200</span>
               </a>
               <Link
                 href="/course"

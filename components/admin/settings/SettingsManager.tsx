@@ -245,7 +245,7 @@ export function SettingsManager({
                   className={`w-full pl-9 pr-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                     fieldErrors.contactEmail ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                   } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                  placeholder="contact@renukaartstudio.com"
+                  placeholder="renuka.art.studio25@gmail.com"
                 />
               </div>
               {fieldErrors.contactEmail && (
@@ -267,7 +267,7 @@ export function SettingsManager({
                   className={`w-full pl-9 pr-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                     fieldErrors.contactPhone ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                   } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 95991 09200"
                 />
               </div>
               {fieldErrors.contactPhone && (
@@ -289,7 +289,7 @@ export function SettingsManager({
                   className={`w-full pl-9 pr-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                     fieldErrors.supportWhatsapp ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                   } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 95991 09200"
                 />
               </div>
               {fieldErrors.supportWhatsapp && (
@@ -338,7 +338,7 @@ export function SettingsManager({
                 className={`w-full px-3 py-2 rounded-lg border text-xs bg-white text-[#292923] focus:outline-none focus:ring-1 focus:ring-[#68705A] ${
                   fieldErrors.replyToEmail ? "border-red-400 bg-red-50/20" : "border-[#464137]/20"
                 } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`}
-                placeholder="contact@renukaartstudio.com"
+                placeholder="renuka.art.studio25@gmail.com"
               />
               {fieldErrors.replyToEmail && (
                 <p className="text-[0.7rem] text-red-600 mt-1">{fieldErrors.replyToEmail[0]}</p>

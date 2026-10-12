@@ -177,6 +177,7 @@ export interface MasterclassData {
       href: string;
     }>;
     contactEmail: string;
+    contactPhone?: string;
     copyrightYear: number;
     disclaimer: string;
     handwrittenSignature: string;
@@ -699,7 +700,8 @@ export const masterclassData: MasterclassData = {
       { label: "Terms & Conditions", href: "/terms-and-conditions" },
       { label: "Privacy Policy", href: "#privacy" },
     ],
-    contactEmail: "hello@renukaartstudio.com",
+    contactEmail: "renuka.art.studio25@gmail.com",
+    contactPhone: "+91 95991 09200",
     copyrightYear: 2026,
     disclaimer:
       "Renuka Art Studio provides educational art guidance and mindful creative mentorship. All illustrations and demonstrations are designed to foster peaceful personal expression.",

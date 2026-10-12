@@ -2,10 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
+import { Mail, Phone } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
 export const Footer: React.FC = () => {
   const { brand, footer } = useLandingContent();
+  const contactEmail = footer.contactEmail || "renuka.art.studio25@gmail.com";
+  const contactPhone = footer.contactPhone || "+91 95991 09200";
 
   return (
     <footer id="contact" className="border-t border-[#464137]/10 bg-[#F7F4EC] py-14 pb-28 sm:pb-32">
@@ -55,11 +58,33 @@ export const Footer: React.FC = () => {
           </nav>
         </div>
 
-        {/* Middle Row: Descriptor */}
-        <div className="text-xs text-[#2C2A24]">
-          <p className="max-w-2xl text-xs sm:text-[0.82rem] font-medium leading-relaxed">
-            {footer.brandDescription}
-          </p>
+        {/* Middle Row: Descriptor & Direct Contact */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="text-xs text-[#2C2A24] max-w-xl">
+            <p className="text-xs sm:text-[0.82rem] font-medium leading-relaxed">
+              {footer.brandDescription}
+            </p>
+          </div>
+
+          {/* Studio Contact Channels */}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-semibold">
+            <a
+              href={`mailto:${contactEmail}`}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 border border-[#464137]/15 text-[#14120E] hover:border-[#444C38]/40 hover:bg-white transition-all shadow-2xs group"
+              title="Email Renuka Art Studio"
+            >
+              <Mail className="size-3.5 text-[#444C38] group-hover:scale-110 transition-transform" />
+              <span>{contactEmail}</span>
+            </a>
+            <a
+              href={`tel:+91${contactPhone.replace(/\D/g, "").slice(-10)}`}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 border border-[#464137]/15 text-[#14120E] hover:border-[#444C38]/40 hover:bg-white transition-all shadow-2xs group"
+              title="Call or WhatsApp Renuka Art Studio"
+            >
+              <Phone className="size-3.5 text-[#444C38] group-hover:scale-110 transition-transform" />
+              <span>+91 {contactPhone.replace(/\D/g, "").slice(-10)}</span>
+            </a>
+          </div>
         </div>
 
         {/* Bottom Row: Copyright, Terms & Handwritten Signoff */}

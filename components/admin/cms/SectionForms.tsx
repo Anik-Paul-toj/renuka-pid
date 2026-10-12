@@ -1157,9 +1157,12 @@ export function FooterForm({ value, onChange }: FormProps<any>) {
         <TextArea value={value?.brandDescription} onChange={(val) => onChange({ ...value, brandDescription: val })} rows={2} />
       </FormField>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <FormField label="Contact Email Address">
-          <TextInput value={value?.contactEmail} onChange={(val) => onChange({ ...value, contactEmail: val })} />
+          <TextInput value={value?.contactEmail} onChange={(val) => onChange({ ...value, contactEmail: val })} placeholder="renuka.art.studio25@gmail.com" />
+        </FormField>
+        <FormField label="Contact Phone / WhatsApp">
+          <TextInput value={value?.contactPhone} onChange={(val) => onChange({ ...value, contactPhone: val })} placeholder="+91 9599109200" />
         </FormField>
         <FormField label="Copyright Year">
           <TextInput

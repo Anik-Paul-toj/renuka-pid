@@ -94,6 +94,8 @@ Amount: ${formattedAmount}${data.paymentId ? `\nPayment ID: ${data.paymentId}` :
 
 Private Access: ${zoomAccessText}
 
+For any assistance, contact us at renuka.art.studio25@gmail.com or +91 9599109200.
+
 Warmly,
 Renuka Aggarwal
 Renuka Art Studio`;
@@ -165,7 +167,7 @@ Renuka Art Studio`;
       </div>
     </div>
 
-    <p>Please check your calendar so you don't miss the live stream. If you have any questions, simply reply to this email.</p>
+    <p>Please check your calendar so you don't miss the live stream. If you have any questions, reply to this email, write to <a href="mailto:renuka.art.studio25@gmail.com" style="color: #68705A;">renuka.art.studio25@gmail.com</a>, or call/WhatsApp <a href="tel:+919599109200" style="color: #68705A;">+91 9599109200</a>.</p>
 
     <div class="footer">
       <p style="margin: 0; font-weight: 600; color: #292923;">Warmly,</p>
