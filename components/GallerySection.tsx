@@ -184,48 +184,46 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
           </p>
 
           {/* Category Navigation Pills */}
-          {images.length > 0 && (
-            <div className="pt-2 flex items-center justify-center gap-2 flex-wrap">
-              <button
-                onClick={() => setActiveTab("all")}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all cursor-pointer ${
-                  activeTab === "all"
-                    ? "bg-[#68705A] text-white shadow-xs"
-                    : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
-                }`}
-              >
-                All ({images.length})
-              </button>
+          <div className="pt-2 flex items-center justify-center gap-2 flex-wrap">
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all cursor-pointer ${
+                activeTab === "all"
+                  ? "bg-[#68705A] text-white shadow-xs"
+                  : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
+              }`}
+            >
+              All ({images.length})
+            </button>
 
-              <button
-                onClick={() => setActiveTab("artist_gallery")}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === "artist_gallery"
-                    ? "bg-[#68705A] text-white shadow-xs"
-                    : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
-                }`}
-              >
-                <Palette className="size-3" />
-                <span>Artist Gallery ({artistImages.length})</span>
-              </button>
+            <button
+              onClick={() => setActiveTab("artist_gallery")}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "artist_gallery"
+                  ? "bg-[#68705A] text-white shadow-xs"
+                  : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
+              }`}
+            >
+              <Palette className="size-3" />
+              <span>Artist Gallery ({artistImages.length})</span>
+            </button>
 
-              <button
-                onClick={() => setActiveTab("students_gallery")}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === "students_gallery"
-                    ? "bg-[#68705A] text-white shadow-xs"
-                    : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
-                }`}
-              >
-                <Brush className="size-3" />
-                <span>Students Gallery ({studentsImages.length})</span>
-              </button>
-            </div>
-          )}
+            <button
+              onClick={() => setActiveTab("students_gallery")}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "students_gallery"
+                  ? "bg-[#68705A] text-white shadow-xs"
+                  : "bg-white/80 border border-[#464137]/15 text-[#6F6B61] hover:text-[#292923] hover:bg-white"
+              }`}
+            >
+              <Brush className="size-3" />
+              <span>Students Gallery ({studentsImages.length})</span>
+            </button>
+          </div>
         </div>
 
-        {/* Global Empty State */}
-        {images.length === 0 ? (
+        {/* Gallery Content Area */}
+        {images.length === 0 && activeTab === "all" ? (
           <div className="p-12 sm:p-16 rounded-3xl bg-[#F7F4EC] border border-dashed border-[#464137]/20 text-center max-w-xl mx-auto space-y-4 shadow-xs">
             <div className="size-14 rounded-2xl bg-[#C8D1C7]/30 flex items-center justify-center mx-auto text-[#68705A]">
               <Sparkles className="size-7" />
