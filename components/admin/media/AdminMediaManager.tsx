@@ -31,6 +31,20 @@ interface AdminMediaManagerProps {
   systemAssets?: SystemAsset[];
 }
 
+function formatDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return "";
+  }
+}
+
 export function AdminMediaManager({
   initialGalleryItems,
   systemAssets = [],
@@ -512,7 +526,7 @@ export function AdminMediaManager({
                       <div className="flex items-center gap-2 text-[0.65rem] text-[#8C877C] mt-1.5">
                         <span>{(item.fileSizeBytes / 1024).toFixed(0)} KB</span>
                         <span>•</span>
-                        <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                        <span suppressHydrationWarning>{formatDate(item.createdAt)}</span>
                       </div>
                     </div>
 

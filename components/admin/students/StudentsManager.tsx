@@ -482,7 +482,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                       {/* Student Name */}
                       <td className="px-5 py-4">
                         <div className="font-bold text-[#292923] text-sm">{student.fullName}</div>
-                        <div className="text-[0.68rem] text-[#6F6B61] mt-0.5">
+                        <div suppressHydrationWarning className="text-[0.68rem] text-[#6F6B61] mt-0.5">
                           Joined{" "}
                           {new Date(student.createdAt).toLocaleDateString("en-IN", {
                             month: "short",
@@ -824,7 +824,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                                   ? "Complimentary"
                                   : `₹${(booking.amountPaise / 100).toLocaleString("en-IN")}`}
                               </span>
-                              <span className="text-[0.68rem] text-[#6F6B61]">
+                              <span suppressHydrationWarning className="text-[0.68rem] text-[#6F6B61]">
                                 {new Date(booking.createdAt).toLocaleDateString("en-IN", {
                                   month: "short",
                                   day: "numeric",

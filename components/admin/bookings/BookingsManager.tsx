@@ -433,7 +433,7 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                     </td>
 
                     {/* Date */}
-                    <td className="px-5 py-4 text-[0.68rem] text-[#6F6B61] whitespace-nowrap">
+                    <td suppressHydrationWarning className="px-5 py-4 text-[0.68rem] text-[#6F6B61] whitespace-nowrap">
                       {new Date(booking.createdAt).toLocaleDateString("en-IN", {
                         month: "short",
                         day: "numeric",
