@@ -562,10 +562,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 : "Reserve Your Free Seat")}
             </h3>
 
-            <p className="mt-1 text-xs leading-relaxed text-[#2C2A24] font-medium">
-              Enter your details below to receive your private stream link, calendar invitation, and preparation guides.
-            </p>
-
             {/* Quick Session Details */}
             <div className="mt-3 rounded-md bg-[#F7F4EC] p-2.5 border border-[#464137]/15 text-[11px] text-[#14120E] flex flex-col gap-1.5">
               <div className="flex items-center justify-between font-semibold">
