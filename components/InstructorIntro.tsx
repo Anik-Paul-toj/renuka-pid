@@ -74,6 +74,9 @@ export const InstructorIntro: React.FC = () => {
   const qualifications = aboutArtist?.qualifications || [];
   const expertise = aboutArtist?.expertise || [];
 
+  // Temporarily hide Education and Areas of Expertise sections per client request
+  const SHOW_EDUCATION_AND_EXPERTISE = false;
+
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
@@ -145,8 +148,10 @@ export const InstructorIntro: React.FC = () => {
             ease: "power2.out",
           },
           "-=0.5"
-        )
-        .from(
+        );
+
+      if (credentialsRef.current) {
+        tl.from(
           credentialsRef.current,
           {
             opacity: 0,
@@ -155,9 +160,12 @@ export const InstructorIntro: React.FC = () => {
             ease: "power2.out",
           },
           "-=0.4"
-        )
-        .from(
-          eduBlocksRef.current ? Array.from(eduBlocksRef.current.children) : [],
+        );
+      }
+
+      if (eduBlocksRef.current && eduBlocksRef.current.children.length > 0) {
+        tl.from(
+          Array.from(eduBlocksRef.current.children),
           {
             opacity: 0,
             y: 12,
@@ -166,9 +174,12 @@ export const InstructorIntro: React.FC = () => {
             ease: "power2.out",
           },
           "-=0.5"
-        )
-        .from(
-          expertiseBlocksRef.current ? Array.from(expertiseBlocksRef.current.children) : [],
+        );
+      }
+
+      if (expertiseBlocksRef.current && expertiseBlocksRef.current.children.length > 0) {
+        tl.from(
+          Array.from(expertiseBlocksRef.current.children),
           {
             opacity: 0,
             y: 12,
@@ -178,6 +189,7 @@ export const InstructorIntro: React.FC = () => {
           },
           "-=0.6"
         );
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -301,7 +313,7 @@ export const InstructorIntro: React.FC = () => {
         </div>
 
         {/* Credentials & Expertise Columns */}
-        {(qualifications.length > 0 || expertise.length > 0) && (
+        {SHOW_EDUCATION_AND_EXPERTISE && (qualifications.length > 0 || expertise.length > 0) && (
           <div
             ref={credentialsRef}
             className="mx-auto max-w-4xl mt-12 sm:mt-16 pt-10 sm:pt-12 border-t border-[#464137]/15"
