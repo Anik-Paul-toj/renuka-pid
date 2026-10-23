@@ -202,7 +202,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
                 onClick={onOpenModal}
                 className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none text-xs"
               >
-                <span>Let&apos;s Create</span>
+                <span>Enroll Now</span>
                 <ArrowRight className="size-3.5" />
               </button>
             ) : (
@@ -210,7 +210,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
                 href="/course"
                 className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none inline-flex items-center gap-1.5 text-xs"
               >
-                <span>Let&apos;s Create</span>
+                <span>Enroll Now</span>
                 <ArrowRight className="size-3.5" />
               </Link>
             )}
