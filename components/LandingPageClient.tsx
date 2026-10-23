@@ -53,14 +53,14 @@ export function LandingPageClient({
             {/* Section 01: Hero & Stats */}
             <Hero onOpenModal={handleOpenModal} initialCourse={initialCourse} />
 
-            {/* Section 02: About Renuka (Instructor Story & Credentials) */}
-            <InstructorIntro />
-
-            {/* Section 03: Who This Is For (Target Audience) */}
+            {/* Section 02: Who This Is For (Target Audience) */}
             <AudienceSection />
 
-            {/* Section 04: Video Preview */}
+            {/* Section 03: What You'll Learn in the Live Masterclass (Video Preview & Learning Outcomes) */}
             <VideoSection onOpenModal={handleOpenModal} />
+
+            {/* Section 04: About the Artist — Renuka Aggarwal (Instructor Story & Credentials) */}
+            <InstructorIntro />
 
             {/* Section 05: Curated Watercolour Gallery */}
             <GallerySection initialImages={initialGalleryImages} />
