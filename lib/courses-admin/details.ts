@@ -107,27 +107,48 @@ export const DEFAULT_ARTISTRY_DETAILS: CourseContentDetails = {
 };
 
 export const DEFAULT_WORKSHOP_DETAILS: CourseContentDetails = {
-  cardSubtitle: "One-Day Masterclass",
-  cardSummary: "Interactive Live Masterclass on Zoom",
-  cardDescription: "Live Masterclass designed to fix basics and get you painting.",
+  cardSubtitle: "Live Online Masterclass • 120 Minutes",
+  cardSummary: "From “I Can’t Paint” to “I Painted This Myself”",
+  cardDescription:
+    "A live, interactive 120-minute masterclass designed for beginners and adults who want to learn watercolour painting, fix fundamental mistakes, and paint with confidence.",
   subjects: "Watercolour Essentials • Live Demonstration",
   cardPriceLabel: "Complete Live Atelier Access",
-  sessionCountText: "1 Live Session",
-  sessionDurationText: "130 mins",
-  durationMonthsText: "1 Day",
+  sessionCountText: "1 Live Interactive Session",
+  sessionDurationText: "120 Minutes (2 Hours)",
+  durationMonthsText: "One-Day Masterclass",
   fullDescription:
-    "Live intimate masterclass session on Zoom with personal guidance and feedback.",
-  learningOutcomesHeading: "",
-  learningOutcomesSubheading: "",
-  learningOutcomes: [],
-  whyHeading: "",
-  whyDescription: "",
-  whyCallout: "",
-  scheduleHeading: "Live Workshop Details",
-  scheduleItems: [],
+    "A live, hands-on masterclass created to help beginners and creative adults take their first confident steps into watercolour.\n\nDesigned for anyone who has ever felt “I can’t paint” or struggled with water control, color mixing, and muddy washes from unstructured video tutorials. In this interactive 120-minute session on Zoom, Renuka Aggarwal guides you step-by-step through essential techniques, foundational principles, and a complete beginner-friendly painting created together live.",
+  learningOutcomesHeading: "What You’ll Learn in the Masterclass",
+  learningOutcomesSubheading: "Practical Techniques & Core Foundation Secrets",
+  learningOutcomes: [
+    "The secrets behind fresh, luminous watercolour washes without muddiness",
+    "Mastering water-to-pigment control for predictable, consistent results",
+    "Essential colour mixing principles and building harmonious limited palettes",
+    "How to begin your watercolour journey with simple observation and minimal drawing skills",
+    "Live step-by-step painting demonstration explaining every mindful brushstroke in real time",
+    "Complete material clarity: understanding papers, brush types, and transparent pigments",
+    "Interactive Q&A and direct guidance to fix common beginner mistakes",
+  ],
+  whyHeading: "Who This Masterclass Is Ideal For",
+  whyDescription:
+    "• Complete Beginners with little or no prior painting experience who want to learn watercolor basics properly.\n• Adults (20+) & Working Professionals seeking a calming, mindful creative outlet beyond daily routines.\n• Homemakers wanting to explore their artistic side and create mindful time for themselves.\n• Hobby Artists who have tried YouTube tutorials but still feel hesitant or struggle with water control.\n• Aspiring Artists who want a structured, solid foundation before moving into full courses.",
+  whyCallout: "From “I Can’t Paint” to “I Painted This Myself.”",
+  scheduleHeading: "Session Schedule & Live Atelier Details",
+  scheduleItems: [
+    {
+      label: "Live Interactive Session (120 Mins)",
+      detail:
+        "Complete step-by-step paint-along demonstration on Zoom with live commentary and technique breakdown.",
+    },
+    {
+      label: "Live Discussion & Creative Q&A",
+      detail:
+        "Ask questions directly to Renuka regarding paper, brushes, colours, and overcoming painting roadblocks.",
+    },
+  ],
   scheduleNote:
-    "Live interactive atelier sessions on Zoom with personal feedback and guidance.",
-  ctaText: "Register Now",
+    "Conducted live on Zoom in comfortable Hinglish. Meeting link, calendar invite, and preparation details are emailed immediately upon enrollment.",
+  ctaText: "Enrol in Masterclass",
 };
 
 /**
@@ -160,8 +181,36 @@ export function parseCourseDetails(
         return {
           ...DEFAULT_WORKSHOP_DETAILS,
           ...parsed,
-          learningOutcomes: [],
-          scheduleItems: [],
+          cardSubtitle: parsed.cardSubtitle || DEFAULT_WORKSHOP_DETAILS.cardSubtitle,
+          cardDescription:
+            parsed.cardDescription && parsed.cardDescription.length > 50
+              ? parsed.cardDescription
+              : DEFAULT_WORKSHOP_DETAILS.cardDescription,
+          sessionDurationText: "120 Minutes (2 Hours)",
+          sessionCountText: parsed.sessionCountText || DEFAULT_WORKSHOP_DETAILS.sessionCountText,
+          durationMonthsText: parsed.durationMonthsText || DEFAULT_WORKSHOP_DETAILS.durationMonthsText,
+          fullDescription:
+            parsed.fullDescription && parsed.fullDescription.length > 150
+              ? parsed.fullDescription
+              : DEFAULT_WORKSHOP_DETAILS.fullDescription,
+          learningOutcomesHeading:
+            parsed.learningOutcomesHeading || DEFAULT_WORKSHOP_DETAILS.learningOutcomesHeading,
+          learningOutcomesSubheading:
+            parsed.learningOutcomesSubheading || DEFAULT_WORKSHOP_DETAILS.learningOutcomesSubheading,
+          learningOutcomes:
+            Array.isArray(parsed.learningOutcomes) && parsed.learningOutcomes.length > 0
+              ? parsed.learningOutcomes
+              : DEFAULT_WORKSHOP_DETAILS.learningOutcomes,
+          whyHeading: parsed.whyHeading || DEFAULT_WORKSHOP_DETAILS.whyHeading,
+          whyDescription: parsed.whyDescription || DEFAULT_WORKSHOP_DETAILS.whyDescription,
+          whyCallout: parsed.whyCallout || DEFAULT_WORKSHOP_DETAILS.whyCallout,
+          scheduleHeading: parsed.scheduleHeading || DEFAULT_WORKSHOP_DETAILS.scheduleHeading,
+          scheduleItems:
+            Array.isArray(parsed.scheduleItems) && parsed.scheduleItems.length > 0
+              ? parsed.scheduleItems
+              : DEFAULT_WORKSHOP_DETAILS.scheduleItems,
+          scheduleNote: parsed.scheduleNote || DEFAULT_WORKSHOP_DETAILS.scheduleNote,
+          ctaText: parsed.ctaText || DEFAULT_WORKSHOP_DETAILS.ctaText,
         };
       }
 

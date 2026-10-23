@@ -297,7 +297,7 @@ export async function getPublicCourses(): Promise<AdminCourseData[]> {
       {
         id: "11111111-1111-1111-1111-111111111111",
         slug: "the-watercolour",
-        title: "The WATERCOLOUR Roadmap: One-Day Masterclass",
+        title: "The WATERCOLOUR Roadmap: From “I Can’t Paint” to “I Painted This Myself”",
         description: null,
         originalPricePaise: 59900,
         offerPricePaise: 9900,
@@ -436,6 +436,58 @@ export async function getPublicCourseBySlug(
     .maybeSingle();
 
   if (error || !course) {
+    if (
+      slug === "the-watercolour" ||
+      slug === "the-watercolour-roadmap"
+    ) {
+      const activeBatch: SafeBatchScheduleData = {
+        id: "22222222-2222-2222-2222-222222222222",
+        courseId: "11111111-1111-1111-1111-111111111111",
+        batchName: "Live Masterclass — 28 Oct 2026",
+        startDate: "2026-10-28",
+        endDate: "2026-10-28",
+        lastRegistrationDate: "2026-10-28",
+        startTime: "6:30 PM",
+        endTime: "8:30 PM",
+        timezone: "Asia/Kolkata",
+        totalSeats: 200,
+        seatsBooked: 1,
+        seatsRemaining: 199,
+        isEnrollmentOpen: true,
+        status: "open",
+        isExpired: false,
+        isSoldOut: false,
+        formattedStartDate: "28 Oct 2026",
+        formattedLastRegistrationDate: "28 Oct 2026",
+        formattedTiming: "6:30 PM – 8:30 PM IST",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return {
+        course: {
+          id: "11111111-1111-1111-1111-111111111111",
+          slug,
+          title:
+            "The WATERCOLOUR Roadmap: From “I Can’t Paint” to “I Painted This Myself”",
+          description: null,
+          originalPricePaise: 59900,
+          offerPricePaise: 9900,
+          originalPrice: 599,
+          offerPrice: 99,
+          currency: "INR",
+          durationMinutes: 120,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          imagePath: "",
+          details: DEFAULT_WORKSHOP_DETAILS,
+          activeBatch,
+        },
+        activeBatch,
+      };
+    }
+
     if (
       slug === "watercolour-foundation" ||
       slug === "watercolour-artistry-foundation"

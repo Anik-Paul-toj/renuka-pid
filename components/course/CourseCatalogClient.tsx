@@ -241,20 +241,20 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   </h2>
                   <div className="mt-2.5 h-0.5 w-16 bg-[#444C38]/35" />
 
-                  {/* Subtitle */}
-                  <p className="mt-2.5 text-sm sm:text-base font-serif italic text-[#444C38] font-medium leading-relaxed">
+                  {/* Subtitle / Tagline */}
+                  <p className="mt-2 text-sm sm:text-base font-serif italic text-[#444C38] font-medium leading-relaxed">
                     “I Can’t Paint” to “I Painted This Myself.”
                   </p>
 
                   {/* Sessions, Duration & Language */}
-                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-[#2C2A24] font-semibold">
+                  <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-[#2C2A24] font-semibold">
                     <span className="flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-[#444C38]" />
-                      One-Day Masterclass
+                      Live Online Masterclass
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-[#444C38]" />
-                      {masterclassCourse.durationMinutes || 120} Minutes
+                      120 Minutes (2 Hours)
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-[#444C38]" />
@@ -262,6 +262,11 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     </span>
                   </div>
                 </div>
+
+                {/* Concise Course Description */}
+                <p className="text-xs sm:text-sm text-[#2C2A24] font-medium leading-relaxed">
+                  A focused 120-minute live masterclass designed for beginners and adults who want to learn watercolour painting, overcome fundamental mistakes, and paint with confidence.
+                </p>
 
                 {/* Dynamic Supabase Batch Schedule Box */}
                 {renderScheduleBadge(masterclassCourse)}

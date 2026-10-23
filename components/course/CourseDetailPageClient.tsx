@@ -199,7 +199,7 @@ export function CourseDetailPageClient({
                         Sessions
                       </span>
                       <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] block">
-                        {details.sessionCountText || (isFoundation ? "2 Live Interactive Sessions" : "24 Live Interactive Classes")}
+                        {details.sessionCountText || (isWorkshop ? "1 Live Interactive Session" : isFoundation ? "2 Live Interactive Sessions" : "24 Live Interactive Classes")}
                       </span>
                     </div>
                   </div>
@@ -213,7 +213,7 @@ export function CourseDetailPageClient({
                         Duration
                       </span>
                       <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] block">
-                        {details.sessionDurationText || (isFoundation ? "90 Minutes Each" : "3 Months (90 Min Sessions)")}
+                        {details.sessionDurationText || (isWorkshop ? "120 Minutes (2 Hours)" : isFoundation ? "90 Minutes Each" : "3 Months (90 Min Sessions)")}
                       </span>
                     </div>
                   </div>
@@ -508,7 +508,9 @@ export function CourseDetailPageClient({
                       <div className="mt-2 flex items-center gap-1.5 text-[0.72rem] text-[#3E522D] font-bold">
                         <Sparkles className="size-3.5 text-[#B93821] shrink-0" />
                         <span>
-                          {isFoundation ? (
+                          {isWorkshop ? (
+                            <>Complete Live Atelier Access • Zoom Interactive Paint-Along</>
+                          ) : isFoundation ? (
                             <>Includes <span className="font-price font-semibold tabular-nums">₹990</span> credit toward subsequent Artistry + Foundation course</>
                           ) : (
                             <>Foundation Students: <span className="font-price font-semibold tabular-nums">₹990</span> Credit automatically applied at checkout (Pay <span className="font-price font-bold tabular-nums">₹9,000</span>)</>
@@ -550,7 +552,9 @@ export function CourseDetailPageClient({
                         {isRegistrationClosed
                           ? "Registration Closed"
                           : details.ctaText ||
-                            (isFoundation
+                            (isWorkshop
+                              ? "Enrol in Masterclass"
+                              : isFoundation
                               ? "Enrol in Foundation Course"
                               : "Enrol in Artistry Course")}
                       </span>
