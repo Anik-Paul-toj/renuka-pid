@@ -388,8 +388,8 @@ export function CourseDetailPageClient({
                 </div>
               )}
 
-              {/* 4. Schedule Breakdown (if applicable) */}
-              {details.scheduleItems && details.scheduleItems.length > 0 && (
+              {/* 4. Schedule Breakdown (if applicable, omitted for Foundation course) */}
+              {!isFoundation && details.scheduleItems && details.scheduleItems.length > 0 && (
                 <div className="space-y-4 pt-2">
                   <div className="border-b border-[#464137]/15 pb-2">
                     <span className="text-[0.7rem] uppercase tracking-widest font-bold text-[#444C38] block">

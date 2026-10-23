@@ -35,21 +35,9 @@ export const DEFAULT_FOUNDATION_DETAILS: CourseContentDetails = {
   whyDescription:
     "Starting watercolour can be confusing—which paper, which brushes, which colours, how much water, and which techniques to use?\n\nThis foundation course gives you the right knowledge and direction from the beginning, helping you avoid unnecessary purchases and common beginner mistakes.",
   whyCallout: "A strong foundation before you start creating.",
-  scheduleHeading: "Session Details",
-  scheduleItems: [
-    {
-      label: "Session 1",
-      detail:
-        "Material Knowledge, Understanding Papers, Brushes, Colours & Essential Washes (90 Mins)",
-    },
-    {
-      label: "Session 2",
-      detail:
-        "Colour Theory, Shade Chart Mixing, Palette Setup & Guided Mini Activity (90 Mins)",
-    },
-  ],
-  scheduleNote:
-    "Live interactive atelier sessions on Zoom with personal feedback and guidance.",
+  scheduleHeading: "",
+  scheduleItems: [],
+  scheduleNote: "",
   ctaText: "Enrol in Foundation Course",
 };
 
@@ -211,6 +199,19 @@ export function parseCourseDetails(
               : DEFAULT_WORKSHOP_DETAILS.scheduleItems,
           scheduleNote: parsed.scheduleNote || DEFAULT_WORKSHOP_DETAILS.scheduleNote,
           ctaText: parsed.ctaText || DEFAULT_WORKSHOP_DETAILS.ctaText,
+        };
+      }
+
+      if (slug === "watercolour-foundation") {
+        return {
+          ...DEFAULT_FOUNDATION_DETAILS,
+          ...parsed,
+          scheduleItems: [],
+          scheduleHeading: "",
+          scheduleNote: "",
+          learningOutcomes: Array.isArray(parsed.learningOutcomes)
+            ? parsed.learningOutcomes
+            : DEFAULT_FOUNDATION_DETAILS.learningOutcomes,
         };
       }
 
