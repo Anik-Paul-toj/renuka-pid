@@ -35,7 +35,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
       </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <div className="paper-card relative overflow-hidden rounded-xl bg-[#FAF8F2]/92 backdrop-blur-xs px-6 py-14 sm:py-20 text-center border border-[#464137]/15 shadow-[0_12px_40px_rgba(50,45,35,0.06)]">
+        <div className="paper-card relative overflow-hidden rounded-xl bg-[#FAF8F2]/92 backdrop-blur-xs px-6 py-12 sm:py-16 text-center border border-[#464137]/15 shadow-[0_12px_40px_rgba(50,45,35,0.06)]">
           {/* Delicate watercolor washes */}
           <div
             aria-hidden="true"
@@ -59,7 +59,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
               {finalCta.description}
             </p>
 
-            <div className="mt-8 flex flex-col items-center gap-4">
+            <div className="mt-8 flex justify-center">
               <Link
                 href="/course"
                 className="btn-studio px-10 py-4 text-xs sm:text-sm tracking-widest font-bold inline-flex items-center gap-2"
@@ -67,19 +67,6 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
                 <span>{finalCta.ctaText?.replace(/\s*→\s*$/, "") || "EXPLORE COURSES"}</span>
                 <ArrowRight className="size-4" />
               </Link>
-
-              {/* Handwritten artistic annotation */}
-              <p className="font-script text-3xl text-[#444C38] mt-2 select-none font-bold">
-                {finalCta.handwrittenPhrase}
-              </p>
-
-              <p className="text-xs font-bold text-[#444C38] tracking-wider uppercase">
-                {finalCta.dateInfo}
-              </p>
-
-              <p className="text-xs text-[#3E3A32] font-semibold">
-                {finalCta.subNote}
-              </p>
             </div>
           </div>
         </div>
