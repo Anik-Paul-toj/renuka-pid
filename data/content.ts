@@ -647,7 +647,7 @@ export const masterclassData: MasterclassData = {
         "This Masterclass is specially designed for beginners aged 20+, including working professionals, homemakers and anyone who wants to start painting from scratch.",
     },
     {
-      question: "What will I learn in the 120-minute Masterclass?",
+      question: "What will I learn in 2 hours?",
       answer:
         "You’ll learn the basics of water control, colour mixing, brush handling and simple watercolour techniques, and create a painting along with the instructor.",
     },
