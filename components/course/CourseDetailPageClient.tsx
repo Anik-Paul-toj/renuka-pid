@@ -38,6 +38,9 @@ export function CourseDetailPageClient({
     course.slug === "the-watercolour" ||
     course.slug === "the-watercolour-roadmap";
   const isFoundation = course.slug === "watercolour-foundation";
+  const isStartingSoonCourse =
+    course.slug === "watercolour-foundation" ||
+    course.slug === "watercolour-artistry-foundation";
   const details = course.details;
 
   const isRegistrationClosed = Boolean(
@@ -277,10 +280,16 @@ export function CourseDetailPageClient({
                         <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
                           Batch Starting Date
                         </span>
-                        <span className="font-bold text-[#14120E] text-xs sm:text-sm block">
-                          {activeBatch.formattedStartDate ||
-                            activeBatch.startDate ||
-                            "To be announced"}
+                        <span
+                          className={`font-bold text-xs sm:text-sm block ${
+                            isStartingSoonCourse ? "text-[#3E522D] tracking-wider" : "text-[#14120E]"
+                          }`}
+                        >
+                          {isStartingSoonCourse
+                            ? "STARTING SOON"
+                            : activeBatch.formattedStartDate ||
+                              activeBatch.startDate ||
+                              "To be announced"}
                         </span>
                       </div>
                     </div>
@@ -300,10 +309,12 @@ export function CourseDetailPageClient({
                               : "text-[#B93821]"
                           }`}
                         >
-                          {activeBatch.formattedLastRegistrationDate ||
-                            activeBatch.lastRegistrationDate ||
-                            activeBatch.startDate ||
-                            "To be announced"}
+                          {isStartingSoonCourse
+                            ? "To be announced"
+                            : activeBatch.formattedLastRegistrationDate ||
+                              activeBatch.lastRegistrationDate ||
+                              activeBatch.startDate ||
+                              "To be announced"}
                         </span>
                       </div>
                     </div>
@@ -521,7 +532,7 @@ export function CourseDetailPageClient({
                         <div className="mt-2 text-xs space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-[#353D2A] text-[0.72rem]">
-                              ✓ {activeBatch.batchName} ({activeBatch.formattedStartDate || activeBatch.startDate})
+                              ✓ {activeBatch.batchName} ({isStartingSoonCourse ? "STARTING SOON" : (activeBatch.formattedStartDate || activeBatch.startDate)})
                             </span>
                             <span
                               className={`px-2 py-0.2 rounded text-[0.6rem] font-bold uppercase tracking-wider ${
@@ -536,7 +547,7 @@ export function CourseDetailPageClient({
                             </span>
                           </div>
                           <div className="text-[0.68rem] text-[#6F6B61] flex flex-wrap gap-x-2.5">
-                            <span>Last Registration: <strong>{activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate}</strong></span>
+                            <span>Last Registration: <strong>{isStartingSoonCourse ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong></span>
                             <span>Timing: <strong>{activeBatch.formattedTiming || activeBatch.startTime}</strong></span>
                           </div>
                         </div>

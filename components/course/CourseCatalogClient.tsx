@@ -64,6 +64,10 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
       ? "Registration Closed"
       : "Open for Registration";
 
+    const isStartingSoonCourse =
+      course.slug === "watercolour-foundation" ||
+      course.slug === "watercolour-artistry-foundation";
+
     return (
       <div className="relative overflow-hidden rounded-xl bg-[#FAF8F2]/90 border border-[#444C38]/25 p-3.5 sm:p-4 shadow-2xs space-y-2.5">
         <div className="flex items-center justify-between gap-2 border-b border-[#444C38]/15 pb-2">
@@ -108,8 +112,14 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
               <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
                 Batch Starts
               </span>
-              <span className="font-bold text-[#14120E] text-[0.78rem] block leading-tight">
-                {batch.formattedStartDate || batch.startDate || "TBA"}
+              <span
+                className={`font-bold text-[0.78rem] block leading-tight ${
+                  isStartingSoonCourse ? "text-[#3E522D] tracking-wide" : "text-[#14120E]"
+                }`}
+              >
+                {isStartingSoonCourse
+                  ? "STARTING SOON"
+                  : batch.formattedStartDate || batch.startDate || "TBA"}
               </span>
             </div>
           </div>
@@ -128,10 +138,12 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   isClosed ? "text-[#6F6B61] line-through" : "text-[#B93821]"
                 }`}
               >
-                {batch.formattedLastRegistrationDate ||
-                  batch.lastRegistrationDate ||
-                  batch.startDate ||
-                  "TBA"}
+                {isStartingSoonCourse
+                  ? "To be announced"
+                  : batch.formattedLastRegistrationDate ||
+                    batch.lastRegistrationDate ||
+                    batch.startDate ||
+                    "TBA"}
               </span>
             </div>
           </div>

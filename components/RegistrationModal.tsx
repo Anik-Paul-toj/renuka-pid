@@ -563,39 +563,55 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             </h3>
 
             {/* Quick Session Details */}
-            <div className="mt-3 rounded-md bg-[#F7F4EC] p-2.5 border border-[#464137]/15 text-[11px] text-[#14120E] flex flex-col gap-1.5">
-              <div className="flex items-center justify-between font-semibold">
-                <div className="flex items-center gap-2">
-                  <Calendar className="size-3 text-[#444C38] shrink-0" />
-                  <span>{activeBatch?.startDate ? `${activeBatch.batchName} (${activeBatch.formattedStartDate || activeBatch.startDate})` : hero.date}</span>
+            {(() => {
+              const isStartingSoonCourse =
+                courseSlug === "watercolour-foundation" ||
+                courseSlug === "watercolour-artistry-foundation" ||
+                (activeBatch as any)?.courseSlug === "watercolour-foundation" ||
+                (activeBatch as any)?.courseSlug === "watercolour-artistry-foundation";
+
+              return (
+                <div className="mt-3 rounded-md bg-[#F7F4EC] p-2.5 border border-[#464137]/15 text-[11px] text-[#14120E] flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between font-semibold">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="size-3 text-[#444C38] shrink-0" />
+                      <span>
+                        {activeBatch?.startDate
+                          ? isStartingSoonCourse
+                            ? `${activeBatch.batchName} (STARTING SOON)`
+                            : `${activeBatch.batchName} (${activeBatch.formattedStartDate || activeBatch.startDate})`
+                          : hero.date}
+                      </span>
+                    </div>
+                    {activeBatch && (
+                      <span
+                        className={`px-1.5 py-0.2 rounded text-[0.6rem] font-bold uppercase ${
+                          activeBatch.isRegistrationClosed || activeBatch.isExpired || !activeBatch.isEnrollmentOpen
+                            ? "bg-[#6F6B61]/15 text-[#6F6B61]"
+                            : "bg-[#3E522D]/15 text-[#3E522D]"
+                        }`}
+                      >
+                        {activeBatch.isRegistrationClosed || activeBatch.isExpired || !activeBatch.isEnrollmentOpen
+                          ? "Closed"
+                          : "Open"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 font-semibold">
+                    <Clock className="size-3 text-[#444C38] shrink-0" />
+                    <span>{activeBatch?.formattedTiming || (activeBatch?.startTime ? `${activeBatch.startTime} – ${activeBatch.endTime} IST` : `${hero.time} (${hero.duration})`)}</span>
+                  </div>
+                  {activeBatch?.lastRegistrationDate && (
+                    <div className="text-[10px] text-[#6F6B61] flex items-center gap-1.5">
+                      <Hourglass className="size-2.5 text-[#B93821] shrink-0" />
+                      <span>
+                        Last Registration: <strong>{isStartingSoonCourse ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong>
+                      </span>
+                    </div>
+                  )}
                 </div>
-                {activeBatch && (
-                  <span
-                    className={`px-1.5 py-0.2 rounded text-[0.6rem] font-bold uppercase ${
-                      activeBatch.isRegistrationClosed || activeBatch.isExpired || !activeBatch.isEnrollmentOpen
-                        ? "bg-[#6F6B61]/15 text-[#6F6B61]"
-                        : "bg-[#3E522D]/15 text-[#3E522D]"
-                    }`}
-                  >
-                    {activeBatch.isRegistrationClosed || activeBatch.isExpired || !activeBatch.isEnrollmentOpen
-                      ? "Closed"
-                      : "Open"}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 font-semibold">
-                <Clock className="size-3 text-[#444C38] shrink-0" />
-                <span>{activeBatch?.formattedTiming || (activeBatch?.startTime ? `${activeBatch.startTime} – ${activeBatch.endTime} IST` : `${hero.time} (${hero.duration})`)}</span>
-              </div>
-              {activeBatch?.lastRegistrationDate && (
-                <div className="text-[10px] text-[#6F6B61] flex items-center gap-1.5">
-                  <Hourglass className="size-2.5 text-[#B93821] shrink-0" />
-                  <span>
-                    Last Registration: <strong>{activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate}</strong>
-                  </span>
-                </div>
-              )}
-            </div>
+              );
+            })()}
 
             {/* Registration Closed Alert */}
             {(activeBatch?.isRegistrationClosed || activeBatch?.isExpired || (activeBatch && !activeBatch.isEnrollmentOpen)) && (
