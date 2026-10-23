@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Calendar, Clock, Globe, Hourglass, Video } from "lucide-react";
+import { ArrowRight, Calendar, Clock, Globe, Hourglass, Video } from "lucide-react";
 import { workshopData, MasterclassData } from "@/data/content";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { useLandingContent } from "@/components/LandingContentProvider";
@@ -244,24 +244,20 @@ export const Hero: React.FC<HeroProps> = ({
               </div>
             </div>
 
-            {/* 6. Primary Register CTA + Handwritten Note */}
-            <div className="mt-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3.5 w-full sm:w-auto">
+            {/* 6. Primary Register CTA */}
+            <div className="mt-4 sm:mt-5 flex items-center w-full sm:w-auto">
               <button
                 onClick={onOpenModal}
                 disabled={isExpired}
-                className="btn-studio w-full sm:w-auto px-7 py-3 text-xs sm:text-sm tracking-wider font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-hero-cta w-full sm:w-auto"
               >
-                <span>{isExpired ? "REGISTRATION CLOSED" : `${workshopData.cta} →`}</span>
+                <span>{isExpired ? "REGISTRATION CLOSED" : workshopData.cta}</span>
+                {!isExpired && <ArrowRight className="size-4 shrink-0" />}
               </button>
-
-              {/* Handwritten artistic annotation */}
-              <span className="font-script text-xl sm:text-2xl text-[#444C38] select-none font-bold">
-                {workshopData.handwrittenPhrase}
-              </span>
             </div>
 
             {/* 7. Live Registration Countdown */}
-            <div className="mt-3 w-full pt-2.5 border-t border-[#464137]/15">
+            <div className="mt-4 w-full pt-3 border-t border-[#464137]/15">
               <CountdownTimer
                 deadline={workshopData.registrationDeadline}
                 onExpireChange={setIsExpired}
