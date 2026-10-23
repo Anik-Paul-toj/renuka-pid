@@ -42,10 +42,10 @@ export const DEFAULT_FOUNDATION_DETAILS: CourseContentDetails = {
 };
 
 export const DEFAULT_ARTISTRY_DETAILS: CourseContentDetails = {
-  cardSubtitle: "Landscape • Floral • Still Life",
+  cardSubtitle: "LANDSCAPE · FLORAL · STILL LIFE",
   cardSummary: "24 Live Interactive Sessions",
   cardDescription: "A Complete 3-Months Watercolour Learning Journey.",
-  subjects: "Landscape • Floral • Still Life",
+  subjects: "LANDSCAPE · FLORAL · STILL LIFE",
   cardPriceLabel: "Course Fee: ₹9,990/-",
   sessionCountText: "24 Live Classes",
   sessionDurationText: "90 Minutes Each",

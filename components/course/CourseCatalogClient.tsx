@@ -560,29 +560,20 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                 {/* Dynamic Supabase Batch Schedule Box */}
                 {renderScheduleBadge(artistryCourse)}
 
-                {/* Course Focus Section */}
-                <div className="space-y-2">
-                  <h3 className="text-[0.72rem] font-bold uppercase tracking-[0.18em] text-[#444C38]">
-                    Course Focus
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#2C2A24] font-medium">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4 text-[#444C38] shrink-0" />
-                      <span>3 Master Subjects: Landscape, Floral, Still Life</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4 text-[#444C38] shrink-0" />
-                      <span>2 Foundation + 18 Demos + 3 Discussions</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4 text-[#444C38] shrink-0" />
-                      <span>Atmospheric Washes, Tones & Composition</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4 text-[#444C38] shrink-0" />
-                      <span>Complimentary Black Ink Demo Session</span>
-                    </div>
+                {/* 3 Master Subjects Highlight */}
+                <div className="relative overflow-hidden rounded-xl bg-[#FAF8F2]/90 border border-[#444C38]/25 p-3.5 sm:p-4 shadow-2xs flex items-center justify-center text-center">
+                  <div className="pointer-events-none absolute inset-0 z-0">
+                    <Image
+                      src="/images/forBox/74fc888bca54b341f924b7f463803851.jpg.jpeg"
+                      alt=""
+                      fill
+                      sizes="600px"
+                      className="object-cover object-center opacity-15 mix-blend-multiply select-none"
+                    />
                   </div>
+                  <span className="relative z-10 font-serif text-sm sm:text-base md:text-[1.05rem] font-bold tracking-[0.14em] sm:tracking-[0.2em] text-[#353D2A] uppercase leading-relaxed break-words">
+                    LANDSCAPE · FLORAL · STILL LIFE
+                  </span>
                 </div>
               </div>
 

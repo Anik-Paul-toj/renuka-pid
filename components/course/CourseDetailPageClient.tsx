@@ -152,7 +152,7 @@ export function CourseDetailPageClient({
                     ? "Watercolour Essentials • Live Demonstration"
                     : isFoundation
                     ? "Materials • Techniques • Colour Mixing • Wash"
-                    : "Landscape • Floral • Still Life")}
+                    : "LANDSCAPE · FLORAL · STILL LIFE")}
               </span>
               <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#FAF8F2] leading-tight">
                 {course.title}
