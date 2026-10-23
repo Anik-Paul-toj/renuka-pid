@@ -315,13 +315,13 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
                   <Link
                     href={`/course/${masterclassCourse.slug}`}
-                    className="flex-1 sm:flex-none border border-[#444C38]/40 hover:bg-[#EBE7DC] px-5 py-2.5 rounded-md text-xs font-bold text-[#444C38] transition-colors text-center inline-flex items-center justify-center gap-2"
+                    className="btn-course-learn flex-1 sm:flex-none"
                   >
                     <span>Learn More</span>
-                    <ArrowRight className="size-3.5" />
+                    <ArrowRight className="size-4" />
                   </Link>
 
                   <button
@@ -331,7 +331,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                       !masterclassCourse.activeBatch?.isEnrollmentOpen ||
                       masterclassCourse.activeBatch?.isSoldOut
                     }
-                    className="btn-studio flex-1 sm:flex-none px-6 py-2.5 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm text-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="btn-course-enrol flex-1 sm:flex-none"
                   >
                     <span>
                       {masterclassCourse.activeBatch?.isExpired ||
@@ -456,13 +456,13 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
                   <Link
                     href={`/course/${foundationCourse.slug}`}
-                    className="flex-1 sm:flex-none border border-[#444C38]/40 hover:bg-[#EBE7DC] px-5 py-2.5 rounded-md text-xs font-bold text-[#444C38] transition-colors text-center inline-flex items-center justify-center gap-2"
+                    className="btn-course-learn flex-1 sm:flex-none"
                   >
                     <span>Learn More</span>
-                    <ArrowRight className="size-3.5" />
+                    <ArrowRight className="size-4" />
                   </Link>
 
                   <button
@@ -474,7 +474,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                       (foundationCourse.activeBatch?.seatsRemaining !== undefined &&
                         foundationCourse.activeBatch.seatsRemaining <= 0)
                     }
-                    className="btn-studio flex-1 sm:flex-none px-6 py-2.5 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm text-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="btn-course-enrol flex-1 sm:flex-none"
                   >
                     <span>
                       {foundationCourse.activeBatch?.isSoldOut ||
@@ -604,13 +604,13 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
                   <Link
                     href={`/course/${artistryCourse.slug}`}
-                    className="flex-1 sm:flex-none border border-[#444C38]/40 hover:bg-[#EBE7DC] px-5 py-2.5 rounded-md text-xs font-bold text-[#444C38] transition-colors text-center inline-flex items-center justify-center gap-2"
+                    className="btn-course-learn flex-1 sm:flex-none"
                   >
                     <span>Learn More</span>
-                    <ArrowRight className="size-3.5" />
+                    <ArrowRight className="size-4" />
                   </Link>
 
                   <button
@@ -622,7 +622,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                       (artistryCourse.activeBatch?.seatsRemaining !== undefined &&
                         artistryCourse.activeBatch.seatsRemaining <= 0)
                     }
-                    className="btn-studio flex-1 sm:flex-none px-6 py-2.5 text-xs tracking-wider font-bold inline-flex items-center justify-center gap-2 shadow-sm text-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="btn-course-enrol flex-1 sm:flex-none"
                   >
                     <span>
                       {artistryCourse.activeBatch?.isSoldOut ||
