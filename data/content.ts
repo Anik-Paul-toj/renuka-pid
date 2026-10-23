@@ -227,7 +227,7 @@ export const workshopData: WorkshopData = {
   originalPrice: 599,
   offerPrice: 199,
   registrationDeadline: "2026-10-28T18:30:00+05:30",
-  cta: "REGISTER NOW",
+  cta: "BOOK NOW",
   handwrittenPhrase: "Art heals. Always.",
 };
 
