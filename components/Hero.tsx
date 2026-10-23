@@ -252,7 +252,7 @@ export const Hero: React.FC<HeroProps> = ({
                 className="btn-hero-cta w-full sm:w-auto"
               >
                 <span>{isExpired ? "REGISTRATION CLOSED" : workshopData.cta}</span>
-                {!isExpired && <ArrowRight className="size-4 shrink-0" />}
+                {!isExpired && <ArrowRight className="size-[1.125rem] shrink-0" />}
               </button>
             </div>
 
