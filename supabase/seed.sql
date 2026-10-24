@@ -367,7 +367,7 @@ VALUES (
     ],
     "takeawayHeading": "And the biggest takeaway:",
     "takeawayText": "You’ll stop wondering, “Why doesn’t my painting look like the reference?” — and start understanding exactly what to do differently.",
-    "ctaText": "EXPLORE THE MASTERCLASS →",
+    "ctaText": "BOOK NOW",
     "handwrittenNote": "Small Steps, Creative Big Changes"
   }$json$::jsonb,
   'published',

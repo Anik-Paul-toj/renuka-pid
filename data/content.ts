@@ -249,7 +249,7 @@ export const masterclassData: MasterclassData = {
     time: "6:30 PM IST (9:00 AM EDT)",
     duration: "120 Minutes",
     language: "English (with gentle visual demonstrations)",
-    ctaText: "EXPLORE COURSES",
+    ctaText: "BOOK NOW",
     urgencyText: "Complimentary live registration • Gentle joining details by email",
     guaranteeText: "Live intimate atelier broadcast • Limited to 200 interactive attendees.",
     targetAudienceNote: "Designed warmly for beginners, working adults, and creative souls at every level.",
@@ -388,7 +388,7 @@ export const masterclassData: MasterclassData = {
     takeawayHeading: "And the biggest takeaway:",
     takeawayText:
       "You’ll stop wondering, “Why doesn’t my painting look like the reference?” — and start understanding exactly what to do differently.",
-    ctaText: "EXPLORE THE MASTERCLASS",
+    ctaText: "BOOK NOW",
     handwrittenNote: "Small Steps, Creative Big Changes",
   },
   transformation: {

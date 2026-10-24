@@ -171,7 +171,11 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
                 onClick={onOpenModal}
                 className="btn-studio px-6 py-2.5 text-xs sm:text-sm tracking-wider font-bold"
               >
-                <span>{videoSection.ctaText?.replace(/\s*→\s*$/, "")}</span>
+                <span>
+                  {videoSection.ctaText && !videoSection.ctaText.includes("EXPLORE THE MASTERCLASS")
+                    ? videoSection.ctaText.replace(/\s*→\s*$/, "")
+                    : "BOOK NOW"}
+                </span>
                 <ArrowRight className="size-3.5" />
               </button>
 
