@@ -121,9 +121,9 @@ body {
 
 /* Course Card Action Buttons */
 .btn-course-learn {
-  border: 1px solid rgba(68, 76, 56, 0.4);
-  background-color: #FAF8F2;
-  color: #353D2A;
+  border: 1.5px solid #9E2A18;
+  background: linear-gradient(135deg, #C23B25 0%, #A82A17 100%);
+  color: #FFFFFF;
   border-radius: 8px;
   font-size: 0.8125rem;
   font-weight: 700;
@@ -136,18 +136,23 @@ body {
   gap: 0.5rem;
   padding: 0.8125rem 1.625rem;
   min-height: 48px;
-  box-shadow: 0 1px 3px rgba(50, 45, 35, 0.05);
+  box-shadow: 0 4px 14px rgba(185, 56, 33, 0.3), 0 1px 3px rgba(0, 0, 0, 0.08);
   text-align: center;
   cursor: pointer;
   text-decoration: none;
 }
 
 .btn-course-learn:hover {
-  border-color: rgba(68, 76, 56, 0.75);
-  background-color: #EBE7DC;
-  color: #14120E;
+  border-color: #8C2212;
+  background: linear-gradient(135deg, #CE422B 0%, #B52F1B 100%);
+  color: #FFFFFF;
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(68, 76, 56, 0.12);
+  box-shadow: 0 6px 20px rgba(185, 56, 33, 0.42), 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.btn-course-learn:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow: 0 2px 8px rgba(185, 56, 33, 0.25);
 }
 
 .btn-course-learn:hover svg {
