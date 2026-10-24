@@ -91,24 +91,40 @@ body {
 .btn-studio {
   background-color: var(--sage);
   color: #FFFFFF;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  transition: all 0.25s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   cursor: pointer;
-  border: 1px solid rgba(104, 112, 90, 0.4);
+  border: 1.5px solid #2B3122;
+  box-shadow: 
+    3px 3px 0px #24291D,
+    4px 5px 12px rgba(36, 41, 29, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .btn-studio:hover {
   background-color: var(--sage-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(104, 112, 90, 0.22);
+  border-color: #24291D;
+  transform: translate(-1px, -1px);
+  box-shadow: 
+    4px 4px 0px #24291D,
+    5px 7px 16px rgba(36, 41, 29, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.btn-studio:active {
+  transform: translate(2px, 2px);
+  box-shadow: 
+    1px 1px 0px #24291D,
+    1px 2px 6px rgba(36, 41, 29, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .btn-studio:hover svg {
@@ -116,12 +132,12 @@ body {
 }
 
 .btn-studio svg {
-  transition: transform 0.25s ease;
+  transition: transform 0.22s ease;
 }
 
 /* Course Card Action Buttons */
 .btn-course-learn {
-  border: 1.5px solid #9E2A18;
+  border: 1.5px solid #8C2212;
   background: linear-gradient(135deg, #C23B25 0%, #A82A17 100%);
   color: #FFFFFF;
   border-radius: 8px;
@@ -129,30 +145,39 @@ body {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.8125rem 1.625rem;
   min-height: 48px;
-  box-shadow: 0 4px 14px rgba(185, 56, 33, 0.3), 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    3px 3px 0px #73170A,
+    4px 5px 12px rgba(115, 23, 10, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
   text-align: center;
   cursor: pointer;
   text-decoration: none;
 }
 
 .btn-course-learn:hover {
-  border-color: #8C2212;
+  border-color: #7D1D0F;
   background: linear-gradient(135deg, #CE422B 0%, #B52F1B 100%);
   color: #FFFFFF;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(185, 56, 33, 0.42), 0 2px 6px rgba(0, 0, 0, 0.12);
+  transform: translate(-1px, -1px);
+  box-shadow: 
+    4px 4px 0px #73170A,
+    5px 7px 16px rgba(115, 23, 10, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .btn-course-learn:active {
-  transform: translateY(0) scale(0.985);
-  box-shadow: 0 2px 8px rgba(185, 56, 33, 0.25);
+  transform: translate(2px, 2px);
+  box-shadow: 
+    1px 1px 0px #73170A,
+    1px 2px 6px rgba(115, 23, 10, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .btn-course-learn:hover svg {
@@ -166,13 +191,13 @@ body {
 .btn-course-enrol {
   background-color: var(--sage);
   color: #FFFFFF;
-  border: 1px solid #383F2E;
+  border: 1.5px solid #2B3122;
   border-radius: 8px;
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -180,14 +205,29 @@ body {
   padding: 0.8125rem 2rem;
   min-height: 48px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(68, 76, 56, 0.22);
+  box-shadow: 
+    3px 3px 0px #24291D,
+    4px 5px 12px rgba(36, 41, 29, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   text-align: center;
 }
 
 .btn-course-enrol:hover:not(:disabled) {
   background-color: var(--sage-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(68, 76, 56, 0.32);
+  border-color: #24291D;
+  transform: translate(-1px, -1px);
+  box-shadow: 
+    4px 4px 0px #24291D,
+    5px 7px 16px rgba(36, 41, 29, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.btn-course-enrol:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 
+    1px 1px 0px #24291D,
+    1px 2px 6px rgba(36, 41, 29, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .btn-course-enrol:disabled {
@@ -201,13 +241,13 @@ body {
 .btn-hero-cta {
   background-color: var(--sage);
   color: #FFFFFF;
-  border: 1.5px solid rgba(183, 161, 107, 0.4);
+  border: 1.5px solid rgba(183, 161, 107, 0.5);
   border-radius: 10px;
   font-size: 0.9375rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -216,8 +256,10 @@ body {
   min-height: 52px;
   cursor: pointer;
   box-shadow: 
-    0 4px 18px rgba(68, 76, 56, 0.26),
-    0 0 0 1px rgba(183, 161, 107, 0.25);
+    3px 3px 0px #24291D,
+    4px 6px 16px rgba(36, 41, 29, 0.32),
+    0 0 0 1px rgba(183, 161, 107, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   text-align: center;
   animation: hero-cta-pulse 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   will-change: transform, box-shadow;
@@ -226,20 +268,24 @@ body {
 @keyframes hero-cta-pulse {
   0%, 100% {
     background-color: var(--sage);
-    border-color: rgba(183, 161, 107, 0.35);
+    border-color: rgba(183, 161, 107, 0.4);
     box-shadow: 
-      0 4px 18px rgba(68, 76, 56, 0.26),
+      3px 3px 0px #24291D,
+      4px 6px 16px rgba(36, 41, 29, 0.3),
       0 0 0 1px rgba(183, 161, 107, 0.25),
-      0 0 0 0 rgba(183, 161, 107, 0);
+      0 0 0 0 rgba(183, 161, 107, 0),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
     transform: scale(1);
   }
   50% {
     background-color: #4B553E;
     border-color: rgba(212, 185, 130, 0.85);
     box-shadow: 
-      0 6px 24px rgba(68, 76, 56, 0.32),
+      3.5px 3.5px 0px #24291D,
+      5px 8px 22px rgba(36, 41, 29, 0.36),
       0 0 0 1.5px rgba(212, 185, 130, 0.65),
-      0 0 20px 2px rgba(183, 161, 107, 0.38);
+      0 0 20px 2px rgba(183, 161, 107, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
     transform: scale(1.025);
   }
 }
@@ -248,18 +294,22 @@ body {
   animation: none;
   background-color: #48523B;
   border-color: rgba(212, 185, 130, 0.9);
-  transform: translateY(-2px) scale(1.01);
+  transform: translate(-1px, -1px) scale(1.01);
   box-shadow: 
-    0 8px 28px rgba(50, 56, 40, 0.38),
+    4px 4px 0px #24291D,
+    6px 9px 24px rgba(36, 41, 29, 0.42),
     0 0 0 1.5px rgba(212, 185, 130, 0.75),
-    0 0 22px rgba(183, 161, 107, 0.45);
+    0 0 22px rgba(183, 161, 107, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .btn-hero-cta:active:not(:disabled) {
-  transform: translateY(0) scale(0.985);
+  transform: translate(2px, 2px) scale(0.985);
   box-shadow: 
-    0 2px 8px rgba(50, 56, 40, 0.3),
-    0 0 0 1px rgba(183, 161, 107, 0.5);
+    1px 1px 0px #24291D,
+    1px 2px 6px rgba(36, 41, 29, 0.25),
+    0 0 0 1px rgba(183, 161, 107, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .btn-hero-cta:hover:not(:disabled) svg {
@@ -279,13 +329,22 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .btn-studio,
+  .btn-course-learn,
+  .btn-course-enrol,
   .btn-hero-cta {
     animation: none !important;
     transition: none !important;
   }
+  .btn-studio:hover,
+  .btn-course-learn:hover,
+  .btn-course-enrol:hover,
   .btn-hero-cta:hover:not(:disabled) {
     transform: none !important;
   }
+  .btn-studio:active,
+  .btn-course-learn:active,
+  .btn-course-enrol:active,
   .btn-hero-cta:active:not(:disabled) {
     transform: none !important;
   }
