@@ -583,7 +583,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                       className="object-cover object-center opacity-15 mix-blend-multiply select-none"
                     />
                   </div>
-                  <span className="relative z-10 font-serif text-sm sm:text-base md:text-[1.05rem] font-bold tracking-[0.14em] sm:tracking-[0.2em] text-[#353D2A] uppercase leading-relaxed break-words">
+                  <span className="relative z-10 font-serif text-[1.05rem] sm:text-[1.22rem] md:text-[1.32rem] font-black tracking-[0.12em] sm:tracking-[0.18em] text-[#12180D] uppercase leading-relaxed break-words [-webkit-text-stroke:1.1px_currentColor] drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)]">
                     LANDSCAPE · FLORAL · STILL LIFE
                   </span>
                 </div>
