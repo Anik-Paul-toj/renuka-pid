@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { X, CheckCircle2, Calendar, Clock, Sparkles, ArrowRight, AlertCircle, Hourglass } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { resolveWhatsAppGroupUrl } from "@/lib/whatsapp/group";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -849,8 +851,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             </div>
 
             <h3 className="mt-4 font-serif text-2xl font-bold text-[#14120E]">
-              Your Seat Is Confirmed, {name}!
+              Payment Successful!
             </h3>
+
+            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium max-w-md mx-auto">
+              Thank you for enrolling with Renuka Art Studio. Your booking has been confirmed.
+            </p>
 
             {bookingInfo?.bookingReference && (
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
@@ -865,12 +871,34 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               </div>
             )}
 
-            <p className="mt-3 text-xs sm:text-sm leading-relaxed text-[#2C2A24] font-medium">
+            {/* WhatsApp Group Invitation Block */}
+            <div className="mt-5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/35 p-4 text-center">
+              <p className="text-xs sm:text-sm font-semibold text-[#14120E] leading-relaxed">
+                Join our WhatsApp group to receive course updates and important announcements.
+              </p>
+              <div className="mt-3 flex justify-center">
+                <a
+                  href={resolveWhatsAppGroupUrl({
+                    courseSlug,
+                    batchMetadata: activeBatch as any,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-whatsapp w-full sm:w-auto text-xs sm:text-sm"
+                  aria-label="Join our official WhatsApp group for course updates (opens in a new tab)"
+                >
+                  <WhatsAppIcon className="size-5 shrink-0" />
+                  <span>JOIN WHATSAPP GROUP</span>
+                </a>
+              </div>
+            </div>
+
+            <p className="mt-4 text-xs leading-relaxed text-[#2C2A24] font-medium">
               We have sent the private access link and calendar invitations to:
             </p>
-            <p className="mt-1 font-bold text-[#444C38]">{email}</p>
+            <p className="mt-0.5 font-bold text-[#444C38]">{email}</p>
 
-            <div className="mt-6 rounded-md bg-[#F7F4EC] p-4 text-left border border-[#464137]/15 text-xs space-y-2">
+            <div className="mt-5 rounded-md bg-[#F7F4EC] p-4 text-left border border-[#464137]/15 text-xs space-y-2">
               <p className="font-bold text-[#444C38]">Important Next Steps:</p>
               <p className="text-[#2C2A24] font-medium">
                 1. Check your inbox for the calendar invite so you don&apos;t miss the live stream.
@@ -881,6 +909,19 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               <p className="text-[#2C2A24] font-medium">
                 3. Your booking is registered under reference <span className="font-mono font-bold text-[#14120E]">{bookingInfo?.bookingReference}</span>.
               </p>
+              {bookingInfo?.bookingReference && (
+                <p className="pt-1 text-[#444C38] font-medium">
+                  Permanent receipt page:{" "}
+                  <a
+                    href={`/booking/${bookingInfo.bookingReference}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-bold hover:text-[#14120E]"
+                  >
+                    View Booking Confirmation →
+                  </a>
+                </p>
+              )}
               <p className="text-[11px] text-[#6F6B61] pt-1 border-t border-[#464137]/10">
                 Need help? Contact us at <a href="mailto:renuka.art.studio25@gmail.com" className="underline font-semibold text-[#444C38]">renuka.art.studio25@gmail.com</a> or <a href="tel:+919599109200" className="underline font-semibold text-[#444C38]">+91 9599109200</a>.
               </p>
@@ -891,7 +932,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 if (isPaymentLocked) return;
                 handleReset();
               }}
-              className="btn-studio w-full py-3 mt-6"
+              className="btn-studio w-full py-3 mt-5"
             >
               Back to Masterclass Overview
             </button>

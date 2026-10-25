@@ -328,24 +328,72 @@ body {
   animation: none !important;
 }
 
+/* WhatsApp Group Action Button with 3D tactile shadow */
+.btn-whatsapp {
+  background-color: #25D366;
+  color: #FFFFFF;
+  border: 1.5px solid #1EBE5B;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.75rem;
+  min-height: 48px;
+  cursor: pointer;
+  box-shadow: 
+    3px 3px 0px #128C7E,
+    4px 5px 14px rgba(18, 140, 126, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn-whatsapp:hover {
+  background-color: #22BF5B;
+  border-color: #128C7E;
+  color: #FFFFFF;
+  transform: translate(-1px, -1px);
+  box-shadow: 
+    4px 4px 0px #128C7E,
+    5px 7px 18px rgba(18, 140, 126, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-whatsapp:active {
+  transform: translate(2px, 2px);
+  box-shadow: 
+    1px 1px 0px #128C7E,
+    1px 2px 6px rgba(18, 140, 126, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .btn-studio,
   .btn-course-learn,
   .btn-course-enrol,
-  .btn-hero-cta {
+  .btn-hero-cta,
+  .btn-whatsapp {
     animation: none !important;
     transition: none !important;
   }
   .btn-studio:hover,
   .btn-course-learn:hover,
   .btn-course-enrol:hover,
-  .btn-hero-cta:hover:not(:disabled) {
+  .btn-hero-cta:hover:not(:disabled),
+  .btn-whatsapp:hover {
     transform: none !important;
   }
   .btn-studio:active,
   .btn-course-learn:active,
   .btn-course-enrol:active,
-  .btn-hero-cta:active:not(:disabled) {
+  .btn-hero-cta:active:not(:disabled),
+  .btn-whatsapp:active {
     transform: none !important;
   }
 }
