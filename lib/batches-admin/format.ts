@@ -233,3 +233,58 @@ export function deriveBatchStatus(batch: {
   }
   return "open";
 }
+
+export interface BatchRegistrationCheckInput {
+  isEnrollmentOpen?: boolean;
+  lastRegistrationDate?: string | null;
+  startDate?: string | null;
+  startTime?: string | null;
+  isSoldOut?: boolean;
+  totalSeats?: number;
+  seatsBooked?: number;
+}
+
+/**
+ * Shared authoritative registration check for any batch (Roadmap, Foundation, Artistry).
+ * Evaluates enrollment open state, capacity/sold-out state, and deadline/same-day class start time in Asia/Kolkata.
+ * Fails safely (isOpen: false) if batch data is missing or undefined.
+ */
+export function isBatchRegistrationOpen(
+  batch?: BatchRegistrationCheckInput | null,
+  referenceDate: Date = new Date()
+): { isOpen: boolean; reason?: "closed" | "expired" | "sold_out" | "not_open" } {
+  if (!batch) {
+    return { isOpen: false, reason: "not_open" };
+  }
+
+  if (batch.isEnrollmentOpen === false) {
+    return { isOpen: false, reason: "not_open" };
+  }
+
+  if (batch.isSoldOut) {
+    return { isOpen: false, reason: "sold_out" };
+  }
+
+  if (
+    typeof batch.totalSeats === "number" &&
+    typeof batch.seatsBooked === "number" &&
+    batch.seatsBooked >= batch.totalSeats
+  ) {
+    return { isOpen: false, reason: "sold_out" };
+  }
+
+  const expired = isRegistrationDeadlineExpired(
+    batch.lastRegistrationDate,
+    referenceDate,
+    {
+      startDate: batch.startDate,
+      startTime: batch.startTime,
+    }
+  );
+
+  if (expired) {
+    return { isOpen: false, reason: "expired" };
+  }
+
+  return { isOpen: true };
+}

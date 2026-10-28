@@ -7,6 +7,7 @@ import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface VideoSectionProps {
   onOpenModal: () => void;
+  isRegistrationClosed?: boolean;
 }
 
 const videoBoxImages: string[] = [
@@ -20,7 +21,10 @@ const videoBoxImages: string[] = [
 
 const takeawayBoxImage = "/images/forBox/3f3cf5f03a81fdc837ba23ea44e7199e.jpg.jpeg";
 
-export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
+export const VideoSection: React.FC<VideoSectionProps> = ({
+  onOpenModal,
+  isRegistrationClosed,
+}) => {
   const { videoSection } = useLandingContent();
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -169,14 +173,21 @@ export const VideoSection: React.FC<VideoSectionProps> = ({ onOpenModal }) => {
             <div className="mt-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3.5">
               <button
                 onClick={onOpenModal}
-                className="btn-studio px-6 py-2.5 text-xs sm:text-sm tracking-wider font-bold"
+                disabled={isRegistrationClosed}
+                className={`btn-studio px-6 py-2.5 text-xs sm:text-sm tracking-wider font-bold ${
+                  isRegistrationClosed
+                    ? "opacity-60 cursor-not-allowed bg-[#6F6B61]/20 text-[#6F6B61] pointer-events-none"
+                    : ""
+                }`}
               >
                 <span>
-                  {videoSection.ctaText && !videoSection.ctaText.includes("EXPLORE THE MASTERCLASS")
+                  {isRegistrationClosed
+                    ? "REGISTRATION CLOSED"
+                    : videoSection.ctaText && !videoSection.ctaText.includes("EXPLORE THE MASTERCLASS")
                     ? videoSection.ctaText.replace(/\s*→\s*$/, "")
                     : "BOOK NOW"}
                 </span>
-                <ArrowRight className="size-3.5" />
+                {!isRegistrationClosed && <ArrowRight className="size-3.5" />}
               </button>
 
               <span className="font-script text-xl sm:text-2xl text-[#444C38] select-none font-bold">

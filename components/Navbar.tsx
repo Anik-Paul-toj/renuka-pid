@@ -6,10 +6,12 @@ import { usePathname } from "next/navigation";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { MasterclassData } from "@/data/content";
 import { useLandingContent } from "@/components/LandingContentProvider";
+import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
 
 interface NavbarProps {
   onOpenModal?: () => void;
   content?: MasterclassData["brand"];
+  isRegistrationClosed?: boolean;
 }
 
 interface NavItem {
@@ -27,7 +29,11 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Contact", href: "/#contact", key: "contact" },
 ];
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  onOpenModal,
+  content,
+  isRegistrationClosed,
+}) => {
   const { brand: contextBrand } = useLandingContent();
   const brand = content || contextBrand;
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,6 +42,53 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
 
   const isHome = pathname === "/";
   const isCourse = pathname?.startsWith("/course");
+
+  // If isRegistrationClosed is not explicitly provided, check Roadmap batch status (fail-safe: defaults to closed)
+  const [internalRoadmapClosed, setInternalRoadmapClosed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (isRegistrationClosed !== undefined) return;
+    fetch("/api/cohort-batches/active?courseSlug=the-watercolour", {
+      cache: "no-store",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          setInternalRoadmapClosed(true);
+          return null;
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (!data?.success || !data?.batch) {
+          setInternalRoadmapClosed(true);
+          return;
+        }
+        const b = data.batch;
+        const closed = Boolean(
+          !b.isEnrollmentOpen ||
+            b.isExpired ||
+            b.isSoldOut ||
+            isRegistrationDeadlineExpired(
+              b.lastRegistrationDate || b.startDate,
+              new Date(),
+              {
+                startDate: b.startDate,
+                startTime: b.startTime,
+              }
+            )
+        );
+        setInternalRoadmapClosed(closed);
+      })
+      .catch(() => {
+        setInternalRoadmapClosed(true);
+      });
+  }, [isRegistrationClosed]);
+
+  // Authoritative closed state: fail-safe to closed if still loading internal check
+  const effectiveRegistrationClosed =
+    isRegistrationClosed !== undefined
+      ? isRegistrationClosed
+      : internalRoadmapClosed ?? true;
 
   const [activeSection, setActiveSection] = useState<string>(() => {
     if (isCourse) return "courses";
@@ -197,10 +250,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
         {/* Right CTA Button & Mobile Menu Toggle */}
         <div className="flex items-center gap-3">
           <div>
-            {onOpenModal ? (
+            {effectiveRegistrationClosed ? (
               <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none text-xs opacity-60 cursor-not-allowed bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25 hover:bg-[#6F6B61]/15 hover:text-[#6F6B61] pointer-events-none uppercase font-bold tracking-wider"
+              >
+                <span>Registration Closed</span>
+              </button>
+            ) : onOpenModal ? (
+              <button
+                type="button"
                 onClick={onOpenModal}
-                className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none text-xs"
+                className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none text-xs uppercase font-bold tracking-wider"
               >
                 <span>Book Now</span>
                 <ArrowRight className="size-3.5" />
@@ -208,7 +271,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenModal, content }) => {
             ) : (
               <Link
                 href="/course"
-                className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none inline-flex items-center gap-1.5 text-xs"
+                className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none inline-flex items-center gap-1.5 text-xs uppercase font-bold tracking-wider"
               >
                 <span>Book Now</span>
                 <ArrowRight className="size-3.5" />

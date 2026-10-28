@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { consumeCreditForBooking } from "@/lib/course-credit/service";
+import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
 import crypto from "crypto";
 
 export interface PaymentServiceError {
@@ -8,6 +9,7 @@ export interface PaymentServiceError {
     | "INVALID_INPUT"
     | "BOOKING_NOT_FOUND"
     | "BOOKING_EXPIRED"
+    | "ENROLLMENT_CLOSED"
     | "ALREADY_PAID"
     | "RAZORPAY_API_ERROR"
     | "INVALID_PAYMENT_SIGNATURE"
@@ -82,6 +84,10 @@ export async function createOrderForBooking(
       seat_released,
       cohort_batches (
         batch_name,
+        start_date,
+        start_time,
+        last_registration_date,
+        is_enrollment_open,
         courses (
           title
         )
@@ -128,6 +134,29 @@ export async function createOrderForBooking(
         statusCode: 410,
       },
     };
+  }
+
+  // Authoritatively enforce batch registration status and cutoff at payment initiation
+  const cohortBatch = (booking as any)?.cohort_batches;
+  if (cohortBatch) {
+    const isExpired = isRegistrationDeadlineExpired(
+      cohortBatch.last_registration_date || cohortBatch.start_date,
+      new Date(),
+      {
+        startDate: cohortBatch.start_date,
+        startTime: cohortBatch.start_time,
+      }
+    );
+    if (!cohortBatch.is_enrollment_open || isExpired) {
+      return {
+        success: false,
+        error: {
+          code: "ENROLLMENT_CLOSED",
+          message: "Registration for this batch has closed as the deadline has passed.",
+          statusCode: 400,
+        },
+      };
+    }
   }
 
   // Validate authoritative amount

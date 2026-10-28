@@ -812,22 +812,25 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 disabled={
                   isLoading ||
                   (isPaymentLocked && !paymentPending) ||
-                  activeBatch?.isSoldOut ||
+                  !activeBatch ||
+                  activeBatch.isSoldOut ||
                   Boolean(
-                    activeBatch?.isRegistrationClosed ||
-                      activeBatch?.isExpired ||
-                      (activeBatch && !activeBatch.isEnrollmentOpen)
+                    activeBatch.isRegistrationClosed ||
+                      activeBatch.isExpired ||
+                      !activeBatch.isEnrollmentOpen
                   )
                 }
                 className="btn-studio w-full py-3 mt-1.5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <span>Processing...</span>
-                ) : activeBatch?.isSoldOut ? (
+                ) : !activeBatch ? (
+                  <span>Checking Availability...</span>
+                ) : activeBatch.isSoldOut ? (
                   <span>Cohort Sold Out</span>
-                ) : activeBatch?.isRegistrationClosed ||
-                  activeBatch?.isExpired ||
-                  (activeBatch && !activeBatch.isEnrollmentOpen) ? (
+                ) : activeBatch.isRegistrationClosed ||
+                  activeBatch.isExpired ||
+                  !activeBatch.isEnrollmentOpen ? (
                   <span>Registration Closed</span>
                 ) : paymentPending ? (
                   <>

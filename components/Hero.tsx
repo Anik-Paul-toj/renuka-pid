@@ -7,6 +7,7 @@ import { workshopData, MasterclassData } from "@/data/content";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { useLandingContent } from "@/components/LandingContentProvider";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
+import { parseStartTimeToHoursMinutes } from "@/lib/batches-admin/format";
 
 interface HeroProps {
   onOpenModal: () => void;
@@ -19,14 +20,29 @@ interface HeroProps {
     offerPrice: number;
     durationMinutes?: number;
   } | null;
+  activeBatch?: any | null;
+  isRegistrationClosed?: boolean;
+}
+
+function getLiveDeadlineISO(batch?: any | null): string {
+  if (!batch?.startDate) return workshopData.registrationDeadline;
+  const deadlineDate = batch.lastRegistrationDate || batch.startDate;
+  const parsedTime = parseStartTimeToHoursMinutes(batch.startTime);
+  const hours = parsedTime ? String(parsedTime.hours).padStart(2, "0") : "18";
+  const minutes = parsedTime ? String(parsedTime.minutes).padStart(2, "0") : "30";
+  return `${deadlineDate}T${hours}:${minutes}:00+05:30`;
 }
 
 export const Hero: React.FC<HeroProps> = ({
   onOpenModal,
   content,
   initialCourse,
+  activeBatch,
+  isRegistrationClosed,
 }) => {
   const [isExpired, setIsExpired] = useState(false);
+  const effectiveExpired =
+    isRegistrationClosed !== undefined ? isRegistrationClosed : isExpired;
   const [coursePricing, setCoursePricing] = useState<{
     originalPrice: number;
     offerPrice: number;
@@ -246,18 +262,18 @@ export const Hero: React.FC<HeroProps> = ({
             <div className="mt-4 sm:mt-5 flex items-center w-full sm:w-auto">
               <button
                 onClick={onOpenModal}
-                disabled={isExpired}
+                disabled={effectiveExpired}
                 className="btn-hero-cta w-full sm:w-auto"
               >
-                <span>{isExpired ? "REGISTRATION CLOSED" : workshopData.cta}</span>
-                {!isExpired && <ArrowRight className="size-[1.125rem] shrink-0" />}
+                <span>{effectiveExpired ? "REGISTRATION CLOSED" : workshopData.cta}</span>
+                {!effectiveExpired && <ArrowRight className="size-[1.125rem] shrink-0" />}
               </button>
             </div>
 
             {/* 7. Live Registration Countdown */}
             <div className="mt-4 w-full pt-3 border-t border-[#464137]/15">
               <CountdownTimer
-                deadline={workshopData.registrationDeadline}
+                deadline={getLiveDeadlineISO(activeBatch)}
                 onExpireChange={setIsExpired}
               />
             </div>

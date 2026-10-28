@@ -88,7 +88,10 @@ export function CourseDetailPageClient({
 
       {/* Top Navbar */}
       <div className="relative z-10">
-        <Navbar onOpenModal={() => setIsModalOpen(true)} />
+        <Navbar
+          onOpenModal={() => !isRegistrationClosed && setIsModalOpen(true)}
+          isRegistrationClosed={isRegistrationClosed}
+        />
       </div>
 
       <main className="relative z-10 flex-1 py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
