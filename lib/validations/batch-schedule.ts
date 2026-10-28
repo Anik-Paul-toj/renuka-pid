@@ -40,13 +40,13 @@ export const batchScheduleSchema = z
       .optional(),
   })
   .superRefine((data, ctx) => {
-    // Constraint: The registration deadline must not be earlier than the batch start date.
+    // Constraint: The registration deadline must not be after the batch start date.
     if (data.lastRegistrationDate && data.startDate) {
-      if (data.lastRegistrationDate < data.startDate) {
+      if (data.lastRegistrationDate > data.startDate) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["lastRegistrationDate"],
-          message: "The registration deadline must not be earlier than the batch start date.",
+          message: "The registration deadline must not be after the batch start date.",
         });
       }
     }

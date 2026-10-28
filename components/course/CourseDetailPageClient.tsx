@@ -49,7 +49,14 @@ export function CourseDetailPageClient({
       activeBatch.isExpired ||
       activeBatch.isSoldOut ||
       (activeBatch.lastRegistrationDate &&
-        isRegistrationDeadlineExpired(activeBatch.lastRegistrationDate))
+        isRegistrationDeadlineExpired(
+          activeBatch.lastRegistrationDate,
+          new Date(),
+          {
+            startDate: activeBatch.startDate,
+            startTime: activeBatch.startTime,
+          }
+        ))
   );
 
   return (

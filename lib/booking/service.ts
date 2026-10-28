@@ -182,7 +182,12 @@ export async function processBooking(
     (courseDetails as any)?.batchSchedule?.lastRegistrationDate ||
     batchData.start_date;
 
-  if (isRegistrationDeadlineExpired(lastRegDate)) {
+  if (
+    isRegistrationDeadlineExpired(lastRegDate, new Date(), {
+      startDate: batchData.start_date,
+      startTime: batchData.start_time,
+    })
+  ) {
     return {
       success: false,
       error: {

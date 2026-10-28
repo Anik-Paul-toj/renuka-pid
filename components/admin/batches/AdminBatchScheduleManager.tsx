@@ -362,11 +362,11 @@ export function AdminBatchScheduleManager({
       errors.startTime = "Batch start time is required.";
     }
 
-    // Critical Constraint: The registration deadline must not be earlier than the batch start date.
+    // Critical Constraint: The registration deadline must not be after the batch start date.
     if (formData.lastRegistrationDate && formData.startDate) {
-      if (formData.lastRegistrationDate < formData.startDate) {
+      if (formData.lastRegistrationDate > formData.startDate) {
         errors.lastRegistrationDate =
-          "The registration deadline must not be earlier than the batch start date.";
+          "The registration deadline must not be after the batch start date.";
       }
     }
 
@@ -437,7 +437,12 @@ export function AdminBatchScheduleManager({
   };
 
   const isExpired = isRegistrationDeadlineExpired(
-    formData.lastRegistrationDate
+    formData.lastRegistrationDate,
+    new Date(),
+    {
+      startDate: formData.startDate,
+      startTime: formData.startTime,
+    }
   );
   const isClosed =
     formData.status === "closed" ||
@@ -1062,7 +1067,7 @@ export function AdminBatchScheduleManager({
                 Cover images update immediately on the public course page.
               </li>
               <li>
-                The registration deadline must not be earlier than the batch start date.
+                The registration deadline must not be after the batch start date.
               </li>
               <li>
                 Times are formatted with the official India timezone (Asia/Kolkata).

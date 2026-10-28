@@ -139,7 +139,10 @@ export async function getBatchByCourseId(
 
   const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
-  const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate);
+  const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate, new Date(), {
+    startDate: batchData.start_date,
+    startTime: batchData.start_time,
+  });
 
   // Derive batch status
   let status: BatchStatus = "open";
@@ -282,7 +285,10 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
 
   const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
-  const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate);
+  const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate, new Date(), {
+    startDate: batchData.start_date,
+    startTime: batchData.start_time,
+  });
 
   let status: BatchStatus = "open";
   if (!batchData.is_enrollment_open) {
@@ -469,7 +475,14 @@ export async function updateBatchSchedule(
 
   const seatsRemaining = Math.max(0, updatedRow.total_seats - updatedRow.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
-  const isExpired = isRegistrationDeadlineExpired(input.lastRegistrationDate);
+  const isExpired = isRegistrationDeadlineExpired(
+    input.lastRegistrationDate,
+    new Date(),
+    {
+      startDate: input.startDate,
+      startTime: input.startTime,
+    }
+  );
 
   return {
     id: updatedRow.id,

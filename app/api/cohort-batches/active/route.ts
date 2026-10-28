@@ -114,7 +114,14 @@ export async function GET(request: NextRequest) {
     const lastRegistrationDate =
       batch.last_registration_date || fallbackMetaDeadline || batch.start_date;
 
-    const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate);
+    const isExpired = isRegistrationDeadlineExpired(
+      lastRegistrationDate,
+      new Date(),
+      {
+        startDate: batch.start_date,
+        startTime: batch.start_time,
+      }
+    );
     const isRegistrationClosed = !batch.is_enrollment_open || isExpired || isSoldOut;
 
     return NextResponse.json(

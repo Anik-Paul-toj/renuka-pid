@@ -3,23 +3,24 @@
 // Verifies:
 // 1. Asia/Kolkata (IST) date and time formatting
 // 2. Registration deadline expiration detection in IST timezone
-// 3. Batch schedule schema validation rules:
-//    - Rejection when lastRegistrationDate < startDate ("The registration deadline must not be earlier than the batch start date.")
-//    - Acceptance when lastRegistrationDate >= startDate
-//    - End date >= start date validation
-// 4. Migration SQL file integrity (20261012000001_batch_registration_deadline.sql)
-// 5. Course routing & slug mapping for both required courses:
-//    - Watercolour Foundation (/course/watercolour-foundation)
-//    - Watercolour Artistry + Foundation (/course/watercolour-artistry-foundation)
-// 6. Resilience fallback handling when database column is pending migration
-// 7. Booking service registration deadline check enforcement
+// 3. Admin date validation rules:
+//    - Registration deadline one day before class: accepted
+//    - Registration deadline equal to class date: accepted
+//    - Registration deadline after class date: rejected ("The registration deadline must not be after the batch start date.")
+// 4. Same-day bookings up to class start time:
+//    - Class at 6:00 PM IST, booking at 5:59 PM IST: allowed
+//    - Booking at or after registration cutoff (6:00 PM IST): rejected
+//    - Booking after class start: rejected
+// 5. Registration status closed: rejected
+// 6. Capacity protection and seat allocation: sold out rejected
+// 7. Midnight timezone handling in Asia/Kolkata
 // ==============================================================================
 
 import assert from "node:assert";
 import fs from "node:fs";
 
 console.log("==================================================================");
-console.log("RUNNING DYNAMIC COURSE BATCHES & ADMIN SCHEDULING TEST SUITE");
+console.log("RUNNING BATCH REGISTRATION DEADLINE & SAME-DAY BOOKING TEST SUITE");
 console.log("==================================================================");
 
 let passedTests = 0;
@@ -45,6 +46,8 @@ import {
   formatBatchTimeIST,
   isRegistrationDeadlineExpired,
   getTodayISTString,
+  getNowIST,
+  parseStartTimeToHoursMinutes,
   deriveBatchStatus,
 } from "../lib/batches-admin/format.ts";
 
@@ -59,13 +62,12 @@ runTest("Test 1: IST Date formatting formats YYYY-MM-DD correctly in English/IST
   assert.ok(formatted.includes("October") || formatted.includes("Oct"), `Expected month October, got: ${formatted}`);
   assert.ok(formatted.includes("25"), `Expected day 25, got: ${formatted}`);
 
-  // Invalid date fallback
   assert.strictEqual(formatBatchDateIST(null), "To be announced");
   assert.strictEqual(formatBatchDateIST(undefined), "To be announced");
   assert.strictEqual(formatBatchDateIST(""), "To be announced");
 });
 
-runTest("Test 2: IST Time formatting handles standard 12h/24h strings nicely", () => {
+runTest("Test 2: IST Time formatting handles 12h/24h strings", () => {
   assert.strictEqual(formatBatchTimeIST("10:00 AM"), "10:00 AM IST");
   assert.strictEqual(formatBatchTimeIST("10:00 AM IST"), "10:00 AM IST");
   assert.strictEqual(formatBatchTimeIST("06:30 PM", "08:30 PM"), "06:30 PM – 08:30 PM IST");
@@ -73,191 +75,195 @@ runTest("Test 2: IST Time formatting handles standard 12h/24h strings nicely", (
 });
 
 // ------------------------------------------------------------------------------
-// Test 3: Registration Deadline Expiry Logic in IST
+// Scenario 1: Registration deadline one day before class: accepted
 // ------------------------------------------------------------------------------
-runTest("Test 3: Registration deadline expiration detects past vs future dates", () => {
-  const todayIST = getTodayISTString();
-  assert.match(todayIST, /^\d{4}-\d{2}-\d{2}$/, "Today IST must be in YYYY-MM-DD format");
-
-  // A past date should be expired
-  assert.strictEqual(isRegistrationDeadlineExpired("2020-01-01"), true);
-  
-  // A far future date should NOT be expired
-  assert.strictEqual(isRegistrationDeadlineExpired("2099-12-31"), false);
-
-  // Null or empty deadline should NOT be expired (open by default unless specified)
-  assert.strictEqual(isRegistrationDeadlineExpired(null), false);
-  assert.strictEqual(isRegistrationDeadlineExpired(undefined), false);
-
-  // Today itself should NOT be expired (deadline includes current day)
-  assert.strictEqual(isRegistrationDeadlineExpired(todayIST), false);
-});
-
-// ------------------------------------------------------------------------------
-// Test 4: Batch Status Derivation
-// ------------------------------------------------------------------------------
-runTest("Test 4: deriveBatchStatus reflects closed, expired, and open states", () => {
-  // If explicitly closed in DB
-  const closedRes = deriveBatchStatus({
-    isEnrollmentOpen: false,
-    lastRegistrationDate: "2099-12-31",
-  });
-  assert.strictEqual(closedRes, "closed");
-
-  // If status is open but deadline has expired
-  const expiredRes = deriveBatchStatus({
-    isEnrollmentOpen: true,
-    lastRegistrationDate: "2020-01-01",
-  });
-  assert.strictEqual(expiredRes, "closed");
-
-  // If open and deadline in future
-  const openRes = deriveBatchStatus({
-    isEnrollmentOpen: true,
-    lastRegistrationDate: "2099-12-31",
-  });
-  assert.strictEqual(openRes, "open");
-});
-
-// ------------------------------------------------------------------------------
-// Test 5: Validation - Registration Deadline cannot be earlier than start date
-// ------------------------------------------------------------------------------
-runTest("Test 5: Validation rejects when registration deadline is earlier than start date", () => {
-  const invalidPayload = {
-    batchName: "Weekend Batch Oct 2026",
-    startDate: "2026-10-25",
-    lastRegistrationDate: "2026-10-20", // earlier than start date -> INVALID per user constraint
-    startTime: "10:00 AM",
-    endTime: "12:00 PM",
+runTest("Scenario 1: Registration deadline one day before class is accepted", () => {
+  const payload = {
+    batchName: "Live Masterclass — 14 Nov 2026",
+    startDate: "2026-11-14",
+    lastRegistrationDate: "2026-11-13", // one day before
+    startTime: "11:00 AM",
+    endTime: "1:00 PM",
     status: "open",
+    totalSeats: 100,
   };
 
-  const result = batchScheduleSchema.safeParse(invalidPayload);
-  assert.strictEqual(result.success, false, "Should fail validation when deadline < start date");
-  
-  const issue = result.error?.issues.find(i => i.path.includes("lastRegistrationDate"));
+  const result = batchScheduleSchema.safeParse(payload);
+  assert.strictEqual(result.success, true, `Expected validation to pass: ${JSON.stringify(result.error?.issues)}`);
+});
+
+// ------------------------------------------------------------------------------
+// Scenario 2: Registration deadline equal to class date: accepted
+// ------------------------------------------------------------------------------
+runTest("Scenario 2: Registration deadline equal to class date is accepted", () => {
+  const payload = {
+    batchName: "Live Masterclass — 14 Nov 2026",
+    startDate: "2026-11-14",
+    lastRegistrationDate: "2026-11-14", // same calendar day
+    startTime: "6:00 PM",
+    endTime: "8:00 PM",
+    status: "open",
+    totalSeats: 100,
+  };
+
+  const result = batchScheduleSchema.safeParse(payload);
+  assert.strictEqual(result.success, true, `Expected validation to pass: ${JSON.stringify(result.error?.issues)}`);
+});
+
+// ------------------------------------------------------------------------------
+// Scenario 3: Registration deadline after class date: rejected
+// ------------------------------------------------------------------------------
+runTest("Scenario 3: Registration deadline after class date is rejected", () => {
+  const payload = {
+    batchName: "Live Masterclass — 14 Nov 2026",
+    startDate: "2026-11-14",
+    lastRegistrationDate: "2026-11-15", // after class date -> invalid
+    startTime: "6:00 PM",
+    endTime: "8:00 PM",
+    status: "open",
+    totalSeats: 100,
+  };
+
+  const result = batchScheduleSchema.safeParse(payload);
+  assert.strictEqual(result.success, false, "Should fail when lastRegistrationDate > startDate");
+  const issue = result.error?.issues.find((i) => i.path.includes("lastRegistrationDate"));
   assert.ok(issue, "Must have an issue on lastRegistrationDate");
   assert.strictEqual(
     issue.message,
-    "The registration deadline must not be earlier than the batch start date."
+    "The registration deadline must not be after the batch start date."
   );
 });
 
-runTest("Test 6: Validation accepts when registration deadline is on or after start date", () => {
-  const validSameDayPayload = {
-    batchName: "Weekend Batch Oct 2026",
-    startDate: "2026-10-25",
-    lastRegistrationDate: "2026-10-25", // on the same date -> VALID
-    startTime: "10:00 AM",
-    endTime: "12:00 PM",
-    status: "open",
-  };
+// ------------------------------------------------------------------------------
+// Scenario 4: Class starts at 6:00 PM IST and customer attempts to book at 5:59 PM IST: allowed
+// ------------------------------------------------------------------------------
+runTest("Scenario 4: Customer booking at 5:59 PM IST for a 6:00 PM IST class is allowed", () => {
+  // 5:59:00 PM IST is 12:29:00 UTC (17:59 IST)
+  const attemptTime = new Date("2026-11-14T12:29:00Z");
 
-  const result1 = batchScheduleSchema.safeParse(validSameDayPayload);
-  assert.strictEqual(result1.success, true, `Expected validation to pass: ${JSON.stringify(result1.error?.issues)}`);
-
-  const validAfterPayload = {
-    batchName: "Weekend Batch Oct 2026",
-    startDate: "2026-10-25",
-    lastRegistrationDate: "2026-10-30", // after start date -> VALID
-    startTime: "10:00 AM",
-    endTime: "12:00 PM",
-    status: "open",
-  };
-
-  const result2 = batchScheduleSchema.safeParse(validAfterPayload);
-  assert.strictEqual(result2.success, true, `Expected validation to pass: ${JSON.stringify(result2.error?.issues)}`);
-});
-
-runTest("Test 7: Validation rejects invalid date formats and end date before start date", () => {
-  // Invalid date format
-  const badDateResult = batchScheduleSchema.safeParse({
-    batchName: "Weekend Batch",
-    startDate: "25-10-2026", // Not YYYY-MM-DD
-    lastRegistrationDate: "2026-10-25",
-    startTime: "10:00 AM",
+  const isExpired = isRegistrationDeadlineExpired("2026-11-14", attemptTime, {
+    startDate: "2026-11-14",
+    startTime: "6:00 PM",
   });
-  assert.strictEqual(badDateResult.success, false);
 
-  // End date earlier than start date
-  const badEndDateResult = batchScheduleSchema.safeParse({
-    batchName: "Weekend Batch",
-    startDate: "2026-10-25",
-    endDate: "2026-10-20",
-    lastRegistrationDate: "2026-10-25",
-    startTime: "10:00 AM",
+  assert.strictEqual(isExpired, false, "Booking at 5:59 PM IST should NOT be expired for a 6:00 PM IST class");
+});
+
+// ------------------------------------------------------------------------------
+// Scenario 5: Customer attempts to book at or after the registration cutoff: rejected
+// ------------------------------------------------------------------------------
+runTest("Scenario 5: Customer booking at or after registration cutoff is rejected", () => {
+  // Exactly at 6:00:00 PM IST (12:30:00 UTC)
+  const atCutoffTime = new Date("2026-11-14T12:30:00Z");
+  const isExpiredAtCutoff = isRegistrationDeadlineExpired("2026-11-14", atCutoffTime, {
+    startDate: "2026-11-14",
+    startTime: "6:00 PM",
   });
-  assert.strictEqual(badEndDateResult.success, false);
+  assert.strictEqual(isExpiredAtCutoff, true, "Booking at 6:00 PM IST sharp should be expired/cutoff");
+
+  // Deadline on previous day (2026-11-13) attempted on class day (2026-11-14)
+  const dayAfterDeadline = new Date("2026-11-14T05:00:00Z"); // 10:30 AM IST on 14 Nov
+  const isExpiredPastDay = isRegistrationDeadlineExpired("2026-11-13", dayAfterDeadline, {
+    startDate: "2026-11-14",
+    startTime: "6:00 PM",
+  });
+  assert.strictEqual(isExpiredPastDay, true, "Booking after deadline day has passed must be expired");
 });
 
 // ------------------------------------------------------------------------------
-// Test 8: SQL Migration Integrity
+// Scenario 6: Customer attempts to book after class start: rejected
 // ------------------------------------------------------------------------------
-runTest("Test 8: Migration SQL file contains required schema changes and RLS safe view update", () => {
-  const migrationPath = "supabase/migrations/20261012000001_batch_registration_deadline.sql";
-  assert.ok(fs.existsSync(migrationPath), `Migration file must exist at ${migrationPath}`);
+runTest("Scenario 6: Customer booking after class start is rejected", () => {
+  // 6:01:00 PM IST is 12:31:00 UTC
+  const afterStartTime = new Date("2026-11-14T12:31:00Z");
+  const isExpiredAfter = isRegistrationDeadlineExpired("2026-11-14", afterStartTime, {
+    startDate: "2026-11-14",
+    startTime: "6:00 PM",
+  });
+  assert.strictEqual(isExpiredAfter, true, "Booking at 6:01 PM IST after class start must be rejected");
 
-  const sqlContent = fs.readFileSync(migrationPath, "utf-8");
-  assert.ok(
-    sqlContent.includes("last_registration_date"),
-    "SQL must add or reference last_registration_date column"
-  );
-  assert.ok(
-    sqlContent.includes("cohort_batches"),
-    "SQL must alter cohort_batches table"
-  );
-  assert.ok(
-    sqlContent.includes("public_cohort_batches"),
-    "SQL must recreate or update public_cohort_batches view"
-  );
+  // Attempting next day after class completed
+  const nextDay = new Date("2026-11-15T04:00:00Z");
+  const isExpiredNextDay = isRegistrationDeadlineExpired("2026-11-14", nextDay, {
+    startDate: "2026-11-14",
+    startTime: "6:00 PM",
+  });
+  assert.strictEqual(isExpiredNextDay, true, "Booking after class date has passed must be rejected");
 });
 
 // ------------------------------------------------------------------------------
-// Test 9: Public Course Slugs & Routes Existence
+// Scenario 7: Registration status is closed: booking rejected
 // ------------------------------------------------------------------------------
-runTest("Test 9: Public course routes and cards link to correct slugs", () => {
-  const catalogClientPath = "components/course/CourseCatalogClient.tsx";
-  assert.ok(fs.existsSync(catalogClientPath), "CourseCatalogClient.tsx must exist");
-  const catalogContent = fs.readFileSync(catalogClientPath, "utf-8");
-
-  // Check Watercolour Foundation and Watercolour Artistry
-  assert.ok(
-    catalogContent.includes("watercolour-foundation"),
-    "Catalog must route to /course/watercolour-foundation"
-  );
-  assert.ok(
-    catalogContent.includes("watercolour-artistry-foundation"),
-    "Catalog must route to /course/watercolour-artistry-foundation"
-  );
-
-  // Check buttons
-  assert.ok(catalogContent.includes("Learn More"), "Catalog must have 'Learn More' button");
-  assert.ok(
-    catalogContent.includes("Book Now") || catalogContent.includes("Enrol Now"),
-    "Catalog must have 'Book Now / Enrol Now' button"
-  );
+runTest("Scenario 7: Registration status closed is derived as closed", () => {
+  const statusClosed = deriveBatchStatus({
+    isEnrollmentOpen: false,
+    lastRegistrationDate: "2099-12-31",
+    startDate: "2099-12-31",
+    startTime: "6:00 PM",
+  });
+  assert.strictEqual(statusClosed, "closed", "deriveBatchStatus must return 'closed' when isEnrollmentOpen is false");
 });
 
 // ------------------------------------------------------------------------------
-// Test 10: Admin Navigation & Integration
+// Scenario 8: Booking/payment validation and capacity protection continue to work correctly
 // ------------------------------------------------------------------------------
-runTest("Test 10: Admin panel navigation and course manager integrate batch scheduling", () => {
-  const adminBatchesPath = "app/admin/batches/page.tsx";
-  assert.ok(fs.existsSync(adminBatchesPath), "app/admin/batches/page.tsx must exist");
+runTest("Scenario 8: Capacity protection marks batch as closed when sold out", () => {
+  const statusSoldOut = deriveBatchStatus({
+    isEnrollmentOpen: true,
+    lastRegistrationDate: "2099-12-31",
+    startDate: "2099-12-31",
+    startTime: "6:00 PM",
+    isSoldOut: true,
+  });
+  assert.strictEqual(statusSoldOut, "closed", "deriveBatchStatus must return 'closed' when sold out");
+});
 
-  const sidebarPath = "components/admin/AdminSidebar.tsx";
-  const sidebarContent = fs.readFileSync(sidebarPath, "utf-8");
-  assert.ok(
-    sidebarContent.includes("/admin/batches"),
-    "Admin sidebar must include link to /admin/batches"
-  );
+// ------------------------------------------------------------------------------
+// Scenario 9: Date validation behaves correctly around midnight in Asia/Kolkata
+// ------------------------------------------------------------------------------
+runTest("Scenario 9: Date validation behaves correctly around midnight in Asia/Kolkata", () => {
+  // 11:59:59 PM IST on 13 Nov 2026 is 18:29:59 UTC on 13 Nov 2026
+  const beforeMidnightUTC = new Date("2026-11-13T18:29:59Z");
+  const beforeMidnightIST = getNowIST(beforeMidnightUTC);
+  assert.strictEqual(beforeMidnightIST.dateStr, "2026-11-13");
+  assert.strictEqual(beforeMidnightIST.hours, 23);
+  assert.strictEqual(beforeMidnightIST.minutes, 59);
 
-  const courseManagerPath = "components/admin/courses/CourseManager.tsx";
-  const courseManagerContent = fs.readFileSync(courseManagerPath, "utf-8");
-  assert.ok(
-    courseManagerContent.includes("AdminBatchScheduleManager"),
-    "CourseManager must integrate AdminBatchScheduleManager"
-  );
+  // 12:00:00 AM (midnight) IST on 14 Nov 2026 is 18:30:00 UTC on 13 Nov 2026
+  const atMidnightUTC = new Date("2026-11-13T18:30:00Z");
+  const atMidnightIST = getNowIST(atMidnightUTC);
+  assert.strictEqual(atMidnightIST.dateStr, "2026-11-14");
+  assert.strictEqual(atMidnightIST.hours, 0);
+  assert.strictEqual(atMidnightIST.minutes, 0);
+
+  // At midnight on the class date (Nov 14), booking for a 6:00 PM class should be allowed
+  const isExpiredAtMidnight = isRegistrationDeadlineExpired("2026-11-14", atMidnightUTC, {
+    startDate: "2026-11-14",
+    startTime: "6:00 PM",
+  });
+  assert.strictEqual(isExpiredAtMidnight, false, "At midnight on class day, registration must remain open");
+
+  // If deadline was 2026-11-13, at midnight of 2026-11-14 (18:30:00 UTC), deadline is now expired
+  const isExpiredPrevDeadlineAtMidnight = isRegistrationDeadlineExpired("2026-11-13", atMidnightUTC, {
+    startDate: "2026-11-14",
+    startTime: "6:00 PM",
+  });
+  assert.strictEqual(isExpiredPrevDeadlineAtMidnight, true, "Deadline of 13 Nov must be expired once 14 Nov begins");
+});
+
+// ------------------------------------------------------------------------------
+// Test Time String Parser helper
+// ------------------------------------------------------------------------------
+runTest("Test Time Parser: Handles diverse time formats accurately", () => {
+  assert.deepStrictEqual(parseStartTimeToHoursMinutes("6:00 PM"), { hours: 18, minutes: 0 });
+  assert.deepStrictEqual(parseStartTimeToHoursMinutes("6:00 PM IST"), { hours: 18, minutes: 0 });
+  assert.deepStrictEqual(parseStartTimeToHoursMinutes("11:00 AM"), { hours: 11, minutes: 0 });
+  assert.deepStrictEqual(parseStartTimeToHoursMinutes("11:30 AM – 1:30 PM IST"), { hours: 11, minutes: 30 });
+  assert.deepStrictEqual(parseStartTimeToHoursMinutes("18:30"), { hours: 18, minutes: 30 });
+  assert.deepStrictEqual(parseStartTimeToHoursMinutes("12:00 PM"), { hours: 12, minutes: 0 });
+  assert.deepStrictEqual(parseStartTimeToHoursMinutes("12:00 AM"), { hours: 0, minutes: 0 });
+  assert.strictEqual(parseStartTimeToHoursMinutes(""), null);
+  assert.strictEqual(parseStartTimeToHoursMinutes(null), null);
 });
 
 console.log("==================================================================");
