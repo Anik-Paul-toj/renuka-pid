@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import { X, CheckCircle2, Calendar, Clock, Sparkles, ArrowRight, AlertCircle, Hourglass } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { resolveWhatsAppGroupUrl } from "@/lib/whatsapp/group";
+import {
+  resolveWhatsAppGroupUrl,
+  isWhatsAppGroupEligibleCourse,
+} from "@/lib/whatsapp/group";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -17,6 +20,8 @@ interface RegistrationModalProps {
 
 interface ActiveBatchInfo {
   id: string;
+  courseId?: string;
+  courseSlug?: string;
   batchName: string;
   startDate: string;
   endDate?: string | null;
@@ -42,6 +47,8 @@ interface ConfirmedBookingInfo {
   startDate: string;
   startTime: string;
   paymentId?: string;
+  courseId?: string | null;
+  courseSlug?: string | null;
 }
 
 function loadRazorpayScript(): Promise<boolean> {
@@ -108,6 +115,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       if (data?.success && data?.batch?.id) {
         const batchInfo: ActiveBatchInfo = {
           id: data.batch.id,
+          courseId: data.batch.course?.id,
+          courseSlug: data.batch.course?.slug,
           batchName: data.batch.batchName,
           startDate: data.batch.startDate,
           endDate: data.batch.endDate,
@@ -358,6 +367,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 startDate: batchMeta.startDate,
                 startTime: batchMeta.startTime,
                 paymentId: verifiedPaymentId,
+                courseSlug: courseSlug || activeBatch?.courseSlug || null,
+                courseId: activeBatch?.courseId || null,
               });
               setIsPaymentLocked(false);
               setPaymentPending(false);
@@ -495,6 +506,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           startDate: booking.startDate,
           startTime: booking.startTime,
           paymentId: "COMPLIMENTARY",
+          courseSlug: courseSlug || activeBatch?.courseSlug || booking.courseSlug || null,
+          courseId: activeBatch?.courseId || booking.courseId || null,
         });
         setIsPaymentLocked(false);
         setIsLoading(false);
@@ -871,27 +884,32 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               </div>
             )}
 
-            {/* WhatsApp Group Invitation Block */}
-            <div className="mt-5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/35 p-4 text-center">
-              <p className="text-xs sm:text-sm font-semibold text-[#14120E] leading-relaxed">
-                Join our WhatsApp group to receive course updates and important announcements.
-              </p>
-              <div className="mt-3 flex justify-center">
-                <a
-                  href={resolveWhatsAppGroupUrl({
-                    courseSlug,
-                    batchMetadata: activeBatch as any,
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-whatsapp w-full sm:w-auto text-xs sm:text-sm"
-                  aria-label="Join our official WhatsApp group for course updates (opens in a new tab)"
-                >
-                  <WhatsAppIcon className="size-5 shrink-0" />
-                  <span>JOIN WHATSAPP GROUP</span>
-                </a>
+            {/* WhatsApp Group Invitation Block - Only for Foundation & Artistry + Foundation */}
+            {isWhatsAppGroupEligibleCourse({
+              courseSlug: bookingInfo?.courseSlug || courseSlug || activeBatch?.courseSlug,
+              courseId: bookingInfo?.courseId || activeBatch?.courseId,
+            }) && (
+              <div className="mt-5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/35 p-4 text-center">
+                <p className="text-xs sm:text-sm font-semibold text-[#14120E] leading-relaxed">
+                  Join our WhatsApp group to receive course updates and important announcements.
+                </p>
+                <div className="mt-3 flex justify-center">
+                  <a
+                    href={resolveWhatsAppGroupUrl({
+                      courseSlug: bookingInfo?.courseSlug || courseSlug || activeBatch?.courseSlug,
+                      batchMetadata: activeBatch as any,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-whatsapp w-full sm:w-auto text-xs sm:text-sm"
+                    aria-label="Join our official WhatsApp group for course updates (opens in a new tab)"
+                  >
+                    <WhatsAppIcon className="size-5 shrink-0" />
+                    <span>JOIN WHATSAPP GROUP</span>
+                  </a>
+                </div>
               </div>
-            </div>
+            )}
 
             <p className="mt-4 text-xs leading-relaxed text-[#2C2A24] font-medium">
               We have sent the private access link and calendar invitations to:

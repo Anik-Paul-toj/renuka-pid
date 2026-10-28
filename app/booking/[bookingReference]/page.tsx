@@ -3,7 +3,10 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { CheckCircle2, AlertCircle, Calendar, Clock, ArrowRight, ShieldCheck, User, Mail, Hash } from "lucide-react";
 import { getBookingByReference } from "@/lib/booking/service";
-import { resolveWhatsAppGroupUrl } from "@/lib/whatsapp/group";
+import {
+  resolveWhatsAppGroupUrl,
+  isWhatsAppGroupEligibleCourse,
+} from "@/lib/whatsapp/group";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +62,15 @@ export default async function BookingConfirmationPage({
 
   const booking = result.data;
   const isConfirmed = booking.status === "confirmed";
-  const whatsappUrl = resolveWhatsAppGroupUrl();
+  const showWhatsAppInvitation =
+    isConfirmed &&
+    isWhatsAppGroupEligibleCourse({
+      courseSlug: booking.courseSlug,
+      courseId: booking.courseId,
+    });
+  const whatsappUrl = resolveWhatsAppGroupUrl({
+    courseSlug: booking.courseSlug,
+  });
 
   // Scenario B: Booking exists but is NOT confirmed (pending, failed, expired, cancelled)
   if (!isConfirmed) {
@@ -123,32 +134,34 @@ export default async function BookingConfirmationPage({
           </span>
         </div>
 
-        {/* Primary WhatsApp Group Invitation Section */}
-        <section
-          aria-label="WhatsApp Group Invitation"
-          className="mt-6 rounded-xl bg-[#25D366]/10 border border-[#25D366]/35 p-5 text-center shadow-xs"
-        >
-          <p className="text-xs sm:text-sm font-semibold text-[#14120E] leading-relaxed">
-            Join our WhatsApp group to receive course updates and important announcements.
-          </p>
+        {/* Primary WhatsApp Group Invitation Section - Only for eligible courses */}
+        {showWhatsAppInvitation && (
+          <section
+            aria-label="WhatsApp Group Invitation"
+            className="mt-6 rounded-xl bg-[#25D366]/10 border border-[#25D366]/35 p-5 text-center shadow-xs"
+          >
+            <p className="text-xs sm:text-sm font-semibold text-[#14120E] leading-relaxed">
+              Join our WhatsApp group to receive course updates and important announcements.
+            </p>
 
-          <div className="mt-3.5 flex justify-center">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-whatsapp w-full sm:w-auto text-xs sm:text-sm"
-              aria-label="Join our official WhatsApp group for course updates (opens in a new tab)"
-            >
-              <WhatsAppIcon className="size-5 shrink-0" />
-              <span>JOIN WHATSAPP GROUP</span>
-            </a>
-          </div>
+            <div className="mt-3.5 flex justify-center">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-whatsapp w-full sm:w-auto text-xs sm:text-sm"
+                aria-label="Join our official WhatsApp group for course updates (opens in a new tab)"
+              >
+                <WhatsAppIcon className="size-5 shrink-0" />
+                <span>JOIN WHATSAPP GROUP</span>
+              </a>
+            </div>
 
-          <p className="mt-2.5 text-[0.7rem] text-[#464137]/80 font-medium">
-            Tap above to join our private atelier group on WhatsApp
-          </p>
-        </section>
+            <p className="mt-2.5 text-[0.7rem] text-[#464137]/80 font-medium">
+              Tap above to join our private atelier group on WhatsApp
+            </p>
+          </section>
+        )}
 
         {/* Course & Session Snapshot */}
         <div className="mt-6 rounded-xl bg-[#F7F4EC] p-4.5 border border-[#464137]/15 text-xs space-y-2.5">

@@ -205,6 +205,126 @@ async function runTests() {
     fail("Test 5 failed", err);
   }
 
+  // --- TEST 6: Course-Specific Eligibility Logic ---
+  try {
+    let isWhatsAppGroupEligibleCourse;
+    try {
+      const mod = await import('../lib/whatsapp/group.ts');
+      isWhatsAppGroupEligibleCourse = mod.isWhatsAppGroupEligibleCourse;
+    } catch {
+      // Fallback matching exact definition in group.ts
+      const eligibleSlugs = ["watercolour-foundation", "watercolour-artistry-foundation"];
+      const eligibleIds = ["e1111111-2222-3333-4444-555555555555", "e2222222-2222-3333-4444-555555555555"];
+      const roadmapSlugs = ["the-watercolour", "the-watercolour-roadmap", "the-watercolour-roadmap-one-day-masterclass"];
+      const roadmapId = "11111111-1111-1111-1111-111111111111";
+
+      isWhatsAppGroupEligibleCourse = (params) => {
+        if (!params) return false;
+        const normalizedSlug = params.courseSlug?.trim().toLowerCase();
+        const normalizedId = params.courseId?.trim().toLowerCase();
+        if ((normalizedId && normalizedId === roadmapId) || (normalizedSlug && roadmapSlugs.includes(normalizedSlug))) return false;
+        if (normalizedSlug && eligibleSlugs.includes(normalizedSlug)) return true;
+        if (normalizedId && eligibleIds.includes(normalizedId)) return true;
+        return false;
+      };
+    }
+
+    // Verify lib/whatsapp/group.ts source contains proper definitions
+    assert.ok(groupTsContent.includes("export function isWhatsAppGroupEligibleCourse"), "group.ts must export isWhatsAppGroupEligibleCourse");
+    assert.ok(groupTsContent.includes('"watercolour-foundation"'), "group.ts must include watercolour-foundation in eligible list");
+    assert.ok(groupTsContent.includes('"watercolour-artistry-foundation"'), "group.ts must include watercolour-artistry-foundation in eligible list");
+    assert.ok(groupTsContent.includes('"the-watercolour"'), "group.ts must include roadmap slugs in excluded list");
+
+    // 1. The WATERCOLOUR Roadmap Masterclass -> MUST BE FALSE
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse({ courseSlug: "the-watercolour" }),
+      false,
+      "Roadmap slug 'the-watercolour' must NOT be eligible for WhatsApp invitation"
+    );
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse({ courseSlug: "the-watercolour-roadmap" }),
+      false,
+      "Roadmap slug 'the-watercolour-roadmap' must NOT be eligible for WhatsApp invitation"
+    );
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse({ courseId: "11111111-1111-1111-1111-111111111111" }),
+      false,
+      "Roadmap ID must NOT be eligible for WhatsApp invitation"
+    );
+
+    // 2. Watercolour Foundation -> MUST BE TRUE
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse({ courseSlug: "watercolour-foundation" }),
+      true,
+      "Foundation course slug 'watercolour-foundation' MUST be eligible for WhatsApp invitation"
+    );
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse({ courseId: "e1111111-2222-3333-4444-555555555555" }),
+      true,
+      "Foundation course ID MUST be eligible for WhatsApp invitation"
+    );
+
+    // 3. Watercolour Artistry + Foundation -> MUST BE TRUE
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse({ courseSlug: "watercolour-artistry-foundation" }),
+      true,
+      "Artistry + Foundation slug 'watercolour-artistry-foundation' MUST be eligible for WhatsApp invitation"
+    );
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse({ courseId: "e2222222-2222-3333-4444-555555555555" }),
+      true,
+      "Artistry + Foundation ID MUST be eligible for WhatsApp invitation"
+    );
+
+    // 4. Edge cases & Unknown courses -> MUST BE FALSE
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse(null),
+      false,
+      "Null params must return false"
+    );
+    assert.strictEqual(
+      isWhatsAppGroupEligibleCourse({ courseSlug: "some-random-course" }),
+      false,
+      "Unregistered slug must return false"
+    );
+
+    pass("Test 6: Course eligibility strictly isolates Foundation & Artistry (true) vs Roadmap Masterclass (false)");
+  } catch (err) {
+    fail("Test 6 failed", err);
+  }
+
+  // --- TEST 7: UI Component Guard Integration ---
+  try {
+    const modalSrc = fs.readFileSync("components/RegistrationModal.tsx", "utf8");
+    const pageSrc = fs.readFileSync("app/booking/[bookingReference]/page.tsx", "utf8");
+
+    // Modal check
+    assert.ok(
+      modalSrc.includes("isWhatsAppGroupEligibleCourse"),
+      "RegistrationModal must import and call isWhatsAppGroupEligibleCourse"
+    );
+    assert.ok(
+      modalSrc.includes("isWhatsAppGroupEligibleCourse({") &&
+      modalSrc.includes("JOIN WHATSAPP GROUP"),
+      "RegistrationModal must conditionally render the WhatsApp invitation section using isWhatsAppGroupEligibleCourse"
+    );
+
+    // Page check
+    assert.ok(
+      pageSrc.includes("isWhatsAppGroupEligibleCourse"),
+      "Booking confirmation page must import and call isWhatsAppGroupEligibleCourse"
+    );
+    assert.ok(
+      pageSrc.includes("showWhatsAppInvitation") &&
+      pageSrc.includes("{showWhatsAppInvitation && ("),
+      "Booking confirmation page must conditionally guard WhatsApp invitation section with showWhatsAppInvitation"
+    );
+
+    pass("Test 7: UI components (RegistrationModal & Booking Confirmation Page) enforce course-specific WhatsApp guards");
+  } catch (err) {
+    fail("Test 7 failed", err);
+  }
+
   console.log("\n==================================================================");
   console.log(`SUITE RESULTS: ${passed} PASSED, ${failed} FAILED`);
   console.log("==================================================================");

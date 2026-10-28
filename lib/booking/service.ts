@@ -9,6 +9,8 @@ import crypto from "crypto";
 export interface SafeBookingDetails {
   bookingReference: string;
   status: "pending" | "confirmed" | "cancelled" | "refunded";
+  courseId?: string | null;
+  courseSlug?: string | null;
   courseTitle: string;
   batchName: string;
   startDate: string;
@@ -644,6 +646,8 @@ export async function processBooking(
     data: {
       bookingReference: createdBooking.booking_reference,
       status: createdBooking.status as "pending",
+      courseId: batchData.course_id || null,
+      courseSlug: course?.slug || null,
       courseTitle,
       batchName: batchData.batch_name,
       startDate: batchData.start_date,
@@ -691,6 +695,8 @@ export async function getBookingByReference(
         end_time,
         timezone,
         courses (
+          id,
+          slug,
           title
         )
       ),
@@ -749,6 +755,8 @@ export async function getBookingByReference(
     data: {
       bookingReference: booking.booking_reference,
       status: booking.status as any,
+      courseId: course?.id || null,
+      courseSlug: course?.slug || null,
       courseTitle: course?.title || "Masterclass",
       batchName: batch?.batch_name || "Live Batch",
       startDate: batch?.start_date || "",
