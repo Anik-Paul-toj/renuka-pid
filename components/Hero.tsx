@@ -114,6 +114,7 @@ export const Hero: React.FC<HeroProps> = ({
 
             {/* 3. Transformation Tagline — One Single Line with Both Highlighted */}
             <p className="mt-2 sm:mt-2.5 font-serif text-[1.05rem] sm:text-[1.28rem] lg:text-[1.5rem] font-bold text-[#14120E] tracking-tight leading-snug">
+              <span className="font-semibold italic text-[#444C38] text-[0.88em] mr-1.5 sm:mr-2">From</span>
               <span>{workshopData.transformationBefore}</span>
               <span className="font-semibold italic text-[#444C38] text-[0.88em] mx-1.5 sm:mx-2">to</span>
               <span>{workshopData.transformationAfter}</span>
@@ -229,9 +230,6 @@ export const Hero: React.FC<HeroProps> = ({
                   <div>
                     <span className="text-[0.66rem] sm:text-[0.7rem] uppercase tracking-[0.16em] font-bold text-[#3E3A32] block leading-none">
                       Workshop Fee:
-                    </span>
-                    <span className="text-[0.64rem] font-semibold text-[#38352E] mt-0.5 block">
-                      Complete Live Atelier Access
                     </span>
                   </div>
                   <PriceDisplay

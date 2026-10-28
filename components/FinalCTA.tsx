@@ -2,8 +2,6 @@
 
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 
 interface FinalCTAProps {
@@ -58,16 +56,6 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenModal }) => {
             <p className="mt-4 text-xs sm:text-base leading-relaxed text-[#2C2A24] font-medium max-w-2xl mx-auto">
               {finalCta.description}
             </p>
-
-            <div className="mt-8 flex justify-center">
-              <Link
-                href="/course"
-                className="btn-studio px-10 py-4 text-xs sm:text-sm tracking-widest font-bold inline-flex items-center gap-2"
-              >
-                <span>{finalCta.ctaText?.replace(/\s*→\s*$/, "") || "EXPLORE COURSES"}</span>
-                <ArrowRight className="size-4" />
-              </Link>
-            </div>
           </div>
         </div>
       </div>
