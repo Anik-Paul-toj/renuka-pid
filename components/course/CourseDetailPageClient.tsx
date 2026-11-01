@@ -306,8 +306,6 @@ export function CourseDetailPageClient({
                         >
                           {isTBAEnrolment
                             ? "DATE TO BE ANNOUNCED"
-                            : isStartingSoonCourse
-                            ? "STARTING SOON"
                             : activeBatch.formattedStartDate ||
                               activeBatch.startDate ||
                               "To be announced"}
@@ -331,8 +329,6 @@ export function CourseDetailPageClient({
                           }`}
                         >
                           {isTBAEnrolment
-                            ? "To be announced"
-                            : isStartingSoonCourse
                             ? "To be announced"
                             : activeBatch.formattedLastRegistrationDate ||
                               activeBatch.lastRegistrationDate ||
@@ -555,7 +551,7 @@ export function CourseDetailPageClient({
                         <div className="mt-2 text-xs space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-[#353D2A] text-[0.72rem]">
-                              ✓ {activeBatch.batchName} ({isTBAEnrolment ? "DATE TO BE ANNOUNCED" : isStartingSoonCourse ? "STARTING SOON" : (activeBatch.formattedStartDate || activeBatch.startDate)})
+                              ✓ {activeBatch.batchName} ({isTBAEnrolment ? "DATE TO BE ANNOUNCED" : (activeBatch.formattedStartDate || activeBatch.startDate)})
                             </span>
                             <span
                               className={`px-2 py-0.2 rounded text-[0.6rem] font-bold uppercase tracking-wider ${
@@ -572,7 +568,7 @@ export function CourseDetailPageClient({
                             </span>
                           </div>
                           <div className="text-[0.68rem] text-[#6F6B61] flex flex-wrap gap-x-2.5">
-                            <span>Last Registration: <strong>{isTBAEnrolment ? "To be announced" : isStartingSoonCourse ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong></span>
+                            <span>Last Registration: <strong>{isTBAEnrolment ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong></span>
                             <span>Timing: <strong>{activeBatch.formattedTiming || activeBatch.startTime || "To be announced"}</strong></span>
                           </div>
                         </div>

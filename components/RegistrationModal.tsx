@@ -579,11 +579,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
             {/* Quick Session Details */}
             {(() => {
-              const isStartingSoonCourse =
-                courseSlug === "watercolour-foundation" ||
-                courseSlug === "watercolour-artistry-foundation" ||
-                (activeBatch as any)?.courseSlug === "watercolour-foundation" ||
-                (activeBatch as any)?.courseSlug === "watercolour-artistry-foundation";
+              // Determine if the batch date is genuinely not yet announced
+              // (empty startDate means TBA — do not hardcode "STARTING SOON" for any specific slug)
+              const batchDateMissing = !activeBatch?.startDate;
 
               return (
                 <div className="mt-3 rounded-md bg-[#F7F4EC] p-2.5 border border-[#464137]/15 text-[11px] text-[#14120E] flex flex-col gap-1.5">
@@ -592,9 +590,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       <Calendar className="size-3 text-[#444C38] shrink-0" />
                       <span>
                         {activeBatch?.startDate
-                          ? isStartingSoonCourse
-                            ? `${activeBatch.batchName} (STARTING SOON)`
-                            : `${activeBatch.batchName} (${activeBatch.formattedStartDate || activeBatch.startDate})`
+                          ? `${activeBatch.batchName} (${activeBatch.formattedStartDate || activeBatch.startDate})`
                           : hero.date}
                       </span>
                     </div>
@@ -620,7 +616,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <div className="text-[10px] text-[#6F6B61] flex items-center gap-1.5">
                       <Hourglass className="size-2.5 text-[#B93821] shrink-0" />
                       <span>
-                        Last Registration: <strong>{isStartingSoonCourse ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong>
+                        Last Registration: <strong>{batchDateMissing ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong>
                       </span>
                     </div>
                   )}

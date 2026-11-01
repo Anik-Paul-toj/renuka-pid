@@ -137,8 +137,6 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
               >
                 {isCohortTBA
                   ? "DATE TO BE ANNOUNCED"
-                  : isStartingSoonCourse
-                  ? "STARTING SOON"
                   : batch.formattedStartDate || batch.startDate || "TBA"}
               </span>
             </div>
@@ -159,8 +157,6 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                 }`}
               >
                 {isCohortTBA
-                  ? "To be announced"
-                  : isStartingSoonCourse
                   ? "To be announced"
                   : batch.formattedLastRegistrationDate ||
                     batch.lastRegistrationDate ||
