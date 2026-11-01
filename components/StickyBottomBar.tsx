@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useLandingContent } from "@/components/LandingContentProvider";
+import { StudioLogo } from "@/components/ui/StudioLogo";
 
 interface StickyBottomBarProps {
   onOpenModal?: () => void;
@@ -24,8 +25,8 @@ export const StickyBottomBar: React.FC<StickyBottomBarProps> = () => {
         </div>
 
         {/* Mobile Info */}
-        <div className="flex sm:hidden flex-col">
-          <span className="text-[0.7rem] font-bold text-[#444C38] uppercase tracking-wider">Renuka Art Studio</span>
+        <div className="flex sm:hidden flex-col justify-center">
+          <StudioLogo variant="black" height={28} />
           <span className="text-[0.68rem] text-[#14120E] font-semibold">{hero.date}</span>
         </div>
       </div>

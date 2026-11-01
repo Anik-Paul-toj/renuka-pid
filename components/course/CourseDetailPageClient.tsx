@@ -20,7 +20,7 @@ import { AdminCourseData } from "@/lib/courses-admin/service";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
+import { isRegistrationDeadlineExpired, isBatchDateAnnounced } from "@/lib/batches-admin/format";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
 
 interface CourseDetailPageClientProps {
@@ -59,6 +59,13 @@ export function CourseDetailPageClient({
         ))
   );
 
+  // For Foundation and Artistry: enrolment is blocked until a date is announced.
+  const isCohortCourse =
+    course.slug === "watercolour-foundation" ||
+    course.slug === "watercolour-artistry-foundation";
+  const isTBAEnrolment =
+    isCohortCourse && !isBatchDateAnnounced(activeBatch?.startDate ?? null);
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between selection:bg-[#444C38]/20">
       {/* Botanical Watercolor Background Art from Public Assets */}
@@ -89,8 +96,8 @@ export function CourseDetailPageClient({
       {/* Top Navbar */}
       <div className="relative z-10">
         <Navbar
-          onOpenModal={() => !isRegistrationClosed && setIsModalOpen(true)}
-          isRegistrationClosed={isRegistrationClosed}
+          onOpenModal={() => !isRegistrationClosed && !isTBAEnrolment && setIsModalOpen(true)}
+          isRegistrationClosed={isRegistrationClosed || isTBAEnrolment}
         />
       </div>
 
@@ -275,7 +282,9 @@ export function CourseDetailPageClient({
                           : "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
                       }`}
                     >
-                      {isRegistrationClosed
+                      {isTBAEnrolment
+                        ? "Enrolment Opening Soon"
+                        : isRegistrationClosed
                         ? "Registration Closed"
                         : "Open for Registration"}
                     </span>
@@ -295,7 +304,9 @@ export function CourseDetailPageClient({
                             isStartingSoonCourse ? "text-[#3E522D] tracking-wider" : "text-[#14120E]"
                           }`}
                         >
-                          {isStartingSoonCourse
+                          {isTBAEnrolment
+                            ? "DATE TO BE ANNOUNCED"
+                            : isStartingSoonCourse
                             ? "STARTING SOON"
                             : activeBatch.formattedStartDate ||
                               activeBatch.startDate ||
@@ -319,7 +330,9 @@ export function CourseDetailPageClient({
                               : "text-[#B93821]"
                           }`}
                         >
-                          {isStartingSoonCourse
+                          {isTBAEnrolment
+                            ? "To be announced"
+                            : isStartingSoonCourse
                             ? "To be announced"
                             : activeBatch.formattedLastRegistrationDate ||
                               activeBatch.lastRegistrationDate ||
@@ -542,7 +555,7 @@ export function CourseDetailPageClient({
                         <div className="mt-2 text-xs space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-[#353D2A] text-[0.72rem]">
-                              ✓ {activeBatch.batchName} ({isStartingSoonCourse ? "STARTING SOON" : (activeBatch.formattedStartDate || activeBatch.startDate)})
+                              ✓ {activeBatch.batchName} ({isTBAEnrolment ? "DATE TO BE ANNOUNCED" : isStartingSoonCourse ? "STARTING SOON" : (activeBatch.formattedStartDate || activeBatch.startDate)})
                             </span>
                             <span
                               className={`px-2 py-0.2 rounded text-[0.6rem] font-bold uppercase tracking-wider ${
@@ -551,26 +564,30 @@ export function CourseDetailPageClient({
                                   : "bg-[#3E522D]/15 text-[#3E522D]"
                               }`}
                             >
-                              {isRegistrationClosed
+                              {isTBAEnrolment
+                                ? "Enrolment Opening Soon"
+                                : isRegistrationClosed
                                 ? "Registration Closed"
                                 : "Open for Registration"}
                             </span>
                           </div>
                           <div className="text-[0.68rem] text-[#6F6B61] flex flex-wrap gap-x-2.5">
-                            <span>Last Registration: <strong>{isStartingSoonCourse ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong></span>
-                            <span>Timing: <strong>{activeBatch.formattedTiming || activeBatch.startTime}</strong></span>
+                            <span>Last Registration: <strong>{isTBAEnrolment ? "To be announced" : isStartingSoonCourse ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong></span>
+                            <span>Timing: <strong>{activeBatch.formattedTiming || activeBatch.startTime || "To be announced"}</strong></span>
                           </div>
                         </div>
                       )}
                     </div>
 
                     <button
-                      onClick={() => !isRegistrationClosed && setIsModalOpen(true)}
-                      disabled={isRegistrationClosed}
+                      onClick={() => !isRegistrationClosed && !isTBAEnrolment && setIsModalOpen(true)}
+                      disabled={isRegistrationClosed || isTBAEnrolment}
                       className="btn-studio px-8 py-4 text-xs sm:text-sm tracking-wider font-bold shadow-md inline-flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span>
-                        {isRegistrationClosed
+                        {isTBAEnrolment
+                          ? "Enrolment Opening Soon"
+                          : isRegistrationClosed
                           ? "Registration Closed"
                           : details.ctaText ||
                             (isWorkshop

@@ -35,6 +35,14 @@ export const metadata: Metadata = {
   title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal — Renuka Art Studio",
   description:
     "Join Renuka Aggarwal for a transformative 120-minute live watercolor masterclass. Step-by-step mindful watercolor courses designed for adults 25+ — no prior experience needed.",
+  icons: {
+    icon: [
+      { url: "/images/renuka-art-studio-logo-black.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/images/renuka-art-studio-logo-black.png", type: "image/png" },
+    ],
+  },
   openGraph: {
     title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal",
     description:

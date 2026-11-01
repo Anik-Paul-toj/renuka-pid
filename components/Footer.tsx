@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Mail } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { StudioLogo } from "@/components/ui/StudioLogo";
 
 export const Footer: React.FC = () => {
   const { brand, footer } = useLandingContent();
@@ -32,13 +33,10 @@ export const Footer: React.FC = () => {
         {/* Top Row: Brand & Nav Links */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-[#464137]/15">
           <div className="flex flex-col">
-            <span className="font-serif text-2xl font-bold tracking-tight text-[#14120E]">
-              {brand.name}
-            </span>
-            <span className="text-[0.68rem] tracking-[0.24em] uppercase text-[#3E3A32] font-bold mt-0.5">
-              {brand.studioName}
-            </span>
-            <span className="text-[0.65rem] tracking-[0.18em] uppercase text-[#444C38] font-bold mt-1">
+            {/* Official logo — black variant on the light footer background */}
+            <StudioLogo variant="black" height={52} />
+            {/* Tagline kept as small supporting text beneath the logo */}
+            <span className="text-[0.65rem] tracking-[0.18em] uppercase text-[#444C38] font-bold mt-1.5 pl-0.5">
               {brand.tagline}
             </span>
           </div>

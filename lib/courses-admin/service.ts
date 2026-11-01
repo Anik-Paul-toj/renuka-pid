@@ -493,6 +493,8 @@ export async function getPublicCourseBySlug(
       slug === "watercolour-artistry-foundation"
     ) {
       const isFoundation = slug === "watercolour-foundation";
+      // Fallback batch: closed by default until the admin announces real dates
+      // and explicitly opens registration. Empty startDate triggers isBatchDateAnnounced()=false.
       const activeBatch: SafeBatchScheduleData = {
         id: isFoundation
           ? "b1111111-2222-3333-4444-555555555555"
@@ -503,22 +505,24 @@ export async function getPublicCourseBySlug(
         batchName: isFoundation
           ? "Watercolour Foundation — Upcoming Live Batch"
           : "Watercolour Artistry — 3-Month Live Journey Batch",
-        startDate: isFoundation ? "2026-11-01" : "2026-11-05",
-        endDate: isFoundation ? "2026-11-02" : "2027-02-05",
-        lastRegistrationDate: isFoundation ? "2026-11-01" : "2026-11-05",
-        startTime: "6:30 PM",
-        endTime: "8:00 PM",
+        // Empty start_date → isBatchDateAnnounced() returns false → enrolment blocked.
+        startDate: "",
+        endDate: null,
+        lastRegistrationDate: "",
+        startTime: "",
+        endTime: "",
         timezone: "Asia/Kolkata",
         totalSeats: isFoundation ? 100 : 50,
         seatsBooked: 0,
         seatsRemaining: isFoundation ? 100 : 50,
-        isEnrollmentOpen: true,
-        status: "open",
+        // isEnrollmentOpen must be false when date is not announced.
+        isEnrollmentOpen: false,
+        status: "closed",
         isExpired: false,
         isSoldOut: false,
-        formattedStartDate: isFoundation ? "01 Nov 2026" : "05 Nov 2026",
-        formattedLastRegistrationDate: isFoundation ? "01 Nov 2026" : "05 Nov 2026",
-        formattedTiming: "6:30 PM – 8:00 PM IST",
+        formattedStartDate: "",
+        formattedLastRegistrationDate: "",
+        formattedTiming: "",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

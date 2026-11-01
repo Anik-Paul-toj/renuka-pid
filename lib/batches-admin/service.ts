@@ -10,6 +10,7 @@ import {
   formatBatchDateIST,
   formatBatchTimeIST,
   isRegistrationDeadlineExpired,
+  isBatchDateAnnounced,
 } from "./format";
 import { parseCourseDetails, COURSE_IMAGES } from "@/lib/courses-admin/details";
 
@@ -144,9 +145,22 @@ export async function getBatchByCourseId(
     startTime: batchData.start_time,
   });
 
+  // For Foundation and Artistry cohort courses: enrolment is only open when the
+  // admin has explicitly opened registration AND a real start date has been announced.
+  const isCohortCourse =
+    course?.slug === "watercolour-foundation" ||
+    course?.slug === "watercolour-artistry-foundation";
+  const dateAnnounced = isCohortCourse
+    ? isBatchDateAnnounced(batchData.start_date)
+    : true;
+
+  // isEnrollmentOpen is false if: DB flag is off, date not announced (cohort), expired, or sold out
+  const isEnrollmentOpen =
+    batchData.is_enrollment_open && dateAnnounced && !isExpired && !isSoldOut;
+
   // Derive batch status
   let status: BatchStatus = "open";
-  if (!batchData.is_enrollment_open) {
+  if (!batchData.is_enrollment_open || !dateAnnounced) {
     status = "closed";
   } else if (isExpired || isSoldOut) {
     status = "closed";
@@ -184,7 +198,7 @@ export async function getBatchByCourseId(
     totalSeats: batchData.total_seats,
     seatsBooked: batchData.seats_booked,
     seatsRemaining,
-    isEnrollmentOpen: batchData.is_enrollment_open && !isExpired && !isSoldOut,
+    isEnrollmentOpen,
     status,
     isExpired,
     isSoldOut,
@@ -290,8 +304,20 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     startTime: batchData.start_time,
   });
 
+  // For Foundation and Artistry cohort courses: enrolment is only open when the
+  // admin has explicitly opened registration AND a real start date has been announced.
+  const isCohortCourse =
+    course?.slug === "watercolour-foundation" ||
+    course?.slug === "watercolour-artistry-foundation";
+  const dateAnnounced = isCohortCourse
+    ? isBatchDateAnnounced(batchData.start_date)
+    : true;
+
+  const isEnrollmentOpen =
+    batchData.is_enrollment_open && dateAnnounced && !isExpired && !isSoldOut;
+
   let status: BatchStatus = "open";
-  if (!batchData.is_enrollment_open) {
+  if (!batchData.is_enrollment_open || !dateAnnounced) {
     status = "closed";
   } else if (isExpired || isSoldOut) {
     status = "closed";
@@ -329,7 +355,7 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     totalSeats: batchData.total_seats,
     seatsBooked: batchData.seats_booked,
     seatsRemaining,
-    isEnrollmentOpen: batchData.is_enrollment_open && !isExpired && !isSoldOut,
+    isEnrollmentOpen,
     status,
     isExpired,
     isSoldOut,

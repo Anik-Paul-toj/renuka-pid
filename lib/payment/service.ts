@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { consumeCreditForBooking } from "@/lib/course-credit/service";
-import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
+import { isRegistrationDeadlineExpired, isBatchDateAnnounced } from "@/lib/batches-admin/format";
 import crypto from "crypto";
 
 export interface PaymentServiceError {
@@ -89,7 +89,8 @@ export async function createOrderForBooking(
         last_registration_date,
         is_enrollment_open,
         courses (
-          title
+          title,
+          slug
         )
       ),
       customers (
@@ -139,6 +140,23 @@ export async function createOrderForBooking(
   // Authoritatively enforce batch registration status and cutoff at payment initiation
   const cohortBatch = (booking as any)?.cohort_batches;
   if (cohortBatch) {
+    // For Foundation and Artistry: reject if the batch date has not been announced.
+    const courseSlug = cohortBatch.courses?.slug;
+    const isCohortCourse =
+      courseSlug === "watercolour-foundation" ||
+      courseSlug === "watercolour-artistry-foundation";
+    if (isCohortCourse && !isBatchDateAnnounced(cohortBatch.start_date)) {
+      return {
+        success: false,
+        error: {
+          code: "ENROLLMENT_CLOSED",
+          message:
+            "Enrolment for this course is not yet open. The batch schedule has not been announced.",
+          statusCode: 400,
+        },
+      };
+    }
+
     const isExpired = isRegistrationDeadlineExpired(
       cohortBatch.last_registration_date || cohortBatch.start_date,
       new Date(),

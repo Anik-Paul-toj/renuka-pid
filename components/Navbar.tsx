@@ -7,6 +7,7 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { MasterclassData } from "@/data/content";
 import { useLandingContent } from "@/components/LandingContentProvider";
 import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
+import { StudioLogo } from "@/components/ui/StudioLogo";
 
 interface NavbarProps {
   onOpenModal?: () => void;
@@ -213,14 +214,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               window.history.pushState(null, "", "/");
             }
           }}
-          className="flex flex-col group"
+          className="flex items-center shrink-0"
+          aria-label="Renuka Art Studio — go to homepage"
         >
-          <span className="font-serif text-2xl tracking-tight text-[#14120E] font-bold">
-            {brand.name}
-          </span>
-          <span className="text-[0.68rem] tracking-[0.22em] text-[#3E3A32] uppercase font-bold">
-            {brand.studioName}
-          </span>
+          {/* Desktop: taller logo */}
+          <StudioLogo
+            variant="black"
+            height={44}
+            priority
+            className="hidden sm:inline-flex"
+          />
+          {/* Mobile: compact logo */}
+          <StudioLogo
+            variant="black"
+            height={36}
+            priority
+            className="sm:hidden"
+          />
         </Link>
 
         {/* Navigation Links (Desktop) */}

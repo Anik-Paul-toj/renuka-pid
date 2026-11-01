@@ -288,3 +288,44 @@ export function isBatchRegistrationOpen(
 
   return { isOpen: true };
 }
+
+/**
+ * Determines whether a batch's start date is genuinely announced.
+ *
+ * A date is considered "not announced" when:
+ * - startDate is null, undefined, or empty
+ * - startDate is a well-known placeholder sentinel ("TBA", "tba", "0000-00-00", etc.)
+ *
+ * This is the single source of truth used by the batch service, booking service,
+ * and UI components to decide whether enrolment for Foundation and Artistry courses
+ * should be permitted.
+ */
+export function isBatchDateAnnounced(startDate?: string | null): boolean {
+  if (!startDate || startDate.trim() === "") return false;
+  const normalized = startDate.trim().toUpperCase();
+  const sentinels = ["TBA", "0000-00-00", "N/A", "NONE", "NULL", "UNKNOWN"];
+  if (sentinels.includes(normalized)) return false;
+  // Ensure it looks like a real YYYY-MM-DD date
+  return /^\d{4}-\d{2}-\d{2}$/.test(startDate.trim());
+}
+
+/**
+ * For Foundation and Artistry courses specifically, an announced date alone is not
+ * sufficient — the admin must also explicitly open registration via is_enrollment_open=true.
+ * This helper combines both checks.
+ *
+ * For all other courses (Masterclass / Roadmap) the standard isEnrollmentOpen flag is
+ * the only gate, so pass isNonCohortCourse=true to skip the date announcement guard.
+ */
+export function isCohortEnrolmentEligible(
+  batch: {
+    isEnrollmentOpen: boolean;
+    startDate?: string | null;
+  } | null | undefined,
+  isCohortCourse: boolean = true
+): boolean {
+  if (!batch) return false;
+  if (!batch.isEnrollmentOpen) return false;
+  if (isCohortCourse && !isBatchDateAnnounced(batch.startDate)) return false;
+  return true;
+}

@@ -14,6 +14,20 @@ import {
 import { AdminCourseData } from "@/lib/courses-admin/service";
 import { RegistrationModal } from "@/components/RegistrationModal";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
+import { isBatchDateAnnounced } from "@/lib/batches-admin/format";
+
+/**
+ * Returns true when a cohort course (Foundation / Artistry) has no announced
+ * batch date yet, so enrolment must be disabled.
+ */
+function isCohortEnrolmentTBA(course: AdminCourseData): boolean {
+  const isCohortCourse =
+    course.slug === "watercolour-foundation" ||
+    course.slug === "watercolour-artistry-foundation";
+  if (!isCohortCourse) return false;
+  // No batch at all, or batch exists but start date is not announced
+  return !isBatchDateAnnounced(course.activeBatch?.startDate ?? null);
+}
 
 interface CourseCatalogClientProps {
   courses: AdminCourseData[];
@@ -45,6 +59,8 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
 
   const renderScheduleBadge = (course: AdminCourseData) => {
     const batch = course.activeBatch;
+    const isCohortTBA = isCohortEnrolmentTBA(course);
+
     if (!batch) {
       return (
         <div className="rounded-xl bg-[#FAF8F2]/90 p-3.5 border border-[#444C38]/20 text-xs text-[#6F6B61]">
@@ -60,6 +76,8 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
     const isClosed = !batch.isEnrollmentOpen || batch.isExpired || isSoldOut;
     const statusLabel = isSoldOut
       ? "Batch Full / Sold Out"
+      : isCohortTBA
+      ? "Enrolment Opening Soon"
       : isClosed
       ? "Registration Closed"
       : "Open for Registration";
@@ -117,7 +135,9 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   isStartingSoonCourse ? "text-[#3E522D] tracking-wide" : "text-[#14120E]"
                 }`}
               >
-                {isStartingSoonCourse
+                {isCohortTBA
+                  ? "DATE TO BE ANNOUNCED"
+                  : isStartingSoonCourse
                   ? "STARTING SOON"
                   : batch.formattedStartDate || batch.startDate || "TBA"}
               </span>
@@ -138,7 +158,9 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   isClosed ? "text-[#6F6B61] line-through" : "text-[#B93821]"
                 }`}
               >
-                {isStartingSoonCourse
+                {isCohortTBA
+                  ? "To be announced"
+                  : isStartingSoonCourse
                   ? "To be announced"
                   : batch.formattedLastRegistrationDate ||
                     batch.lastRegistrationDate ||
@@ -485,6 +507,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   <button
                     onClick={() => handleOpenBooking(foundationCourse)}
                     disabled={
+                      isCohortEnrolmentTBA(foundationCourse) ||
                       foundationCourse.activeBatch?.isExpired ||
                       !foundationCourse.activeBatch?.isEnrollmentOpen ||
                       foundationCourse.activeBatch?.isSoldOut ||
@@ -498,6 +521,8 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                       (foundationCourse.activeBatch?.seatsRemaining !== undefined &&
                         foundationCourse.activeBatch.seatsRemaining <= 0)
                         ? "Batch Full"
+                        : isCohortEnrolmentTBA(foundationCourse)
+                        ? "Enrolment Opening Soon"
                         : foundationCourse.activeBatch?.isExpired ||
                           !foundationCourse.activeBatch?.isEnrollmentOpen
                         ? "Registration Closed"
@@ -624,6 +649,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   <button
                     onClick={() => handleOpenBooking(artistryCourse)}
                     disabled={
+                      isCohortEnrolmentTBA(artistryCourse) ||
                       artistryCourse.activeBatch?.isExpired ||
                       !artistryCourse.activeBatch?.isEnrollmentOpen ||
                       artistryCourse.activeBatch?.isSoldOut ||
@@ -637,6 +663,8 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                       (artistryCourse.activeBatch?.seatsRemaining !== undefined &&
                         artistryCourse.activeBatch.seatsRemaining <= 0)
                         ? "Batch Full"
+                        : isCohortEnrolmentTBA(artistryCourse)
+                        ? "Enrolment Opening Soon"
                         : artistryCourse.activeBatch?.isExpired ||
                           !artistryCourse.activeBatch?.isEnrollmentOpen
                         ? "Registration Closed"

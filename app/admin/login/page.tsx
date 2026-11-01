@@ -2,7 +2,8 @@
 
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, Mail, Sparkles, ArrowRight, AlertCircle } from "lucide-react";
+import { Lock, Mail, ArrowRight, AlertCircle } from "lucide-react";
+import { StudioLogo } from "@/components/ui/StudioLogo";
 
 function LoginForm() {
   const router = useRouter();
@@ -121,9 +122,9 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-[#F7F4EC] flex flex-col justify-center items-center px-4 py-12">
       {/* Brand Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 rounded-full bg-[#C8D1C7]/35 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[#68705A] mb-3">
-          <Sparkles className="size-3.5" />
-          <span>Art Studio</span>
+        {/* Official logo centred above the login card — black on light cream background */}
+        <div className="flex justify-center mb-4">
+          <StudioLogo variant="black" height={72} priority />
         </div>
         <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#292923]">
           Admin Portal Login

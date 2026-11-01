@@ -17,14 +17,13 @@ import {
   Radio,
   Bell,
   Settings,
-  Sparkles,
   ExternalLink,
-  Menu,
   X,
   ShieldCheck,
   KeyRound,
 } from "lucide-react";
 import { AdminProfile } from "@/lib/auth/admin";
+import { StudioLogo } from "@/components/ui/StudioLogo";
 
 interface NavItem {
   name: string;
@@ -70,19 +69,17 @@ export function AdminSidebar({
   const navContent = (
     <div className="flex flex-col h-full bg-[#FAF8F2] border-r border-[#464137]/15">
       {/* Brand Header */}
-      <div className="p-5 border-b border-[#464137]/10 flex items-center justify-between">
-        <Link href="/admin" className="flex items-center gap-2.5">
-          <div className="grid size-8 place-items-center rounded-lg bg-[#68705A] text-[#FAF8F2] shadow-sm">
-            <Sparkles className="size-4" />
-          </div>
-          <div>
-            <span className="block font-serif text-sm font-bold tracking-tight text-[#292923]">
-              Renuka Art Studio
-            </span>
-            <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[#68705A]">
-              Admin Portal
-            </span>
-          </div>
+      <div className="p-4 border-b border-[#464137]/10 flex items-center justify-between">
+        <Link
+          href="/admin"
+          className="flex items-center gap-2 min-w-0"
+          aria-label="Renuka Art Studio Admin Portal"
+        >
+          {/* Black logo on the light sidebar background */}
+          <StudioLogo variant="black" height={36} />
+          <span className="block text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[#68705A] shrink-0">
+            Admin
+          </span>
         </Link>
 
         {onCloseMobile && (

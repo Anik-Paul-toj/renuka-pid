@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateBookingInput } from "@/lib/validations/booking";
 import { verifyCreditVerificationToken } from "@/lib/course-credit/identity";
-import { isRegistrationDeadlineExpired } from "@/lib/batches-admin/format";
+import { isRegistrationDeadlineExpired, isBatchDateAnnounced } from "@/lib/batches-admin/format";
 import { parseCourseDetails } from "@/lib/courses-admin/service";
 import crypto from "crypto";
 
@@ -168,6 +168,25 @@ export async function processBooking(
       error: {
         code: "ENROLLMENT_CLOSED",
         message: "Enrollment is currently closed for this batch.",
+        statusCode: 400,
+      },
+    };
+  }
+
+  // For Foundation and Artistry cohort courses: the admin must announce a real batch
+  // date AND explicitly open registration before any booking is accepted.
+  // This server-side check mirrors the isBatchDateAnnounced() UI gate so that
+  // direct API calls cannot bypass the unannounced state.
+  const isCohortCourse =
+    course.slug === "watercolour-foundation" ||
+    course.slug === "watercolour-artistry-foundation";
+  if (isCohortCourse && !isBatchDateAnnounced(batchData.start_date)) {
+    return {
+      success: false,
+      error: {
+        code: "ENROLLMENT_CLOSED",
+        message:
+          "Enrolment for this course is not yet open. The batch schedule has not been announced. Please check back once registration is officially opened.",
         statusCode: 400,
       },
     };
