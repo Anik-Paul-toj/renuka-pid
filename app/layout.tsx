@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans, Caveat, Manrope } from "next/font/google";
 import "./globals.css";
+import { SplashScreen } from "@/components/SplashScreen";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
@@ -82,6 +83,8 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-screen bg-background text-foreground font-sans selection:bg-sage-light/40 selection:text-foreground"
       >
+        {/* Branded splash screen — shown on full page load/refresh, auto-dismissed */}
+        <SplashScreen />
         {children}
       </body>
     </html>

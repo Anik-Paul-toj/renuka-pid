@@ -202,7 +202,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           : "border-b border-transparent bg-transparent"
       }`}
     >
-      <div className="mx-auto flex h-14 sm:h-16 max-w-7xl xl:max-w-[1400px] items-center justify-between px-6 sm:px-8 lg:px-12">
+      {/* Header row — height matches logo size so everything is vertically centred */}
+      <div className="mx-auto flex h-[76px] sm:h-[88px] lg:h-24 max-w-7xl xl:max-w-[1400px] items-center justify-between px-5 sm:px-8 lg:px-12">
         {/* Brand Logo - Navigates directly to Home (/) */}
         <Link
           href="/"
@@ -217,17 +218,29 @@ export const Navbar: React.FC<NavbarProps> = ({
           className="flex items-center shrink-0"
           aria-label="Renuka Art Studio — go to homepage"
         >
-          {/* Desktop: taller logo */}
+          {/*
+           * Width-based sizing: canvas is 1:1 square so width === height.
+           * These values are ~30% smaller than the previous 140/120/100 px.
+           *
+           * Desktop  ≥1024px : 96px  → visible mark ≈ 77px
+           * Tablet   640-1024: 88px  → visible mark ≈ 70px
+           * Mobile   <640px  : 76px  → visible mark ≈ 61px
+           */}
           <StudioLogo
             variant="black"
-            height={44}
+            width={96}
             priority
-            className="hidden sm:inline-flex"
+            className="hidden lg:inline-flex"
           />
-          {/* Mobile: compact logo */}
           <StudioLogo
             variant="black"
-            height={36}
+            width={88}
+            priority
+            className="hidden sm:inline-flex lg:hidden"
+          />
+          <StudioLogo
+            variant="black"
+            width={76}
             priority
             className="sm:hidden"
           />
