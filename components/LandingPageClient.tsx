@@ -100,7 +100,7 @@ export function LandingPageClient({
   return (
     <LandingContentProvider content={content}>
       <GSAPProvider>
-        <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-accent/25 selection:text-primary">
+        <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-accent/25 selection:text-primary overflow-x-hidden">
           {/* Sticky Header Navigation */}
           <Navbar
             onOpenModal={handleOpenModal}

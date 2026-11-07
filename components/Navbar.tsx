@@ -203,7 +203,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       }`}
     >
       {/* Header row — height matches logo size so everything is vertically centred */}
-      <div className="mx-auto flex h-[76px] sm:h-[88px] lg:h-24 max-w-7xl xl:max-w-[1400px] items-center justify-between px-5 sm:px-8 lg:px-12">
+      <div className="mx-auto flex h-[76px] sm:h-[88px] lg:h-24 max-w-7xl xl:max-w-[1400px] items-center justify-between px-4 sm:px-8 lg:px-12">
         {/* Brand Logo - Navigates directly to Home (/) */}
         <Link
           href="/"
@@ -228,21 +228,8 @@ export const Navbar: React.FC<NavbarProps> = ({
            */}
           <StudioLogo
             variant="black"
-            width={96}
             priority
-            className="hidden lg:inline-flex"
-          />
-          <StudioLogo
-            variant="black"
-            width={88}
-            priority
-            className="hidden sm:inline-flex lg:hidden"
-          />
-          <StudioLogo
-            variant="black"
-            width={76}
-            priority
-            className="sm:hidden"
+            className="w-[68px] h-[68px] sm:w-[84px] sm:h-[84px] lg:w-[96px] lg:h-[96px]"
           />
         </Link>
 
