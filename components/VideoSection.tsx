@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Play, Check, ArrowRight } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
@@ -33,17 +33,24 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
   const youtubeId = extractYouTubeVideoId(videoSection.youtubeId) || "ZRohFR7E-ls";
   const embedUrl = getYouTubeEmbedUrl(youtubeId, { autoplay: true, rel: 0 });
 
-  // Safe thumbnail: prioritize valid relative/http paths, fallback to local downloaded maxres image or YouTube CDN
+  // Safe thumbnail: prioritize active YouTube maxres thumbnail or custom URL, avoiding stale cached legacy paths
   const rawThumbnail = videoSection.videoThumbnail?.trim();
-  const isValidThumbnail =
+  const isValidCustomThumbnail =
     Boolean(rawThumbnail) &&
     !rawThumbnail!.startsWith("C:") &&
     !rawThumbnail!.includes("\\") &&
+    rawThumbnail !== "/images/video_preview.jpg" &&
     (rawThumbnail!.startsWith("/") || rawThumbnail!.startsWith("http"));
 
-  const thumbnailSrc = isValidThumbnail
+  const initialThumbnail = isValidCustomThumbnail
     ? rawThumbnail!
-    : "/images/video_preview.jpg";
+    : getYouTubeThumbnailUrl(youtubeId, "maxres");
+
+  const [currentThumbnail, setCurrentThumbnail] = useState(initialThumbnail);
+
+  useEffect(() => {
+    setCurrentThumbnail(initialThumbnail);
+  }, [initialThumbnail]);
 
   return (
     <section className="relative overflow-hidden bg-[#F7F4EC] py-8 sm:py-10 lg:py-12">
@@ -73,12 +80,19 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                   onClick={() => setIsPlaying(true)}
                 >
                   <Image
-                    src={thumbnailSrc}
+                    src={currentThumbnail}
                     alt={videoSection.videoTitle || "Watercolor Masterclass Studio Preview"}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-95"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 640px"
-                    priority={false}
+                    priority
+                    onError={() => {
+                      if (currentThumbnail.includes("maxresdefault")) {
+                        setCurrentThumbnail(getYouTubeThumbnailUrl(youtubeId, "hq"));
+                      } else if (!currentThumbnail.includes("video_preview_ZRohFR7E-ls")) {
+                        setCurrentThumbnail("/images/video_preview_ZRohFR7E-ls.jpg");
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 bg-[#292923]/25 transition-colors group-hover:bg-[#292923]/15" />
 

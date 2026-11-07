@@ -373,7 +373,7 @@ export const masterclassData: MasterclassData = {
     overline: "INSIDE THE SESSION",
     headline: "What You’ll Learn in the Live Masterclass",
     videoTitle: "Watercolor for a Calmer, Brighter You — Studio Preview",
-    videoThumbnail: "/images/video_preview.jpg",
+    videoThumbnail: "https://i.ytimg.com/vi/ZRohFR7E-ls/maxresdefault.jpg",
     youtubeId: "ZRohFR7E-ls",
     learningPoints: [
       "Understand the secrets behind beautiful watercolour paintings.",
