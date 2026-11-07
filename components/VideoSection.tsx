@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Play, Check, ArrowRight } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
+import { extractYouTubeVideoId, getYouTubeEmbedUrl, getYouTubeThumbnailUrl } from "@/lib/testimonials/youtube";
 
 interface VideoSectionProps {
   onOpenModal: () => void;
@@ -28,6 +29,22 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
   const { videoSection } = useLandingContent();
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Extract clean 11-char YouTube ID with ZRohFR7E-ls default
+  const youtubeId = extractYouTubeVideoId(videoSection.youtubeId) || "ZRohFR7E-ls";
+  const embedUrl = getYouTubeEmbedUrl(youtubeId, { autoplay: true, rel: 0 });
+
+  // Safe thumbnail: prioritize valid relative/http paths, fallback to local downloaded maxres image or YouTube CDN
+  const rawThumbnail = videoSection.videoThumbnail?.trim();
+  const isValidThumbnail =
+    Boolean(rawThumbnail) &&
+    !rawThumbnail!.startsWith("C:") &&
+    !rawThumbnail!.includes("\\") &&
+    (rawThumbnail!.startsWith("/") || rawThumbnail!.startsWith("http"));
+
+  const thumbnailSrc = isValidThumbnail
+    ? rawThumbnail!
+    : "/images/video_preview.jpg";
+
   return (
     <section className="relative overflow-hidden bg-[#F7F4EC] py-8 sm:py-10 lg:py-12">
       {/* Botanical Arch Watercolor Background Art */}
@@ -47,20 +64,21 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
 
       <div className="relative z-10 mx-auto max-w-6xl xl:max-w-7xl px-6 sm:px-8">
         <div className="grid gap-6 lg:gap-8 xl:gap-10 lg:grid-cols-2 lg:items-center">
-          {/* Left Column: Video Preview / Player */}
+          {/* Left Column: Video Preview / Player (16:9 Long-Form Aspect Ratio) */}
           <div className="overflow-hidden rounded-xl bg-[#FAF8F2]/90 p-2.5 sm:p-3 shadow-md border border-[#464137]/15">
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-[#292923]">
+            <div className="relative aspect-video aspect-[16/9] w-full overflow-hidden rounded-lg bg-[#292923]">
               {!isPlaying ? (
                 <div
                   className="group relative h-full w-full cursor-pointer"
                   onClick={() => setIsPlaying(true)}
                 >
                   <Image
-                    src={videoSection.videoThumbnail}
-                    alt={videoSection.videoTitle}
+                    src={thumbnailSrc}
+                    alt={videoSection.videoTitle || "Watercolor Masterclass Studio Preview"}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-95"
-                    sizes="(max-width: 768px) 100vw, 600px"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 640px"
+                    priority={false}
                   />
                   <div className="absolute inset-0 bg-[#292923]/25 transition-colors group-hover:bg-[#292923]/15" />
 
@@ -81,8 +99,8 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
               ) : (
                 <iframe
                   className="absolute inset-0 h-full w-full"
-                  src={`https://www.youtube.com/embed/${videoSection.youtubeId || "I0q9IDdAFCs"}?autoplay=1&rel=0`}
-                  title={videoSection.videoTitle}
+                  src={embedUrl}
+                  title={videoSection.videoTitle || "Watercolor Masterclass Studio Preview"}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                 />
