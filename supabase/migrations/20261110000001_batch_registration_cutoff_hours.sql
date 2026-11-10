@@ -22,7 +22,9 @@ SET registration_closes_before_hours = 2
 WHERE registration_closes_before_hours IS NULL;
 
 -- 4. Re-create public safe view including registration_closes_before_hours
-CREATE OR REPLACE VIEW public.public_cohort_batches AS
+DROP VIEW IF EXISTS public.public_cohort_batches CASCADE;
+
+CREATE VIEW public.public_cohort_batches AS
 SELECT 
   id,
   course_id,
@@ -37,6 +39,7 @@ SELECT
   total_seats,
   seats_booked,
   is_enrollment_open,
+  cover_image_url,
   created_at,
   updated_at
 FROM public.cohort_batches
