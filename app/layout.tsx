@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans, Caveat, Manrope } from "next/font/google";
 import "./globals.css";
 import { SplashScreen } from "@/components/SplashScreen";
+import { PWAProvider } from "@/components/PWAProvider";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
@@ -36,12 +38,21 @@ export const metadata: Metadata = {
   title: "Learn Art. Rediscover Yourself. Create a Kinder You. | Renuka Aggarwal — Renuka Art Studio",
   description:
     "Join Renuka Aggarwal for a transformative 120-minute live watercolor masterclass. Step-by-step mindful watercolor courses designed for adults 25+ — no prior experience needed.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Renuka Art Studio",
+  },
   icons: {
     icon: [
-      { url: "/images/renuka-art-studio-logo-black.png", type: "image/png" },
+      { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
-      { url: "/images/renuka-art-studio-logo-black.png", type: "image/png" },
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
   openGraph: {
@@ -68,6 +79,16 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#444C38" },
+    { media: "(prefers-color-scheme: dark)", color: "#444C38" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -86,6 +107,10 @@ export default function RootLayout({
         {/* Branded splash screen — shown on full page load/refresh, auto-dismissed */}
         <SplashScreen />
         {children}
+        {/* PWA: service worker registration + update notifications */}
+        <PWAProvider />
+        {/* PWA: install prompt banner (Chromium + iOS Safari) */}
+        <InstallPrompt />
       </body>
     </html>
   );
