@@ -7,9 +7,11 @@
 -- Also ensures `last_registration_date` is present and updates `public_cohort_batches` view.
 -- ==============================================================================
 
--- 1. Ensure last_registration_date exists
+-- 1. Ensure last_registration_date and cover_image columns exist
 ALTER TABLE public.cohort_batches
-ADD COLUMN IF NOT EXISTS last_registration_date DATE;
+ADD COLUMN IF NOT EXISTS last_registration_date DATE,
+ADD COLUMN IF NOT EXISTS cover_image_url TEXT,
+ADD COLUMN IF NOT EXISTS cover_image_public_id TEXT;
 
 -- 2. Add registration_closes_before_hours column with allowed values check
 ALTER TABLE public.cohort_batches
