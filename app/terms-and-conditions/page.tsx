@@ -106,7 +106,7 @@ const TERMS_SECTIONS = [
 
 export default function TermsAndConditionsPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between">
+    <div className="relative min-h-screen overflow-x-clip bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between">
       {/* Botanical Watercolor Background Art */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <Image
@@ -133,9 +133,7 @@ export default function TermsAndConditionsPage() {
       />
 
       {/* Top Navigation */}
-      <div className="relative z-10">
-        <Navbar />
-      </div>
+      <Navbar />
 
       <main className="relative z-10 flex-1 pb-16 sm:pb-24">
         {/* Header Hero */}

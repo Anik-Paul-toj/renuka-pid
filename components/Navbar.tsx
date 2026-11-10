@@ -98,15 +98,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   // Track active section on scroll when on landing page
   useEffect(() => {
-    if (!isHome) {
-      if (isCourse) {
-        setActiveSection("courses");
-      }
-      return;
-    }
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
+
+      if (!isHome) {
+        if (isCourse) {
+          setActiveSection("courses");
+        }
+        return;
+      }
 
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
@@ -155,6 +155,13 @@ export const Navbar: React.FC<NavbarProps> = ({
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
+    if (!isHome) {
+      if (isCourse) {
+        setActiveSection("courses");
+      }
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+
     // Also check initial hash
     if (typeof window !== "undefined" && window.location.hash) {
       const hashKey = window.location.hash.replace("#", "");
@@ -196,10 +203,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-300 ${
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         isScrolled
-          ? "border-b border-[#464137]/10 bg-[#F7F4EC]/95 backdrop-blur-md shadow-xs"
-          : "border-b border-transparent bg-transparent"
+          ? "border-b border-[#464137]/15 bg-[#FAF8F2]/95 backdrop-blur-md shadow-xs"
+          : isHome
+          ? "border-b border-transparent bg-transparent"
+          : "border-b border-[#464137]/10 bg-[#FAF8F2]/90 backdrop-blur-sm"
       }`}
     >
       {/* Header row — height matches logo size so everything is vertically centred */}

@@ -68,7 +68,7 @@ export function CourseDetailPageClient({
     isCohortCourse && !isBatchDateAnnounced(activeBatch?.startDate ?? null);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between selection:bg-[#444C38]/20">
+    <div className="relative min-h-screen overflow-x-clip bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between selection:bg-[#444C38]/20">
       {/* Botanical Watercolor Background Art from Public Assets */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <Image
@@ -95,12 +95,10 @@ export function CourseDetailPageClient({
       />
 
       {/* Top Navbar */}
-      <div className="relative z-10">
-        <Navbar
-          onOpenModal={() => !isRegistrationClosed && !isTBAEnrolment && setIsModalOpen(true)}
-          isRegistrationClosed={isRegistrationClosed || isTBAEnrolment}
-        />
-      </div>
+      <Navbar
+        onOpenModal={() => !isRegistrationClosed && !isTBAEnrolment && setIsModalOpen(true)}
+        isRegistrationClosed={isRegistrationClosed || isTBAEnrolment}
+      />
 
       <main className="relative z-10 flex-1 py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
         {/* Navigation Breadcrumb */}
