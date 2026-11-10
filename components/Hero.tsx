@@ -7,7 +7,12 @@ import { workshopData, MasterclassData } from "@/data/content";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { useLandingContent } from "@/components/LandingContentProvider";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
-import { parseStartTimeToHoursMinutes } from "@/lib/batches-admin/format";
+import {
+  parseStartTimeToHoursMinutes,
+  calculateRegistrationClosingDateTime,
+  formatBatchDateWithWeekdayIST,
+  formatBatchTimeIST,
+} from "@/lib/batches-admin/format";
 
 interface HeroProps {
   onOpenModal: () => void;
@@ -26,6 +31,14 @@ interface HeroProps {
 
 function getLiveDeadlineISO(batch?: any | null): string {
   if (!batch?.startDate) return workshopData.registrationDeadline;
+  const cutoff = calculateRegistrationClosingDateTime(
+    batch.startDate,
+    batch.startTime,
+    batch.registrationClosesBeforeHours ?? 2
+  );
+  if (cutoff?.closingIso) {
+    return cutoff.closingIso;
+  }
   const deadlineDate = batch.lastRegistrationDate || batch.startDate;
   const parsedTime = parseStartTimeToHoursMinutes(batch.startTime);
   const hours = parsedTime ? String(parsedTime.hours).padStart(2, "0") : "18";
@@ -84,6 +97,16 @@ export const Hero: React.FC<HeroProps> = ({
   const displayOriginalPrice = coursePricing?.originalPrice ?? workshopData.originalPrice;
   const displayOfferPrice = coursePricing?.offerPrice ?? workshopData.offerPrice;
   const displayDuration = coursePricing?.duration ?? workshopData.duration;
+
+  const displayDate = activeBatch?.startDate
+    ? formatBatchDateWithWeekdayIST(activeBatch.startDate)
+    : activeBatch?.formattedStartDate || workshopData.date;
+
+  const displayTime =
+    activeBatch?.formattedTiming ||
+    (activeBatch?.startTime
+      ? formatBatchTimeIST(activeBatch.startTime, activeBatch.endTime)
+      : workshopData.time);
 
   return (
     <section id="home" className="relative overflow-hidden bg-[#F7F4EC] -mt-[76px] sm:-mt-[88px] lg:-mt-24 pt-[5.75rem] sm:pt-[6.5rem] lg:pt-[7rem] pb-8 sm:pb-10 lg:pb-12">
@@ -175,7 +198,7 @@ export const Hero: React.FC<HeroProps> = ({
                         Date
                       </span>
                       <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] leading-tight block">
-                        {workshopData.date}
+                        {displayDate}
                       </span>
                     </div>
                   </div>
@@ -190,7 +213,7 @@ export const Hero: React.FC<HeroProps> = ({
                         Time
                       </span>
                       <span className="font-bold text-xs sm:text-[0.84rem] text-[#14120E] leading-tight block">
-                        {workshopData.time}
+                        {displayTime}
                       </span>
                     </div>
                   </div>

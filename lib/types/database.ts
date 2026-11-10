@@ -100,6 +100,7 @@ export interface Database {
           start_date: string;
           end_date: string | null;
           last_registration_date?: string | null;
+          registration_closes_before_hours?: number;
           cover_image_url?: string | null;
           cover_image_public_id?: string | null;
           start_time: string;
@@ -120,6 +121,7 @@ export interface Database {
           start_date: string;
           end_date?: string | null;
           last_registration_date?: string | null;
+          registration_closes_before_hours?: number;
           cover_image_url?: string | null;
           cover_image_public_id?: string | null;
           start_time: string;
@@ -140,6 +142,7 @@ export interface Database {
           start_date?: string;
           end_date?: string | null;
           last_registration_date?: string | null;
+          registration_closes_before_hours?: number;
           cover_image_url?: string | null;
           cover_image_public_id?: string | null;
           start_time?: string;
@@ -580,6 +583,7 @@ export interface Database {
           start_date: string;
           end_date: string | null;
           last_registration_date?: string | null;
+          registration_closes_before_hours?: number;
           start_time: string;
           end_time: string;
           timezone: string;

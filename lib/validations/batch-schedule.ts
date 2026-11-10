@@ -20,7 +20,17 @@ export const batchScheduleSchema = z
       .nullable(),
     lastRegistrationDate: z
       .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Last registration date must be in YYYY-MM-DD format."),
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Last registration date must be in YYYY-MM-DD format.")
+      .optional()
+      .nullable(),
+    registrationClosesBeforeHours: z.coerce
+      .number()
+      .int()
+      .refine(
+        (val) => [1, 2, 3, 4, 6, 12, 24].includes(val),
+        "Registration closing window must be 1, 2, 3, 4, 6, 12, or 24 hours."
+      )
+      .default(2),
     startTime: z
       .string()
       .trim()

@@ -85,6 +85,7 @@ export async function processBooking(
       start_date,
       end_date,
       last_registration_date,
+      registration_closes_before_hours,
       start_time,
       end_time,
       timezone,
@@ -107,7 +108,12 @@ export async function processBooking(
 
   if (!batchErr && primaryBatch) {
     batchData = primaryBatch;
-  } else if (batchErr && (batchErr.code === "42703" || batchErr.message?.includes("last_registration_date"))) {
+  } else if (
+    batchErr &&
+    (batchErr.code === "42703" ||
+      batchErr.message?.includes("last_registration_date") ||
+      batchErr.message?.includes("registration_closes_before_hours"))
+  ) {
     const { data: fallbackBatch } = await adminClient
       .from("cohort_batches")
       .select(
@@ -196,6 +202,12 @@ export async function processBooking(
   const courseDetails = course?.slug
     ? parseCourseDetails(course.slug, course.description)
     : null;
+
+  const registrationClosesBeforeHours =
+    batchData.registration_closes_before_hours ??
+    (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
+    2;
+
   const lastRegDate =
     batchData.last_registration_date ||
     (courseDetails as any)?.batchSchedule?.lastRegistrationDate ||
@@ -205,6 +217,7 @@ export async function processBooking(
     isRegistrationDeadlineExpired(lastRegDate, new Date(), {
       startDate: batchData.start_date,
       startTime: batchData.start_time,
+      registrationClosesBeforeHours,
     })
   ) {
     return {
@@ -222,7 +235,7 @@ export async function processBooking(
       success: false,
       error: {
         code: "SOLD_OUT",
-        message: "This workshop batch is completely sold out.",
+        message: "This batch is fully booked. Registration is now closed.",
         statusCode: 409,
       },
     };
@@ -544,7 +557,7 @@ export async function processBooking(
         success: false,
         error: {
           code: "SOLD_OUT",
-          message: "This workshop batch is completely sold out.",
+          message: "This batch is fully booked. Registration is now closed.",
           statusCode: 409,
         },
       };

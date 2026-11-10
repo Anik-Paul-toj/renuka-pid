@@ -11,6 +11,7 @@ import {
   formatBatchTimeIST,
   isRegistrationDeadlineExpired,
   isBatchDateAnnounced,
+  calculateRegistrationClosingDateTime,
 } from "./format";
 import { parseCourseDetails, COURSE_IMAGES } from "@/lib/courses-admin/details";
 
@@ -23,6 +24,9 @@ export interface SafeBatchScheduleData {
   startDate: string;
   endDate: string | null;
   lastRegistrationDate: string;
+  registrationClosesBeforeHours?: number;
+  calculatedClosingDateTimeFormatted?: string;
+  calculatedClosingTime?: string;
   startTime: string;
   endTime: string;
   timezone: string;
@@ -50,7 +54,7 @@ export async function getBatchByCourseId(
 ): Promise<SafeBatchScheduleData | null> {
   const supabase = createAdminClient();
 
-  // 1. Try querying with last_registration_date included
+  // 1. Try querying with last_registration_date and registration_closes_before_hours included
   let batchData: any = null;
   const { data: primaryData, error: primaryErr } = await supabase
     .from("cohort_batches")
@@ -62,6 +66,7 @@ export async function getBatchByCourseId(
       start_date,
       end_date,
       last_registration_date,
+      registration_closes_before_hours,
       start_time,
       end_time,
       timezone,
@@ -86,9 +91,11 @@ export async function getBatchByCourseId(
     batchData = primaryData[0];
   } else if (
     primaryErr &&
-    (primaryErr.code === "42703" || primaryErr.message?.includes("last_registration_date"))
+    (primaryErr.code === "42703" ||
+      primaryErr.message?.includes("last_registration_date") ||
+      primaryErr.message?.includes("registration_closes_before_hours"))
   ) {
-    // Column last_registration_date not yet added in DB, query without it
+    // Columns not yet added in DB, query safe core columns
     const { data: fallbackData } = await supabase
       .from("cohort_batches")
       .select(
@@ -132,17 +139,32 @@ export async function getBatchByCourseId(
     ? parseCourseDetails(course.slug, course.description)
     : null;
 
-  // Derive lastRegistrationDate with priority: DB column > metadata fallback > startDate
+  const registrationClosesBeforeHours =
+    batchData.registration_closes_before_hours ??
+    (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
+    2;
+
+  const closing = calculateRegistrationClosingDateTime(
+    batchData.start_date,
+    batchData.start_time,
+    registrationClosesBeforeHours
+  );
+
+  // Derive lastRegistrationDate with priority: DB column > metadata fallback > calculated > startDate
   const fallbackMetaDeadline =
     (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
   const lastRegistrationDate =
-    batchData.last_registration_date || fallbackMetaDeadline || batchData.start_date;
+    batchData.last_registration_date ||
+    fallbackMetaDeadline ||
+    closing?.closingDateStr ||
+    batchData.start_date;
 
   const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
   const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate, new Date(), {
     startDate: batchData.start_date,
     startTime: batchData.start_time,
+    registrationClosesBeforeHours,
   });
 
   // For Foundation and Artistry cohort courses: enrolment is only open when the
@@ -192,6 +214,9 @@ export async function getBatchByCourseId(
     startDate: batchData.start_date,
     endDate: batchData.end_date,
     lastRegistrationDate,
+    registrationClosesBeforeHours,
+    calculatedClosingDateTimeFormatted: closing?.closingDateTimeFormatted,
+    calculatedClosingTime: closing?.closingTimeStr,
     startTime: batchData.start_time,
     endTime: batchData.end_time,
     timezone: batchData.timezone || "Asia/Kolkata",
@@ -229,6 +254,7 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
       start_date,
       end_date,
       last_registration_date,
+      registration_closes_before_hours,
       start_time,
       end_time,
       timezone,
@@ -252,7 +278,9 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     batchData = primaryData;
   } else if (
     primaryErr &&
-    (primaryErr.code === "42703" || primaryErr.message?.includes("last_registration_date"))
+    (primaryErr.code === "42703" ||
+      primaryErr.message?.includes("last_registration_date") ||
+      primaryErr.message?.includes("registration_closes_before_hours"))
   ) {
     const { data: fallbackData } = await supabase
       .from("cohort_batches")
@@ -292,16 +320,31 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     ? parseCourseDetails(course.slug, course.description)
     : null;
 
+  const registrationClosesBeforeHours =
+    batchData.registration_closes_before_hours ??
+    (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
+    2;
+
+  const closing = calculateRegistrationClosingDateTime(
+    batchData.start_date,
+    batchData.start_time,
+    registrationClosesBeforeHours
+  );
+
   const fallbackMetaDeadline =
     (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
   const lastRegistrationDate =
-    batchData.last_registration_date || fallbackMetaDeadline || batchData.start_date;
+    batchData.last_registration_date ||
+    fallbackMetaDeadline ||
+    closing?.closingDateStr ||
+    batchData.start_date;
 
   const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
   const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate, new Date(), {
     startDate: batchData.start_date,
     startTime: batchData.start_time,
+    registrationClosesBeforeHours,
   });
 
   // For Foundation and Artistry cohort courses: enrolment is only open when the
@@ -349,6 +392,9 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     startDate: batchData.start_date,
     endDate: batchData.end_date,
     lastRegistrationDate,
+    registrationClosesBeforeHours,
+    calculatedClosingDateTimeFormatted: closing?.closingDateTimeFormatted,
+    calculatedClosingTime: closing?.closingTimeStr,
     startTime: batchData.start_time,
     endTime: batchData.end_time,
     timezone: batchData.timezone || "Asia/Kolkata",
@@ -387,21 +433,51 @@ export async function updateBatchSchedule(
   }
   const input = validation.data;
 
+  // Validate totalSeats against existing booked seats
+  const { data: existingBatch } = await supabase
+    .from("cohort_batches")
+    .select("id, seats_booked, total_seats")
+    .eq("id", batchId)
+    .maybeSingle();
+
+  if (existingBatch && input.totalSeats != null) {
+    if (input.totalSeats < existingBatch.seats_booked) {
+      throw new Error(
+        `Total seats (${input.totalSeats}) cannot be less than the current booked seats (${existingBatch.seats_booked}).`
+      );
+    }
+  }
+
+  // Ensure end date is not earlier than start date
+  let effectiveEndDate = input.endDate || null;
+  if (effectiveEndDate && effectiveEndDate < input.startDate) {
+    effectiveEndDate = input.startDate;
+  }
+
+  const registrationClosesBeforeHours = input.registrationClosesBeforeHours ?? 2;
+  const closing = calculateRegistrationClosingDateTime(
+    input.startDate,
+    input.startTime,
+    registrationClosesBeforeHours
+  );
+
+  const derivedLastRegDate =
+    input.lastRegistrationDate || closing?.closingDateStr || input.startDate;
+
   // Determine is_enrollment_open
   const isEnrollmentOpen = input.status === "open" || input.status === "upcoming";
   const nowIso = new Date().toISOString();
 
-  // Attempt 1: Update with last_registration_date
-  let updateErr: any = null;
   let updatedRow: any = null;
 
   const fullUpdatePayload: any = {
     batch_name: input.batchName,
     start_date: input.startDate,
-    end_date: input.endDate || null,
+    end_date: effectiveEndDate,
     start_time: input.startTime,
     end_time: input.endTime || null,
-    last_registration_date: input.lastRegistrationDate,
+    last_registration_date: derivedLastRegDate,
+    registration_closes_before_hours: registrationClosesBeforeHours,
     is_enrollment_open: isEnrollmentOpen,
     updated_at: nowIso,
   };
@@ -410,6 +486,30 @@ export async function updateBatchSchedule(
     fullUpdatePayload.total_seats = input.totalSeats;
   }
 
+  // Helper to persist in course metadata JSON
+  const saveCourseMetadata = async (course: any) => {
+    if (!course) return;
+    try {
+      const details = parseCourseDetails(course.slug, course.description);
+      (details as any).batchSchedule = {
+        lastRegistrationDate: derivedLastRegDate,
+        registrationClosesBeforeHours,
+        batchName: input.batchName,
+        status: input.status,
+        updatedAt: nowIso,
+      };
+      await supabase
+        .from("courses")
+        .update({
+          description: JSON.stringify(details),
+          updated_at: nowIso,
+        })
+        .eq("id", course.id);
+    } catch (metaErr) {
+      console.warn("Failed to save batch metadata in course JSON:", metaErr);
+    }
+  };
+
   const { data: res1, error: err1 } = await supabase
     .from("cohort_batches")
     .update(fullUpdatePayload)
@@ -417,9 +517,14 @@ export async function updateBatchSchedule(
     .select(`*, courses (id, title, slug, description)`)
     .single();
 
-  if (err1 && (err1.code === "42703" || err1.message?.includes("last_registration_date"))) {
-    // Column last_registration_date is not yet present on table; update without it
-    delete fullUpdatePayload.last_registration_date;
+  if (
+    err1 &&
+    (err1.code === "42703" ||
+      err1.message?.includes("registration_closes_before_hours") ||
+      err1.message?.includes("last_registration_date"))
+  ) {
+    // Attempt fallback removing registration_closes_before_hours first
+    delete fullUpdatePayload.registration_closes_before_hours;
     const { data: res2, error: err2 } = await supabase
       .from("cohort_batches")
       .update(fullUpdatePayload)
@@ -427,60 +532,34 @@ export async function updateBatchSchedule(
       .select(`*, courses (id, title, slug, description)`)
       .single();
 
-    if (err2 || !res2) {
-      throw new Error(`Failed to update batch: ${err2?.message || "Unknown error"}`);
-    }
-    updatedRow = res2;
+    if (
+      err2 &&
+      (err2.code === "42703" || err2.message?.includes("last_registration_date"))
+    ) {
+      delete fullUpdatePayload.last_registration_date;
+      const { data: res3, error: err3 } = await supabase
+        .from("cohort_batches")
+        .update(fullUpdatePayload)
+        .eq("id", batchId)
+        .select(`*, courses (id, title, slug, description)`)
+        .single();
 
-    // Persist lastRegistrationDate safely in course description JSON so it is not lost
-    try {
-      const course = res2.courses;
-      if (course) {
-        const details = parseCourseDetails(course.slug, course.description);
-        (details as any).batchSchedule = {
-          lastRegistrationDate: input.lastRegistrationDate,
-          batchName: input.batchName,
-          status: input.status,
-          updatedAt: nowIso,
-        };
-        await supabase
-          .from("courses")
-          .update({
-            description: JSON.stringify(details),
-            updated_at: nowIso,
-          })
-          .eq("id", course.id);
+      if (err3 || !res3) {
+        throw new Error(`Failed to update batch: ${err3?.message || "Unknown error"}`);
       }
-    } catch (metaErr) {
-      console.warn("Failed to save batch metadata in course JSON:", metaErr);
+      updatedRow = res3;
+      await saveCourseMetadata(res3.courses);
+    } else if (err2 || !res2) {
+      throw new Error(`Failed to update batch: ${err2?.message || "Unknown error"}`);
+    } else {
+      updatedRow = res2;
+      await saveCourseMetadata(res2.courses);
     }
   } else if (err1 || !res1) {
     throw new Error(`Failed to update batch: ${err1?.message || "Unknown error"}`);
   } else {
     updatedRow = res1;
-
-    // Also sync to course details metadata for double certainty
-    try {
-      const course = res1.courses;
-      if (course) {
-        const details = parseCourseDetails(course.slug, course.description);
-        (details as any).batchSchedule = {
-          lastRegistrationDate: input.lastRegistrationDate,
-          batchName: input.batchName,
-          status: input.status,
-          updatedAt: nowIso,
-        };
-        await supabase
-          .from("courses")
-          .update({
-            description: JSON.stringify(details),
-            updated_at: nowIso,
-          })
-          .eq("id", course.id);
-      }
-    } catch {
-      // Ignore background sync warning
-    }
+    await saveCourseMetadata(res1.courses);
   }
 
   // Revalidate public & admin paths so changes reflect immediately
@@ -502,11 +581,12 @@ export async function updateBatchSchedule(
   const seatsRemaining = Math.max(0, updatedRow.total_seats - updatedRow.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
   const isExpired = isRegistrationDeadlineExpired(
-    input.lastRegistrationDate,
+    derivedLastRegDate,
     new Date(),
     {
       startDate: input.startDate,
       startTime: input.startTime,
+      registrationClosesBeforeHours,
     }
   );
 
@@ -518,7 +598,10 @@ export async function updateBatchSchedule(
     batchName: updatedRow.batch_name,
     startDate: updatedRow.start_date,
     endDate: updatedRow.end_date,
-    lastRegistrationDate: input.lastRegistrationDate,
+    lastRegistrationDate: derivedLastRegDate,
+    registrationClosesBeforeHours,
+    calculatedClosingDateTimeFormatted: closing?.closingDateTimeFormatted,
+    calculatedClosingTime: closing?.closingTimeStr,
     startTime: updatedRow.start_time,
     endTime: updatedRow.end_time,
     timezone: updatedRow.timezone || "Asia/Kolkata",
@@ -530,7 +613,7 @@ export async function updateBatchSchedule(
     isExpired,
     isSoldOut,
     formattedStartDate: formatBatchDateIST(updatedRow.start_date),
-    formattedLastRegistrationDate: formatBatchDateIST(input.lastRegistrationDate),
+    formattedLastRegistrationDate: formatBatchDateIST(derivedLastRegDate),
     formattedTiming: formatBatchTimeIST(updatedRow.start_time, updatedRow.end_time),
     createdAt: updatedRow.created_at,
     updatedAt: updatedRow.updated_at,

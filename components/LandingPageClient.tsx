@@ -145,7 +145,7 @@ export function LandingPageClient({
           <Footer />
 
           {/* Persistent Sticky Bottom Conversion Bar */}
-          <StickyBottomBar onOpenModal={handleOpenModal} />
+          <StickyBottomBar onOpenModal={handleOpenModal} activeBatch={activeBatch} />
 
           {/* Interactive Registration Modal Drawer */}
           <RegistrationModal

@@ -443,7 +443,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     }
 
     if (currentBatch?.isSoldOut) {
-      setErrorMessage("This workshop cohort is completely sold out.");
+      setErrorMessage("This batch is fully booked. Registration is now closed.");
       setIsLoading(false);
       return;
     }
@@ -624,13 +624,18 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               );
             })()}
 
-            {/* Registration Closed Alert */}
-            {(activeBatch?.isRegistrationClosed || activeBatch?.isExpired || (activeBatch && !activeBatch.isEnrollmentOpen)) && (
+            {/* Registration Closed / Sold Out Alert */}
+            {activeBatch?.isSoldOut ? (
+              <div className="mt-3 flex items-start gap-2 rounded-md border border-[#B93821]/30 bg-[#B93821]/10 p-2.5 text-xs text-[#B93821] font-medium">
+                <AlertCircle className="size-4 shrink-0 text-[#B93821] mt-0.5" />
+                <span>This batch is fully booked. Registration is now closed.</span>
+              </div>
+            ) : (activeBatch?.isRegistrationClosed || activeBatch?.isExpired || (activeBatch && !activeBatch.isEnrollmentOpen)) ? (
               <div className="mt-3 flex items-start gap-2 rounded-md border border-[#444C38]/30 bg-[#EEE9DE] p-2.5 text-xs text-[#292923] font-medium">
                 <AlertCircle className="size-4 shrink-0 text-[#68705A] mt-0.5" />
                 <span>Registration is currently closed for this batch as the deadline has passed.</span>
               </div>
-            )}
+            ) : null}
 
             {/* Payment Pending Alert */}
             {paymentPending && (

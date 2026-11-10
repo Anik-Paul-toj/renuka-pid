@@ -25,6 +25,7 @@ import {
   formatBatchDateIST,
   formatBatchTimeIST,
   isRegistrationDeadlineExpired,
+  calculateRegistrationClosingDateTime,
 } from "@/lib/batches-admin/format";
 
 interface BatchFormData {
@@ -36,6 +37,7 @@ interface BatchFormData {
   startDate: string;
   endDate: string;
   lastRegistrationDate: string;
+  registrationClosesBeforeHours: number;
   startTime: string;
   endTime: string;
   status: "open" | "closed" | "upcoming" | "completed";
@@ -124,6 +126,7 @@ export function AdminBatchScheduleManager({
     startDate: "",
     endDate: "",
     lastRegistrationDate: "",
+    registrationClosesBeforeHours: 2,
     startTime: activeCourse.defaultTiming,
     endTime: activeCourse.defaultEndTime,
     status: "open",
@@ -162,6 +165,7 @@ export function AdminBatchScheduleManager({
           startDate: b.startDate || "",
           endDate: b.endDate || "",
           lastRegistrationDate: b.lastRegistrationDate || b.startDate || "",
+          registrationClosesBeforeHours: b.registrationClosesBeforeHours || 2,
           startTime: b.startTime || "6:30 PM",
           endTime: b.endTime || "8:00 PM",
           status: b.status || (b.isEnrollmentOpen ? "open" : "closed"),
@@ -189,6 +193,7 @@ export function AdminBatchScheduleManager({
           startDate: "2026-11-01",
           endDate: "2026-11-02",
           lastRegistrationDate: "2026-11-01",
+          registrationClosesBeforeHours: 2,
           startTime: "6:30 PM",
           endTime: "8:00 PM",
           status: "open",
@@ -223,7 +228,18 @@ export function AdminBatchScheduleManager({
 
   const handleInputChange = (field: keyof BatchFormData, value: any) => {
     if (isReadOnly) return;
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "startDate") {
+      setFormData((prev) => {
+        const next = { ...prev, startDate: value };
+        // Auto-synchronize endDate if endDate was previously earlier than the new startDate
+        if (prev.endDate && prev.endDate < value) {
+          next.endDate = value;
+        }
+        return next;
+      });
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
     setSuccessMessage(null);
     setErrorMessage(null);
 
@@ -355,11 +371,19 @@ export function AdminBatchScheduleManager({
     if (!formData.startDate) {
       errors.startDate = "Batch start date is required.";
     }
-    if (!formData.lastRegistrationDate) {
-      errors.lastRegistrationDate = "Last date for registration is required.";
-    }
     if (!formData.startTime.trim()) {
       errors.startTime = "Batch start time is required.";
+    }
+
+    // Auto-align endDate if it was earlier than startDate
+    let effectiveEndDate = formData.endDate;
+    if (effectiveEndDate && formData.startDate && effectiveEndDate < formData.startDate) {
+      effectiveEndDate = formData.startDate;
+    }
+
+    // Capacity validation against current bookings
+    if (formData.totalSeats < formData.seatsBooked) {
+      errors.totalSeats = `Total seats (${formData.totalSeats}) cannot be less than the current booked seats (${formData.seatsBooked}).`;
     }
 
     // Critical Constraint: The registration deadline must not be after the batch start date.
@@ -370,8 +394,8 @@ export function AdminBatchScheduleManager({
       }
     }
 
-    if (formData.endDate && formData.startDate) {
-      if (formData.endDate < formData.startDate) {
+    if (effectiveEndDate && formData.startDate) {
+      if (effectiveEndDate < formData.startDate) {
         errors.endDate = "Batch end date cannot be earlier than start date.";
       }
     }
@@ -398,8 +422,9 @@ export function AdminBatchScheduleManager({
           body: JSON.stringify({
             batchName: formData.batchName.trim(),
             startDate: formData.startDate,
-            endDate: formData.endDate || null,
-            lastRegistrationDate: formData.lastRegistrationDate,
+            endDate: effectiveEndDate || null,
+            lastRegistrationDate: formData.lastRegistrationDate || formData.startDate,
+            registrationClosesBeforeHours: formData.registrationClosesBeforeHours || 2,
             startTime: formData.startTime.trim(),
             endTime: formData.endTime ? formData.endTime.trim() : null,
             status: formData.status,
@@ -436,12 +461,19 @@ export function AdminBatchScheduleManager({
     }
   };
 
+  const calculatedClosing = calculateRegistrationClosingDateTime(
+    formData.startDate,
+    formData.startTime,
+    formData.registrationClosesBeforeHours || 2
+  );
+
   const isExpired = isRegistrationDeadlineExpired(
     formData.lastRegistrationDate,
     new Date(),
     {
       startDate: formData.startDate,
       startTime: formData.startTime,
+      registrationClosesBeforeHours: formData.registrationClosesBeforeHours,
     }
   );
   const isClosed =
@@ -822,7 +854,64 @@ export function AdminBatchScheduleManager({
                   </div>
                 </div>
 
-                {/* 4. Batch Status & Total Capacity */}
+                {/* 4. Registration Cutoff Window & Calculated Deadline */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-[#F4F1EA] border border-[#68705A]/30">
+                  <div>
+                    <label className="block text-xs font-bold text-[#292923] mb-1">
+                      Registration Closes Before Batch (Hours){" "}
+                      <span className="text-rose-600">*</span>
+                    </label>
+                    <select
+                      disabled={isReadOnly}
+                      value={formData.registrationClosesBeforeHours}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "registrationClosesBeforeHours",
+                          parseInt(e.target.value) || 2
+                        )
+                      }
+                      className="w-full rounded-lg bg-[#FAF8F2] border border-[#464137]/20 px-3 py-2 text-xs text-[#292923] font-semibold focus:outline-hidden focus:ring-1 focus:ring-[#68705A]"
+                    >
+                      <option value={1}>1 hour</option>
+                      <option value={2}>2 hours (Default)</option>
+                      <option value={3}>3 hours</option>
+                      <option value={4}>4 hours</option>
+                      <option value={6}>6 hours</option>
+                      <option value={12}>12 hours</option>
+                      <option value={24}>24 hours</option>
+                    </select>
+                    <span className="text-[0.66rem] text-[#6F6B61] mt-0.5 block">
+                      Configures the auto-closing window before batch start.
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col justify-center">
+                    <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#68705A] block leading-none mb-1">
+                      Calculated Closing Deadline (Asia/Kolkata)
+                    </span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <Clock className="size-3.5 text-[#68705A] shrink-0" />
+                      <span className="text-xs font-bold text-[#292923]">
+                        {calculatedClosing?.closingDateTimeFormatted
+                          ? `${calculatedClosing.closingDateTimeFormatted} IST`
+                          : "Calculated automatically from start time"}
+                      </span>
+                    </div>
+                    <span className="text-[0.66rem] mt-1 block font-medium">
+                      {calculatedClosing?.isExpired ? (
+                        <span className="text-rose-600">
+                          🔴 Cutoff reached based on current IST time.
+                        </span>
+                      ) : (
+                        <span className="text-[#3E522D]">
+                          🟢 Registration open until this cutoff.
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 5. Batch Status & Total Capacity */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-[#292923] mb-1">
@@ -861,7 +950,7 @@ export function AdminBatchScheduleManager({
                       type="number"
                       disabled={isReadOnly}
                       value={formData.totalSeats}
-                      min={1}
+                      min={formData.seatsBooked || 1}
                       max={1000}
                       onChange={(e) =>
                         handleInputChange(
@@ -869,7 +958,11 @@ export function AdminBatchScheduleManager({
                           parseInt(e.target.value) || 100
                         )
                       }
-                      className="w-full rounded-lg bg-[#F7F4EC] border border-[#464137]/20 px-3 py-2 text-xs text-[#292923] focus:outline-hidden focus:ring-1 focus:ring-[#68705A]"
+                      className={`w-full rounded-lg bg-[#F7F4EC] border px-3 py-2 text-xs text-[#292923] focus:outline-hidden focus:ring-1 focus:ring-[#68705A] ${
+                        fieldErrors.totalSeats
+                          ? "border-rose-400 ring-1 ring-rose-400"
+                          : "border-[#464137]/20"
+                      }`}
                     />
                     <span className="text-[0.66rem] text-[#6F6B61] mt-0.5 block">
                       Booked: {formData.seatsBooked} • Remaining:{" "}
@@ -878,6 +971,11 @@ export function AdminBatchScheduleManager({
                         formData.totalSeats - formData.seatsBooked
                       )}
                     </span>
+                    {fieldErrors.totalSeats && (
+                      <span className="text-[0.68rem] text-rose-600 mt-0.5 block font-medium">
+                        {fieldErrors.totalSeats}
+                      </span>
+                    )}
                   </div>
                 </div>
 

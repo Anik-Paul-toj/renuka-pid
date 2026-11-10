@@ -55,6 +55,7 @@ export function CourseDetailPageClient({
           {
             startDate: activeBatch.startDate,
             startTime: activeBatch.startTime,
+            registrationClosesBeforeHours: activeBatch.registrationClosesBeforeHours,
           }
         ))
   );
@@ -277,12 +278,16 @@ export function CourseDetailPageClient({
 
                     <span
                       className={`px-2.5 py-0.5 rounded text-[0.66rem] font-bold uppercase tracking-wider ${
-                        isRegistrationClosed
+                        activeBatch.isSoldOut
+                          ? "bg-[#B93821]/15 text-[#B93821] border border-[#B93821]/30"
+                          : isRegistrationClosed
                           ? "bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25"
                           : "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
                       }`}
                     >
-                      {isTBAEnrolment
+                      {activeBatch.isSoldOut
+                        ? "This batch is fully booked. Registration is now closed."
+                        : isTBAEnrolment
                         ? "Enrolment Opening Soon"
                         : isRegistrationClosed
                         ? "Registration Closed"
@@ -555,12 +560,16 @@ export function CourseDetailPageClient({
                             </span>
                             <span
                               className={`px-2 py-0.2 rounded text-[0.6rem] font-bold uppercase tracking-wider ${
-                                isRegistrationClosed
+                                activeBatch.isSoldOut
+                                  ? "bg-[#B93821]/15 text-[#B93821]"
+                                  : isRegistrationClosed
                                   ? "bg-[#6F6B61]/15 text-[#6F6B61]"
                                   : "bg-[#3E522D]/15 text-[#3E522D]"
                               }`}
                             >
-                              {isTBAEnrolment
+                              {activeBatch.isSoldOut
+                                ? "This batch is fully booked. Registration is now closed."
+                                : isTBAEnrolment
                                 ? "Enrolment Opening Soon"
                                 : isRegistrationClosed
                                 ? "Registration Closed"
@@ -581,7 +590,9 @@ export function CourseDetailPageClient({
                       className="btn-studio px-8 py-4 text-xs sm:text-sm tracking-wider font-bold shadow-md inline-flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span>
-                        {isTBAEnrolment
+                        {activeBatch.isSoldOut
+                          ? "Batch Full"
+                          : isTBAEnrolment
                           ? "Enrolment Opening Soon"
                           : isRegistrationClosed
                           ? "Registration Closed"

@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { consumeCreditForBooking } from "@/lib/course-credit/service";
 import { isRegistrationDeadlineExpired, isBatchDateAnnounced } from "@/lib/batches-admin/format";
+import { parseCourseDetails } from "@/lib/courses-admin/service";
 import crypto from "crypto";
 
 export interface PaymentServiceError {
@@ -10,6 +11,7 @@ export interface PaymentServiceError {
     | "BOOKING_NOT_FOUND"
     | "BOOKING_EXPIRED"
     | "ENROLLMENT_CLOSED"
+    | "SOLD_OUT"
     | "ALREADY_PAID"
     | "RAZORPAY_API_ERROR"
     | "INVALID_PAYMENT_SIGNATURE"
@@ -71,7 +73,8 @@ export async function createOrderForBooking(
   }
 
   // 1. Authoritative Booking Lookup
-  const { data: booking, error: bookingErr } = await adminClient
+  let booking: any = null;
+  const { data: primaryBooking, error: bookingErr } = await adminClient
     .from("bookings")
     .select(
       `
@@ -87,10 +90,14 @@ export async function createOrderForBooking(
         start_date,
         start_time,
         last_registration_date,
+        registration_closes_before_hours,
+        total_seats,
+        seats_booked,
         is_enrollment_open,
         courses (
           title,
-          slug
+          slug,
+          description
         )
       ),
       customers (
@@ -104,7 +111,52 @@ export async function createOrderForBooking(
     .eq("booking_reference", bookingReference)
     .maybeSingle();
 
-  if (bookingErr || !booking) {
+  if (!bookingErr && primaryBooking) {
+    booking = primaryBooking;
+  } else if (
+    bookingErr &&
+    (bookingErr.code === "42703" ||
+      bookingErr.message?.includes("last_registration_date") ||
+      bookingErr.message?.includes("registration_closes_before_hours"))
+  ) {
+    const { data: fallbackBooking } = await adminClient
+      .from("bookings")
+      .select(
+        `
+        id,
+        booking_reference,
+        status,
+        amount_paise,
+        currency,
+        expires_at,
+        seat_released,
+        cohort_batches (
+          batch_name,
+          start_date,
+          start_time,
+          total_seats,
+          seats_booked,
+          is_enrollment_open,
+          courses (
+            title,
+            slug,
+            description
+          )
+        ),
+        customers (
+          full_name,
+          email,
+          phone,
+          whatsapp_phone
+        )
+      `
+      )
+      .eq("booking_reference", bookingReference)
+      .maybeSingle();
+    booking = fallbackBooking;
+  }
+
+  if (!booking) {
     return {
       success: false,
       error: {
@@ -137,7 +189,7 @@ export async function createOrderForBooking(
     };
   }
 
-  // Authoritatively enforce batch registration status and cutoff at payment initiation
+  // Authoritatively enforce batch registration status, capacity, and cutoff at payment initiation
   const cohortBatch = (booking as any)?.cohort_batches;
   if (cohortBatch) {
     // For Foundation and Artistry: reject if the batch date has not been announced.
@@ -157,12 +209,40 @@ export async function createOrderForBooking(
       };
     }
 
+    // Check capacity / sold-out status
+    if (
+      typeof cohortBatch.total_seats === "number" &&
+      typeof cohortBatch.seats_booked === "number" &&
+      cohortBatch.seats_booked >= cohortBatch.total_seats
+    ) {
+      return {
+        success: false,
+        error: {
+          code: "SOLD_OUT",
+          message: "This batch is fully booked. Registration is now closed.",
+          statusCode: 409,
+        },
+      };
+    }
+
+    const courseDetails = cohortBatch.courses?.slug
+      ? parseCourseDetails(cohortBatch.courses.slug, cohortBatch.courses.description)
+      : null;
+
+    const registrationClosesBeforeHours =
+      cohortBatch.registration_closes_before_hours ??
+      (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
+      2;
+
     const isExpired = isRegistrationDeadlineExpired(
-      cohortBatch.last_registration_date || cohortBatch.start_date,
+      cohortBatch.last_registration_date ||
+        (courseDetails as any)?.batchSchedule?.lastRegistrationDate ||
+        cohortBatch.start_date,
       new Date(),
       {
         startDate: cohortBatch.start_date,
         startTime: cohortBatch.start_time,
+        registrationClosesBeforeHours,
       }
     );
     if (!cohortBatch.is_enrollment_open || isExpired) {

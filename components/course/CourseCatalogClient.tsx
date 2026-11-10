@@ -75,7 +75,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
     );
     const isClosed = !batch.isEnrollmentOpen || batch.isExpired || isSoldOut;
     const statusLabel = isSoldOut
-      ? "Batch Full / Sold Out"
+      ? "This batch is fully booked. Registration is now closed."
       : isCohortTBA
       ? "Enrolment Opening Soon"
       : isClosed
@@ -101,11 +101,6 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            {batch.seatsRemaining !== undefined && batch.seatsRemaining > 0 && !isClosed && (
-              <span className="hidden sm:inline-block text-[0.62rem] font-semibold text-[#6F6B61]">
-                {batch.seatsRemaining} seats available
-              </span>
-            )}
             <span
               className={`px-2 py-0.5 rounded text-[0.64rem] font-bold uppercase tracking-wider ${
                 isSoldOut
