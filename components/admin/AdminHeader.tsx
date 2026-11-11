@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 
 const ROUTE_LABELS: Record<string, string> = {
   "/admin": "Dashboard Overview",
-  "/admin/landing-page": "Landing Page CMS",
   "/admin/courses": "Course & Workshop",
   "/admin/batches": "Batches & Schedule",
   "/admin/media": "Gallery & Media",

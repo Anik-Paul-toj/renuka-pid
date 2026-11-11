@@ -8,7 +8,6 @@ import {
   Calendar,
   Ticket,
   CreditCard,
-  PanelTop,
   Sparkles,
   ArrowUpRight,
   ShieldCheck,
@@ -61,11 +60,11 @@ export default async function AdminDashboardPage() {
 
         <div className="flex items-center gap-2.5">
           <Link
-            href="/admin/landing-page"
+            href="/admin/batches"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#68705A] text-[#FAF8F2] text-xs font-semibold hover:bg-[#58604C] transition-all shadow-xs"
           >
-            <PanelTop className="size-4" />
-            <span>Landing CMS</span>
+            <Calendar className="size-4" />
+            <span>Batch Schedule</span>
           </Link>
           <Link
             href="/admin/broadcast"

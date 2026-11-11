@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  PanelTop,
   GraduationCap,
   Calendar,
   Image as ImageIcon,
@@ -35,7 +34,6 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Landing Page", href: "/admin/landing-page", icon: PanelTop },
   { name: "Course / Workshop", href: "/admin/courses", icon: GraduationCap },
   { name: "Batches / Schedule", href: "/admin/batches", icon: Calendar },
   { name: "Gallery / Media", href: "/admin/media", icon: ImageIcon },
