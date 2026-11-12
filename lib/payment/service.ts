@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { consumeCreditForBooking } from "@/lib/course-credit/service";
 import { isRegistrationDeadlineExpired, isBatchDateAnnounced } from "@/lib/batches-admin/format";
 import { parseCourseDetails } from "@/lib/courses-admin/service";
+import { sendBookingConfirmationEmail } from "@/lib/notifications/service";
+import { sendBookingConfirmationWhatsApp } from "@/lib/whatsapp/service";
 import crypto from "crypto";
 
 export interface PaymentServiceError {
@@ -652,6 +654,18 @@ export async function verifyPayment(input: {
     // Atomically consume any reserved course credit permanently
     await consumeCreditForBooking(booking.id);
 
+    // Trigger transactional notifications asynchronously (failure isolation)
+    try {
+      sendBookingConfirmationEmail(booking.id).catch((e) =>
+        console.error("[Notifications] Email dispatch background error:", e)
+      );
+      sendBookingConfirmationWhatsApp(booking.id).catch((e) =>
+        console.error("[Notifications] WhatsApp dispatch background error:", e)
+      );
+    } catch (notifErr) {
+      console.error("[Notifications] Trigger failure:", notifErr);
+    }
+
     return {
       success: true,
       data: {
@@ -761,6 +775,18 @@ export async function handleWebhookEvent(
 
       // Atomically consume any reserved course credit permanently
       await consumeCreditForBooking(payment.booking_id);
+
+      // Trigger transactional notifications asynchronously (failure isolation)
+      try {
+        sendBookingConfirmationEmail(payment.booking_id).catch((e) =>
+          console.error("[Notifications] Webhook email dispatch background error:", e)
+        );
+        sendBookingConfirmationWhatsApp(payment.booking_id).catch((e) =>
+          console.error("[Notifications] Webhook WhatsApp dispatch background error:", e)
+        );
+      } catch (notifErr) {
+        console.error("[Notifications] Webhook trigger failure:", notifErr);
+      }
 
       return { status: 200, message: "Payment captured successfully.", handled: true };
     }

@@ -3,6 +3,7 @@ export interface WhatsAppConfig {
   phoneNumberId?: string;
   businessAccountId?: string;
   accessToken?: string;
+  appId?: string;
   webhookVerifyToken?: string;
   appSecret?: string;
 }
@@ -43,6 +44,14 @@ export interface SendWhatsAppTemplatePayload {
   components?: WhatsAppTemplateComponent[];
 }
 
+export interface MetaApprovedTemplate {
+  name: string;
+  status: string;
+  language: string;
+  category?: string;
+  components?: any[];
+}
+
 export interface WhatsAppConfigStatus {
   isConfigured: boolean;
   message: string;
@@ -54,4 +63,5 @@ export interface WhatsAppTransport {
   getConfigStatus(): WhatsAppConfigStatus;
   sendTextMessage(payload: SendWhatsAppTextPayload): Promise<WhatsAppSendResult>;
   sendTemplateMessage(payload: SendWhatsAppTemplatePayload): Promise<WhatsAppSendResult>;
+  getApprovedTemplates?(): Promise<MetaApprovedTemplate[]>;
 }

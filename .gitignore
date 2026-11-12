@@ -46,3 +46,7 @@ next-env.d.ts
 
 pre_migration_backup.sql
 supabase/.temp/
+
+# scripts
+scripts/
+scripts/.env.local

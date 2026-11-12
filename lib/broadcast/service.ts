@@ -9,7 +9,8 @@ import {
 import { sendTransactionalEmail } from "@/lib/notifications/email";
 import { getSettings } from "@/lib/settings/service";
 import { getWhatsAppTransport } from "@/lib/whatsapp/client";
-import { isValidWhatsAppNumber } from "@/lib/whatsapp/meta-adapter";
+import { isValidWhatsAppNumber, normalizeWhatsAppNumber } from "@/lib/whatsapp/meta-adapter";
+import { buildMetaTemplateComponents } from "@/lib/whatsapp/templates";
 
 export interface ResolvedRecipient {
   customerId: string;
@@ -17,7 +18,10 @@ export interface ResolvedRecipient {
   email: string;
   phone?: string | null;
   whatsappPhone?: string | null;
+  whatsappConsent?: boolean;
+  courseId?: string | null;
   courseTitle?: string | null;
+  batchId?: string | null;
   batchName?: string | null;
   startDate?: string | null;
   startTime?: string | null;
@@ -717,26 +721,75 @@ export async function sendBroadcast(
         if (!phone || !phone.trim() || !isValidWhatsAppNumber(phone)) {
           whatsappSentFailed = true;
           await adminClient.from("notification_logs").insert({
+            broadcast_id: broadcast.id,
             customer_id: recipient.customerId,
+            course_id: recipient.courseId || null,
+            batch_id: recipient.batchId || null,
             channel: "whatsapp",
             message_type: "broadcast",
             status: "failed",
             error_message: !phone ? "Customer has no registered WhatsApp phone number." : "Invalid WhatsApp phone number format.",
             sent_at: new Date().toISOString(),
           });
+        } else if (recipient.whatsappConsent === false) {
+          whatsappSentFailed = true;
+          await adminClient.from("notification_logs").insert({
+            broadcast_id: broadcast.id,
+            customer_id: recipient.customerId,
+            course_id: recipient.courseId || null,
+            batch_id: recipient.batchId || null,
+            channel: "whatsapp",
+            message_type: "broadcast",
+            status: "failed",
+            error_message: "Customer has opted out of WhatsApp messages.",
+            sent_at: new Date().toISOString(),
+          });
         } else {
           const whatsAppTransport = getWhatsAppTransport();
-          const sendResult = await whatsAppTransport.sendTextMessage({
-            to: phone,
-            body: cleanBody,
+          const normalizedPhone = normalizeWhatsAppNumber(phone);
+
+          // Select template: use custom configured template or mapped approved template
+          const templateName =
+            (targetFilter as any).templateName ||
+            (broadcast.title.toLowerCase().includes("confirmation")
+              ? "booking_confirmation"
+              : "upcoming_class_reminder");
+
+          // Template parameters: {{1}} Student, {{2}} Course, {{3}} Date, {{4}} Time, {{5}} Join Link
+          const templateParams = [
+            recipientName,
+            recipient.courseTitle || courseTitle,
+            recipient.startDate || defaultDate,
+            recipient.startTime || defaultTime,
+            recipient.zoomJoinUrl || defaultJoinLink,
+          ];
+
+          let sendResult = await whatsAppTransport.sendTemplateMessage({
+            to: normalizedPhone,
+            templateName,
+            languageCode: "en",
+            components: buildMetaTemplateComponents(templateParams),
           });
+
+          // Fallback to text message if running in sandbox/testing mode
+          if (!sendResult.success && sendResult.errorCode === "WHATSAPP_NOT_CONFIGURED") {
+            sendResult = await whatsAppTransport.sendTextMessage({
+              to: normalizedPhone,
+              body: cleanBody,
+            });
+          }
 
           if (sendResult.success) {
             whatsappSentSuccess = true;
             await adminClient.from("notification_logs").insert({
+              broadcast_id: broadcast.id,
               customer_id: recipient.customerId,
+              course_id: recipient.courseId || null,
+              batch_id: recipient.batchId || null,
               channel: "whatsapp",
               message_type: "broadcast",
+              template_name: templateName,
+              recipient_phone: normalizedPhone,
               provider_message_id: sendResult.providerMessageId || null,
               status: "sent",
               sent_at: new Date().toISOString(),
@@ -744,14 +797,23 @@ export async function sendBroadcast(
           } else {
             whatsappSentFailed = true;
             await adminClient.from("notification_logs").insert({
+              broadcast_id: broadcast.id,
               customer_id: recipient.customerId,
+              course_id: recipient.courseId || null,
+              batch_id: recipient.batchId || null,
               channel: "whatsapp",
               message_type: "broadcast",
+              template_name: templateName,
+              recipient_phone: normalizedPhone,
               status: "failed",
               error_message: sendResult.error || "WhatsApp delivery failed",
+              error_code: sendResult.errorCode || null,
               sent_at: new Date().toISOString(),
             });
           }
+
+          // Rate limiting delay between WhatsApp dispatches (100ms)
+          await new Promise((r) => setTimeout(r, 100));
         }
       }
 

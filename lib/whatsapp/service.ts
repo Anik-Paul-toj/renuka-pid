@@ -1,9 +1,17 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getWhatsAppTransport } from "./client";
-import { WhatsAppTransport, WhatsAppSendResult, WhatsAppConfigStatus } from "./types";
-import { isValidWhatsAppNumber } from "./meta-adapter";
-import { resolveTemplateVariables } from "./templates";
+import {
+  WhatsAppTransport,
+  WhatsAppConfigStatus,
+  WhatsAppDeliveryStatus,
+} from "./types";
+import { isValidWhatsAppNumber, normalizeWhatsAppNumber } from "./meta-adapter";
+import { buildMetaTemplateComponents } from "./templates";
+import {
+  isWhatsAppGroupEligibleCourse,
+  resolveWhatsAppGroupUrl,
+} from "./group";
 
 export interface WhatsAppServiceResult {
   success: boolean;
@@ -13,8 +21,18 @@ export interface WhatsAppServiceResult {
   code?: string;
 }
 
-// In-memory concurrency lock to prevent duplicate concurrent in-flight dispatches
+export interface UpcomingClassReminderResult {
+  success: boolean;
+  totalEligible: number;
+  sentCount: number;
+  failedCount: number;
+  skippedCount: number;
+  error?: string;
+}
+
+// In-memory concurrency locks to prevent duplicate concurrent in-flight dispatches
 const inFlightWhatsAppConfirmations = new Set<string>();
+const inFlightBatchReminders = new Set<string>();
 
 /**
  * Returns current configuration status of WhatsApp without exposing any credentials.
@@ -25,15 +43,19 @@ export function getWhatsAppConfigStatus(): WhatsAppConfigStatus {
 }
 
 /**
- * Sends a transactional booking confirmation WhatsApp message idempotently.
+ * Sends a transactional booking confirmation WhatsApp message idempotently using Meta Cloud API.
  * 
  * Guarantees:
- * - Only confirmed bookings receive confirmation messages.
- * - Recipient phone derived entirely server-side from customer record (whatsapp_phone || phone).
- * - Idempotent: duplicate webhook, page reload, or repeated verification will not re-send.
- * - Concurrency protected: simultaneous requests for the same booking are serialized/deduped.
- * - Failure isolation: Notification failures never alter payment or booking confirmation status.
- * - Logs strictly in existing public.notification_logs with channel = 'whatsapp'.
+ * 1. Only confirmed bookings receive confirmation messages.
+ * 2. Uses approved WhatsApp template: 'booking_confirmation'.
+ * 3. Maps parameters: {{1}} Customer Name, {{2}} Course Name, {{3}} Booking Reference.
+ * 4. Course-specific behavior:
+ *    - Roadmap Masterclass: Excludes group link.
+ *    - Watercolour Foundation & Artistry + Foundation: Eligible for group links.
+ * 5. Idempotent: duplicate webhook or repeated verification will not re-send.
+ * 6. Concurrency protected.
+ * 7. Failure isolation: Notification failures never alter payment or booking confirmation status.
+ * 8. Logs strictly in existing public.notification_logs with channel = 'whatsapp'.
  */
 export async function sendBookingConfirmationWhatsApp(
   bookingIdOrReference: string,
@@ -59,7 +81,8 @@ export async function sendBookingConfirmationWhatsApp(
         full_name,
         email,
         phone,
-        whatsapp_phone
+        whatsapp_phone,
+        whatsapp_consent
       ),
       cohort_batches (
         id,
@@ -72,6 +95,7 @@ export async function sendBookingConfirmationWhatsApp(
         zoom_passcode,
         courses (
           id,
+          slug,
           title
         )
       ),
@@ -123,10 +147,11 @@ export async function sendBookingConfirmationWhatsApp(
   const recipientPhone = customer?.whatsapp_phone || customer?.phone;
 
   if (!recipientPhone || !recipientPhone.trim()) {
-    // Record failed attempt in notification_logs for audit
     await adminClient.from("notification_logs").insert({
       booking_id: booking.id,
       customer_id: booking.customer_id,
+      course_id: course?.id || null,
+      batch_id: batch?.id || null,
       channel: "whatsapp",
       message_type: "booking-confirmation-whatsapp",
       status: "failed",
@@ -145,6 +170,8 @@ export async function sendBookingConfirmationWhatsApp(
     await adminClient.from("notification_logs").insert({
       booking_id: booking.id,
       customer_id: booking.customer_id,
+      course_id: course?.id || null,
+      batch_id: batch?.id || null,
       channel: "whatsapp",
       message_type: "booking-confirmation-whatsapp",
       status: "failed",
@@ -159,7 +186,16 @@ export async function sendBookingConfirmationWhatsApp(
     };
   }
 
-  // 3. Concurrency Lock: Prevent simultaneous executions for the same booking
+  // 3. Customer Consent Check
+  if (customer?.whatsapp_consent === false) {
+    return {
+      success: false,
+      error: "Customer has opted out of WhatsApp notifications.",
+      code: "WHATSAPP_CONSENT_REVOKED",
+    };
+  }
+
+  // 4. Concurrency Lock: Prevent simultaneous executions for the same booking
   if (inFlightWhatsAppConfirmations.has(booking.id)) {
     return {
       success: true,
@@ -171,7 +207,7 @@ export async function sendBookingConfirmationWhatsApp(
   inFlightWhatsAppConfirmations.add(booking.id);
 
   try {
-    // 4. Idempotency Check via notification_logs
+    // 5. Idempotency Check via notification_logs
     const { data: previousLogs } = await adminClient
       .from("notification_logs")
       .select("id, status, provider_message_id, retry_count, sent_at")
@@ -195,54 +231,43 @@ export async function sendBookingConfirmationWhatsApp(
     const previousFailedCount =
       previousLogs?.filter((l) => l.status === "failed").length || 0;
 
-    // Resolve payment reference
-    const capturedPayment = (booking as any).payments?.find(
-      (p: any) => p.status === "captured"
-    );
-    const paymentId = capturedPayment?.razorpay_payment_id || "N/A";
-    const formattedAmount = `₹${((booking.amount_paise || 0) / 100).toLocaleString("en-IN")}`;
-
-    // 5. Fetch template from existing message_templates table
-    const { data: templateRecord } = await adminClient
-      .from("message_templates")
-      .select("body, variables")
-      .eq("slug", "booking-confirmation-whatsapp")
-      .eq("channel", "whatsapp")
-      .maybeSingle();
-
-    const fallbackBody =
-      "Namaste {{student_name}}! 🌸 Your seat is reserved for {{course_name}} on {{date}} at {{time}}. Your booking reference is {{booking_reference}}. Check your email for stream details.";
-
-    const templateText = templateRecord?.body || fallbackBody;
-
-    // 6. Resolve variables server-side
-    const resolvedBody = resolveTemplateVariables(templateText, {
-      studentName: customer.full_name || "Valued Student",
-      courseName: course?.title || "Masterclass",
-      batchName: batch?.batch_name || "Upcoming Batch",
-      date: batch?.start_date || "Upcoming",
-      time: batch?.start_time ? `${batch.start_time} ${batch?.timezone || "IST"}` : "TBA",
-      bookingReference: booking.booking_reference,
-      amountPaid: formattedAmount,
-      paymentReference: paymentId,
-      zoomLink: batch?.zoom_join_url || "Link will be shared prior to session",
+    // 6. Course-specific group eligibility check
+    const isEligibleForGroup = isWhatsAppGroupEligibleCourse({
+      courseSlug: course?.slug,
+      courseId: course?.id,
     });
 
-    // 7. Dispatch via Transport
-    const sendResult = await transport.sendTextMessage({
+    // 7. Dynamic Variable Mapping for Approved Template: 'booking_confirmation'
+    // Variable {{1}}: Customer name
+    // Variable {{2}}: Course name
+    // Variable {{3}}: Booking reference
+    const customerName = (customer.full_name || "Valued Student").trim();
+    const courseTitle = (course?.title || "Live Masterclass").trim();
+    const bookingRef = booking.booking_reference.trim();
+
+    const templateParams = [customerName, courseTitle, bookingRef];
+
+    // 8. Dispatch via Transport using Approved Meta Template
+    const sendResult = await transport.sendTemplateMessage({
       to: recipientPhone,
-      body: resolvedBody,
+      templateName: "booking_confirmation",
+      languageCode: "en",
+      components: buildMetaTemplateComponents(templateParams),
     });
 
     const nowIso = new Date().toISOString();
 
-    // 8. Record in notification_logs
+    // 9. Record in notification_logs
     if (sendResult.success) {
       await adminClient.from("notification_logs").insert({
         booking_id: booking.id,
         customer_id: booking.customer_id,
+        course_id: course?.id || null,
+        batch_id: batch?.id || null,
         channel: "whatsapp",
         message_type: "booking-confirmation-whatsapp",
+        template_name: "booking_confirmation",
+        recipient_phone: normalizeWhatsAppNumber(recipientPhone),
         provider_message_id: sendResult.providerMessageId || null,
         status: "sent",
         retry_count: previousFailedCount,
@@ -258,11 +283,16 @@ export async function sendBookingConfirmationWhatsApp(
       await adminClient.from("notification_logs").insert({
         booking_id: booking.id,
         customer_id: booking.customer_id,
+        course_id: course?.id || null,
+        batch_id: batch?.id || null,
         channel: "whatsapp",
         message_type: "booking-confirmation-whatsapp",
+        template_name: "booking_confirmation",
+        recipient_phone: normalizeWhatsAppNumber(recipientPhone),
         provider_message_id: null,
         status: "failed",
         error_message: sendResult.error || "WhatsApp delivery failed",
+        error_code: sendResult.errorCode || null,
         retry_count: previousFailedCount + 1,
         sent_at: nowIso,
       });
@@ -274,13 +304,17 @@ export async function sendBookingConfirmationWhatsApp(
       };
     }
   } catch (err: any) {
-    const errorMsg = err?.message || "Unexpected exception during WhatsApp notification processing.";
+    const errorMsg =
+      err?.message || "Unexpected exception during WhatsApp notification processing.";
     try {
       await adminClient.from("notification_logs").insert({
         booking_id: booking.id,
         customer_id: booking.customer_id,
+        course_id: course?.id || null,
+        batch_id: batch?.id || null,
         channel: "whatsapp",
         message_type: "booking-confirmation-whatsapp",
+        template_name: "booking_confirmation",
         status: "failed",
         error_message: errorMsg,
         sent_at: new Date().toISOString(),
@@ -296,5 +330,238 @@ export async function sendBookingConfirmationWhatsApp(
     };
   } finally {
     inFlightWhatsAppConfirmations.delete(booking.id);
+  }
+}
+
+/**
+ * Sends upcoming class reminders via WhatsApp Cloud API to all confirmed students of a batch.
+ * 
+ * Guarantees:
+ * 1. Only confirmed students of the specified batch receive reminders.
+ * 2. Excludes cancelled, expired, or pending bookings.
+ * 3. Prevents duplicate reminders for the same student and batch.
+ * 4. Checks WhatsApp consent and phone validity.
+ * 5. Uses approved Meta utility template.
+ * 6. Maps variables: {{1}} Student, {{2}} Course, {{3}} Date, {{4}} Time, {{5}} Join Link.
+ */
+export async function sendUpcomingClassReminderWhatsApp(options: {
+  batchId: string;
+  adminUserId?: string | null;
+  transport?: WhatsAppTransport;
+}): Promise<UpcomingClassReminderResult> {
+  const { batchId } = options;
+  const adminClient = createAdminClient();
+  const transport = options.transport || getWhatsAppTransport();
+
+  // Guard against concurrent reminder triggers for the same batch
+  if (inFlightBatchReminders.has(batchId)) {
+    return {
+      success: false,
+      totalEligible: 0,
+      sentCount: 0,
+      failedCount: 0,
+      skippedCount: 0,
+      error: "Reminder dispatch is already in progress for this batch.",
+    };
+  }
+
+  inFlightBatchReminders.add(batchId);
+
+  try {
+    // 1. Fetch Batch Details
+    const { data: batch, error: batchErr } = await adminClient
+      .from("cohort_batches")
+      .select(
+        `
+        id,
+        batch_name,
+        start_date,
+        start_time,
+        end_time,
+        timezone,
+        zoom_join_url,
+        is_enrollment_open,
+        courses (
+          id,
+          slug,
+          title
+        )
+      `
+      )
+      .eq("id", batchId)
+      .maybeSingle();
+
+    if (batchErr || !batch) {
+      return {
+        success: false,
+        totalEligible: 0,
+        sentCount: 0,
+        failedCount: 0,
+        skippedCount: 0,
+        error: "Batch record not found.",
+      };
+    }
+
+    const course = (batch as any).courses;
+    const courseTitle = course?.title || "Watercolour Masterclass";
+    const batchDate = batch.start_date || "Upcoming Date";
+    const batchTime = batch.start_time
+      ? `${batch.start_time}${batch.end_time ? " – " + batch.end_time : ""} ${batch.timezone || "IST"}`
+      : "Check email for timing";
+    const joinLink = batch.zoom_join_url || "Link shared via confirmation email";
+
+    // 2. Fetch confirmed bookings for this batch
+    const { data: bookings, error: bookingsErr } = await adminClient
+      .from("bookings")
+      .select(
+        `
+        id,
+        booking_reference,
+        status,
+        customer_id,
+        customers (
+          id,
+          full_name,
+          phone,
+          whatsapp_phone,
+          whatsapp_consent
+        )
+      `
+      )
+      .eq("batch_id", batchId)
+      .eq("status", "confirmed");
+
+    if (bookingsErr || !bookings || bookings.length === 0) {
+      return {
+        success: true,
+        totalEligible: 0,
+        sentCount: 0,
+        failedCount: 0,
+        skippedCount: 0,
+      };
+    }
+
+    // 3. Find students who have ALREADY received this reminder for this batch
+    const { data: sentReminders } = await adminClient
+      .from("notification_logs")
+      .select("customer_id")
+      .eq("batch_id", batchId)
+      .eq("message_type", "upcoming-class-reminder")
+      .in("status", ["sent", "delivered", "read"]);
+
+    const alreadySentCustomerIds = new Set(
+      (sentReminders || []).map((r) => r.customer_id)
+    );
+
+    let sentCount = 0;
+    let failedCount = 0;
+    let skippedCount = 0;
+    let totalEligible = 0;
+
+    for (const b of bookings) {
+      const cust = (b as any).customers;
+      if (!cust) continue;
+
+      const rawPhone = cust.whatsapp_phone || cust.phone;
+      if (!rawPhone || !isValidWhatsAppNumber(rawPhone)) {
+        skippedCount++;
+        continue;
+      }
+
+      if (cust.whatsapp_consent === false) {
+        skippedCount++;
+        continue;
+      }
+
+      if (alreadySentCustomerIds.has(cust.id)) {
+        skippedCount++;
+        continue;
+      }
+
+      totalEligible++;
+      const studentName = cust.full_name || "Student";
+      const normalizedPhone = normalizeWhatsAppNumber(rawPhone);
+
+      // Template parameters for approved utility reminder template:
+      // {{1}}: Student Name
+      // {{2}}: Course Title
+      // {{3}}: Date
+      // {{4}}: Time
+      // {{5}}: Join Link
+      const templateParams = [
+        studentName,
+        courseTitle,
+        batchDate,
+        batchTime,
+        joinLink,
+      ];
+
+      const sendResult = await transport.sendTemplateMessage({
+        to: normalizedPhone,
+        templateName: "upcoming_class_reminder",
+        languageCode: "en",
+        components: buildMetaTemplateComponents(templateParams),
+      });
+
+      const nowIso = new Date().toISOString();
+
+      if (sendResult.success) {
+        sentCount++;
+        alreadySentCustomerIds.add(cust.id);
+
+        await adminClient.from("notification_logs").insert({
+          booking_id: b.id,
+          customer_id: cust.id,
+          course_id: course?.id || null,
+          batch_id: batch.id,
+          channel: "whatsapp",
+          message_type: "upcoming-class-reminder",
+          template_name: "upcoming_class_reminder",
+          recipient_phone: normalizedPhone,
+          provider_message_id: sendResult.providerMessageId || null,
+          status: "sent",
+          sent_at: nowIso,
+        });
+      } else {
+        failedCount++;
+
+        await adminClient.from("notification_logs").insert({
+          booking_id: b.id,
+          customer_id: cust.id,
+          course_id: course?.id || null,
+          batch_id: batch.id,
+          channel: "whatsapp",
+          message_type: "upcoming-class-reminder",
+          template_name: "upcoming_class_reminder",
+          recipient_phone: normalizedPhone,
+          status: "failed",
+          error_message: sendResult.error || "Failed to deliver upcoming class reminder",
+          error_code: sendResult.errorCode || null,
+          sent_at: nowIso,
+        });
+      }
+
+      // Small throttling delay between recipients to prevent rate spike
+      await new Promise((r) => setTimeout(r, 100));
+    }
+
+    return {
+      success: true,
+      totalEligible,
+      sentCount,
+      failedCount,
+      skippedCount,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      totalEligible: 0,
+      sentCount: 0,
+      failedCount: 0,
+      skippedCount: 0,
+      error: err.message || "Failed to process batch class reminders.",
+    };
+  } finally {
+    inFlightBatchReminders.delete(batchId);
   }
 }

@@ -11,9 +11,9 @@ export type AudienceType = z.infer<typeof audienceTypeEnum>;
 
 export const targetFilterSchema = z.object({
   audience: audienceTypeEnum.default("all"),
-  courseId: z.string().uuid("Invalid course identifier").nullable().optional(),
+  courseId: z.string().min(1, "Invalid course identifier").nullable().optional(),
   courseName: z.string().nullable().optional(),
-  batchId: z.string().uuid("Invalid batch identifier").nullable().optional(),
+  batchId: z.string().min(1, "Invalid batch identifier").nullable().optional(),
   batchName: z.string().nullable().optional(),
   subject: z.string().min(1, "Subject is required").max(255, "Subject must be under 255 characters"),
   date: z.string().nullable().optional(),

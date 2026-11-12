@@ -283,7 +283,7 @@ export function MessagesManager({
     return subject
       .replace(/\[Course Name\]|\{\{course_name\}\}/gi, selectedCourse?.title || "The WATERCOLOUR Roadmap: One-Day Masterclass")
       .replace(/\[Batch Name\]|\{\{batch_name\}\}/gi, selectedBatch?.batch_name || "Live Masterclass — 28 Oct 2026")
-      .replace(/\[Student Name\]|\{\{student_name\}\}/gi, "Anik Paul")
+      .replace(/\[Student Name\]|\{\{student_name\}\}/gi, "Renuka (Student Name)")
       .replace(/\[Date\]|\{\{date\}\}/gi, dateValue)
       .replace(/\[Time\]|\{\{time\}\}/gi, formattedTimeRange)
       .replace(/\[Join Link\]|\[Zoom Link\]|\{\{zoom_link\}\}/gi, joinLink);
@@ -291,7 +291,7 @@ export function MessagesManager({
 
   const previewBody = useMemo(() => {
     return body
-      .replace(/\[Student Name\]|\{\{student_name\}\}/gi, "Anik Paul")
+      .replace(/\[Student Name\]|\{\{student_name\}\}/gi, "Renuka (Student Name)")
       .replace(/\[Course Name\]|\{\{course_name\}\}/gi, selectedCourse?.title || "The WATERCOLOUR Roadmap: One-Day Masterclass")
       .replace(/\[Batch Name\]|\{\{batch_name\}\}/gi, selectedBatch?.batch_name || "Live Masterclass — 28 Oct 2026")
       .replace(/\[Date\]|\{\{date\}\}/gi, dateValue)

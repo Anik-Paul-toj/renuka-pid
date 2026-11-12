@@ -5,21 +5,38 @@ import {
   SendWhatsAppTextPayload,
   SendWhatsAppTemplatePayload,
   WhatsAppSendResult,
+  MetaApprovedTemplate,
 } from "./types";
 
 /**
  * Normalizes a phone number for Meta WhatsApp Cloud API.
  * Meta expects digits only, including country code, without '+' or formatting.
- * Example: "+91 98765-43210" -> "919876543210"
+ * Handles Indian 10-digit mobile numbers by prepending the 91 country code.
+ * Example: "+91 95991-09200" -> "919599109200"
+ * Example: "9599109200" -> "919599109200"
  */
 export function normalizeWhatsAppNumber(rawPhone: string): string {
-  return rawPhone.replace(/\D/g, "");
+  if (!rawPhone) return "";
+  const digits = rawPhone.replace(/\D/g, "");
+
+  // If 10 digits starting with 6, 7, 8, or 9: assume Indian mobile and prefix 91
+  if (digits.length === 10 && /^[6-9]/.test(digits)) {
+    return `91${digits}`;
+  }
+
+  // If 11 digits starting with 0 followed by 6-9: strip 0 and prefix 91
+  if (digits.length === 11 && digits.startsWith("0") && /^[6-9]/.test(digits.slice(1))) {
+    return `91${digits.slice(1)}`;
+  }
+
+  return digits;
 }
 
 /**
  * Validates whether a phone number meets international standards (E.164 format: 10-15 digits).
  */
 export function isValidWhatsAppNumber(phone: string): boolean {
+  if (!phone) return false;
   const normalized = normalizeWhatsAppNumber(phone);
   return normalized.length >= 10 && normalized.length <= 15;
 }
@@ -33,20 +50,48 @@ export class MetaWhatsAppAdapter implements WhatsAppTransport {
   private phoneNumberId?: string;
   private accessToken?: string;
   private businessAccountId?: string;
+  private appId?: string;
+  private appSecret?: string;
 
   constructor(overrides?: {
     apiVersion?: string;
     phoneNumberId?: string;
     accessToken?: string;
     businessAccountId?: string;
+    appId?: string;
+    appSecret?: string;
   }) {
-    this.apiVersion = overrides?.apiVersion || process.env.WHATSAPP_API_VERSION || "v21.0";
-    this.phoneNumberId = overrides?.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID;
-    this.accessToken =
+    this.apiVersion = (
+      overrides?.apiVersion ||
+      process.env.WHATSAPP_API_VERSION ||
+      "v21.0"
+    ).trim();
+    this.phoneNumberId = (
+      overrides?.phoneNumberId ||
+      process.env.WHATSAPP_PHONE_NUMBER_ID ||
+      ""
+    ).trim() || undefined;
+    this.accessToken = (
       overrides?.accessToken ||
       process.env.WHATSAPP_ACCESS_TOKEN ||
-      process.env.WHATSAPP_API_TOKEN;
-    this.businessAccountId = overrides?.businessAccountId || process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
+      process.env.WHATSAPP_API_TOKEN ||
+      ""
+    ).trim() || undefined;
+    this.businessAccountId = (
+      overrides?.businessAccountId ||
+      process.env.WHATSAPP_BUSINESS_ACCOUNT_ID ||
+      ""
+    ).trim() || undefined;
+    this.appId = (
+      overrides?.appId ||
+      process.env.WHATSAPP_APP_ID ||
+      ""
+    ).trim() || undefined;
+    this.appSecret = (
+      overrides?.appSecret ||
+      process.env.WHATSAPP_APP_SECRET ||
+      ""
+    ).trim() || undefined;
   }
 
   public isConfigured(): boolean {
@@ -56,7 +101,7 @@ export class MetaWhatsAppAdapter implements WhatsAppTransport {
   public getConfigStatus(): WhatsAppConfigStatus {
     const missing: string[] = [];
     if (!this.phoneNumberId) missing.push("WHATSAPP_PHONE_NUMBER_ID");
-    if (!this.accessToken) missing.push("WHATSAPP_API_TOKEN");
+    if (!this.accessToken) missing.push("WHATSAPP_ACCESS_TOKEN");
 
     if (missing.length > 0) {
       return {
@@ -146,10 +191,64 @@ export class MetaWhatsAppAdapter implements WhatsAppTransport {
       requestBody.template.components = payload.components;
     }
 
-    return this.executePostRequest(url, requestBody);
+    const primaryResult = await this.executePostRequest(url, requestBody);
+
+    // If template failed due to language mismatch (e.g., requested "en" but template is "en_US"), retry with "en_US"
+    if (
+      !primaryResult.success &&
+      primaryResult.errorCode === "100" &&
+      (primaryResult.error?.includes("language") || primaryResult.error?.includes("template")) &&
+      payload.languageCode !== "en_US"
+    ) {
+      const retryBody = {
+        ...requestBody,
+        template: {
+          ...requestBody.template,
+          language: { code: "en_US" },
+        },
+      };
+      return this.executePostRequest(url, retryBody);
+    }
+
+    return primaryResult;
   }
 
-  private async executePostRequest(url: string, body: any): Promise<WhatsAppSendResult> {
+  /**
+   * Fetches approved templates from Meta Graph API for the configured WhatsApp Business Account.
+   */
+  public async getApprovedTemplates(): Promise<MetaApprovedTemplate[]> {
+    if (!this.accessToken || !this.businessAccountId) {
+      return [];
+    }
+
+    try {
+      const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessAccountId}/message_templates?status=APPROVED&limit=100`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!response.ok) return [];
+
+      const data = await response.json().catch(() => null);
+      if (!data || !Array.isArray(data.data)) return [];
+
+      return data.data.map((t: any) => ({
+        name: t.name,
+        status: t.status,
+        language: t.language,
+        category: t.category,
+        components: t.components,
+      }));
+    } catch (err) {
+      console.error("[Meta WhatsApp] Failed to fetch approved templates:", err);
+      return [];
+    }
+  }
+
+  private async executePostRequest(url: string, body: any, attempt: number = 1): Promise<WhatsAppSendResult> {
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -167,6 +266,15 @@ export class MetaWhatsAppAdapter implements WhatsAppTransport {
         const metaError = responseData?.error;
         const errorMessage = metaError?.message || `Meta Cloud API responded with status ${response.status}`;
         const errorCode = metaError?.code ? String(metaError.code) : "PROVIDER_ERROR";
+
+        // Handle rate limiting (code 80007 / 429) or transient 500 error: retry once
+        if (
+          attempt === 1 &&
+          (response.status === 429 || metaError?.code === 80007 || response.status >= 500)
+        ) {
+          await new Promise((r) => setTimeout(r, 1200));
+          return this.executePostRequest(url, body, attempt + 1);
+        }
 
         return {
           success: false,

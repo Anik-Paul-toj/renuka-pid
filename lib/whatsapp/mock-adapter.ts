@@ -154,4 +154,21 @@ export class MockWhatsAppTransport implements WhatsAppTransport {
       status: "sent",
     };
   }
+
+  public async getApprovedTemplates() {
+    return [
+      {
+        name: "booking_confirmation",
+        status: "APPROVED",
+        language: "en",
+        category: "UTILITY",
+      },
+      {
+        name: "upcoming_class_reminder",
+        status: "APPROVED",
+        language: "en",
+        category: "UTILITY",
+      },
+    ];
+  }
 }

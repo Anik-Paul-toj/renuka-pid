@@ -205,6 +205,9 @@ export async function POST(request: NextRequest) {
               st.errors?.[0]?.message ||
               "Delivery failed by WhatsApp provider.";
             updates.error_message = errorDetails;
+            if (st.errors?.[0]?.code) {
+              updates.error_code = String(st.errors[0].code);
+            }
           }
 
           if (Object.keys(updates).length > 0) {

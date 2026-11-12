@@ -291,7 +291,7 @@ export function BroadcastManager({
   // Realistic resolved preview text
   const previewSubject = useMemo(() => {
     return subject
-      .replace(/\[Student Name\]|\{\{student_name\}\}/gi, "Anik")
+      .replace(/\[Student Name\]|\{\{student_name\}\}/gi, "Renuka (Student Name)")
       .replace(/\[Course Name\]|\{\{course_name\}\}/gi, selectedCourse?.title || "The WATERCOLOUR Roadmap: One-Day Masterclass")
       .replace(/\[Batch Name\]|\{\{batch_name\}\}/gi, selectedBatch?.batch_name || "Live Masterclass — 28 Oct 2026")
       .replace(/\[Date\]|\{\{date\}\}/gi, targetFilter.date || "28 October 2026")
@@ -303,7 +303,7 @@ export function BroadcastManager({
     return messageBody
       .replace(/\\r\\n/g, "\n")
       .replace(/\\n/g, "\n")
-      .replace(/\[Student Name\]|\{\{student_name\}\}/gi, "Anik")
+      .replace(/\[Student Name\]|\{\{student_name\}\}/gi, "Renuka (Student Name)")
       .replace(/\[Course Name\]|\{\{course_name\}\}/gi, selectedCourse?.title || "The WATERCOLOUR Roadmap: One-Day Masterclass")
       .replace(/\[Batch Name\]|\{\{batch_name\}\}/gi, selectedBatch?.batch_name || "Live Masterclass — 28 Oct 2026")
       .replace(/\[Date\]|\{\{date\}\}/gi, targetFilter.date || "28 October 2026")
@@ -599,9 +599,14 @@ export function BroadcastManager({
 
         {/* 6. MESSAGE PREVIEW (Exact Visual Preview Box) */}
         <div className="pt-2">
-          <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
-            Message Preview
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-stone-500">
+              Message Preview
+            </label>
+            <span className="text-[11px] text-stone-400">
+              Sample preview — personalized for each student when sent
+            </span>
+          </div>
           <div className="border border-stone-200 rounded-xl p-5 bg-[#FAF9F5] text-stone-800 text-sm leading-relaxed whitespace-pre-wrap font-sans">
             {previewBody}
           </div>
