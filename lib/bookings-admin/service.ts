@@ -63,6 +63,31 @@ export interface AdminBookingDetail {
     status: string;
     createdAt: string;
   }>;
+  discountBenefit?: {
+    isEligible: boolean;
+    referenceIdIssued: string | null;
+    originalCoursePricePaise?: number;
+    creditAmountPaise?: number;
+    creditOwner?: string;
+    redemptionStatus: "not_eligible" | "available" | "reserved" | "redeemed";
+    redeemedAt?: string | null;
+    targetBookingReference?: string | null;
+  };
+  notifications?: {
+    email: {
+      status: string;
+      sentAt: string | null;
+      errorMessage: string | null;
+      providerMessageId: string | null;
+    } | null;
+    whatsapp: {
+      status: string;
+      sentAt: string | null;
+      errorMessage: string | null;
+      errorCode: string | null;
+      providerMessageId: string | null;
+    } | null;
+  };
 }
 
 export interface AdminBookingsListResult {
@@ -378,6 +403,130 @@ export async function getBookingDetailsById(
       createdAt: p.created_at,
     }));
 
+    // Fetch Notification Statuses
+    let emailNotif: {
+      status: string;
+      sentAt: string | null;
+      errorMessage: string | null;
+      providerMessageId: string | null;
+    } | null = null;
+
+    let whatsappNotif: {
+      status: string;
+      sentAt: string | null;
+      errorMessage: string | null;
+      errorCode: string | null;
+      providerMessageId: string | null;
+    } | null = null;
+
+    try {
+      const { data: logs } = await adminClient
+        .from("notification_logs")
+        .select("id, channel, status, sent_at, error_message, error_code, provider_message_id")
+        .eq("booking_id", booking.id)
+        .order("sent_at", { ascending: false });
+
+      if (logs && logs.length > 0) {
+        const emailLog = logs.find((l) => l.channel === "email");
+        if (emailLog) {
+          emailNotif = {
+            status: emailLog.status,
+            sentAt: emailLog.sent_at,
+            errorMessage: emailLog.error_message || null,
+            providerMessageId: emailLog.provider_message_id || null,
+          };
+        }
+
+        const whatsappLog = logs.find((l) => l.channel === "whatsapp");
+        if (whatsappLog) {
+          whatsappNotif = {
+            status: whatsappLog.status,
+            sentAt: whatsappLog.sent_at,
+            errorMessage: whatsappLog.error_message || null,
+            errorCode: whatsappLog.error_code || null,
+            providerMessageId: whatsappLog.provider_message_id || null,
+          };
+        }
+      }
+    } catch {
+      // Ignore if logs query fails
+    }
+
+    // Determine Discount Benefit & Redemption Status
+    const isFoundation =
+      course?.slug === "watercolour-foundation" ||
+      course?.id === "e1111111-2222-3333-4444-555555555555";
+
+    let discountBenefit: AdminBookingDetail["discountBenefit"] = {
+      isEligible: false,
+      referenceIdIssued: null,
+      redemptionStatus: "not_eligible",
+    };
+
+    if (isFoundation) {
+      let redemptionStatus: "available" | "reserved" | "redeemed" = "available";
+      let targetBookingRef: string | null = null;
+      let redeemedAt: string | null = null;
+
+      const originalCoursePricePaise =
+        (course as any)?.price_paise ||
+        (course as any)?.offer_price_paise ||
+        booking.amount_paise;
+      let creditAmountPaise =
+        booking.amount_paise ||
+        (booking as any).original_amount_paise ||
+        (course as any)?.offer_price_paise;
+
+      try {
+        const { data: creditRow } = await adminClient
+          .from("booking_credits")
+          .select(
+            `
+            id,
+            credit_amount_paise,
+            status,
+            updated_at,
+            bookings!booking_credits_target_booking_id_fkey (
+              booking_reference
+            )
+          `
+          )
+          .eq("source_booking_id", booking.id)
+          .in("status", ["reserved", "consumed"])
+          .maybeSingle();
+
+        if (creditRow) {
+          if (creditRow.credit_amount_paise) {
+            creditAmountPaise = creditRow.credit_amount_paise;
+          }
+          if (creditRow.status === "consumed") {
+            redemptionStatus = "redeemed";
+            redeemedAt = creditRow.updated_at;
+            targetBookingRef = (creditRow as any).bookings?.booking_reference || null;
+          } else if (creditRow.status === "reserved") {
+            redemptionStatus = "reserved";
+          }
+        }
+      } catch {
+        // Fallback if table not present
+      }
+
+      const creditOwner = customer?.full_name
+        ? `${customer.full_name} (${customer.email || customer.phone || "Student"})`
+        : customer?.email || customer?.phone || "Student";
+
+      discountBenefit = {
+        isEligible: true,
+        referenceIdIssued: booking.booking_reference,
+        originalCoursePricePaise,
+        creditAmountPaise,
+        creditOwner,
+        redemptionStatus,
+        redeemedAt,
+        targetBookingReference: targetBookingRef,
+      };
+    }
+
     return {
       success: true,
       data: {
@@ -412,6 +561,11 @@ export async function getBookingDetailsById(
           timezone: batch?.timezone || "Asia/Kolkata",
         },
         payments: safePayments,
+        discountBenefit,
+        notifications: {
+          email: emailNotif,
+          whatsapp: whatsappNotif,
+        },
       },
     };
   } catch (err: any) {

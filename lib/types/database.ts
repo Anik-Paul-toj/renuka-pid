@@ -11,7 +11,7 @@ export type PaymentStatus = "created" | "authorized" | "captured" | "failed" | "
 export type ContentStatus = "draft" | "preview" | "published" | "archived";
 export type UserRole = "super_admin" | "admin" | "editor";
 export type NotificationChannel = "email" | "whatsapp";
-export type NotificationStatus = "sent" | "delivered" | "read" | "failed";
+export type NotificationStatus = "sent" | "delivered" | "read" | "failed" | "pending" | "skipped";
 
 export interface Database {
   public: {

@@ -312,6 +312,18 @@ export async function createOrderForBooking(
       })
       .eq("id", booking.id);
 
+    // Trigger transactional notifications asynchronously (failure isolation)
+    try {
+      sendBookingConfirmationEmail(booking.id).catch((e) =>
+        console.error("[Notifications] Auto-confirm email dispatch background error:", e)
+      );
+      sendBookingConfirmationWhatsApp(booking.id).catch((e) =>
+        console.error("[Notifications] Auto-confirm WhatsApp dispatch background error:", e)
+      );
+    } catch (notifErr) {
+      console.error("[Notifications] Auto-confirm trigger failure:", notifErr);
+    }
+
     return {
       success: true,
       data: {

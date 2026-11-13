@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { renderBookingConfirmationEmail } from "@/lib/notifications/templates";
 import { sendTransactionalEmail } from "@/lib/notifications/email";
 import { getSettings } from "@/lib/settings/service";
+import { getCourseDiscountBenefit } from "@/lib/course-credit/service";
+import { parseCourseDetails } from "@/lib/courses-admin/service";
 
 export interface NotificationServiceResult {
   success: boolean;
@@ -46,12 +48,14 @@ export async function sendBookingConfirmationEmail(
         id,
         full_name,
         email,
-        phone
+        phone,
+        whatsapp_phone
       ),
       cohort_batches (
         id,
         batch_name,
         start_date,
+        end_date,
         start_time,
         end_time,
         timezone,
@@ -59,7 +63,10 @@ export async function sendBookingConfirmationEmail(
         zoom_passcode,
         courses (
           id,
-          title
+          slug,
+          title,
+          description,
+          duration_minutes
         )
       ),
       payments (
@@ -156,22 +163,65 @@ export async function sendBookingConfirmationEmail(
     );
     const paymentId = capturedPayment?.razorpay_payment_id || null;
 
-    // 5. Render Template
+    // Resolve course duration and schedule details safely
+    let durationText = "90 Minutes Each";
+    if (course?.slug && course?.description) {
+      const parsed = parseCourseDetails(course.slug, course.description);
+      durationText =
+        parsed.sessionDurationText ||
+        parsed.cardSubtitle ||
+        (course.duration_minutes ? `${course.duration_minutes} Mins` : "90 Minutes Each");
+    } else if (course?.duration_minutes) {
+      durationText = `${course.duration_minutes} Mins`;
+    }
+
+    const startDateText =
+      batch?.start_date && batch.start_date.trim() ? batch.start_date : "To be announced";
+    const startTimeText =
+      batch?.start_time && batch.start_time.trim() ? batch.start_time : "To be announced";
+    const endTimeText =
+      batch?.end_time && batch.end_time.trim() ? batch.end_time : "";
+
+    // 5. Evaluate Dynamic Course Upgrade Credit Benefit
+    const discountBenefit = getCourseDiscountBenefit(
+      {
+        id: course?.id,
+        slug: course?.slug,
+        title: course?.title,
+        offer_price_paise: course?.offer_price_paise,
+      },
+      {
+        booking_reference: booking.booking_reference,
+        amount_paise: booking.amount_paise,
+        original_amount_paise: (booking as any).original_amount_paise,
+      }
+    );
+
+    // 6. Render Template
     const rendered = await renderBookingConfirmationEmail({
       customerName: customer.full_name || "Valued Student",
       customerEmail: customer.email,
+      customerPhone: customer.whatsapp_phone || customer.phone || null,
       bookingReference: booking.booking_reference,
       courseTitle: course?.title || "Masterclass",
+      courseSlug: course?.slug || null,
+      courseDescription: course?.description || null,
       batchName: batch?.batch_name || "Upcoming Batch",
-      startDate: batch?.start_date || "Upcoming",
-      startTime: batch?.start_time || "TBA",
-      endTime: batch?.end_time || "TBA",
+      startDate: startDateText,
+      endDate: batch?.end_date || null,
+      startTime: startTimeText,
+      endTime: endTimeText,
       timezone: batch?.timezone || "Asia/Kolkata",
+      duration: durationText,
       amountPaise: booking.amount_paise,
       currency: booking.currency,
       paymentId,
       zoomJoinUrl: batch?.zoom_join_url || null,
       zoomPasscode: batch?.zoom_passcode || null,
+      isEligibleForDiscount: discountBenefit.isEligible,
+      discountReferenceId: discountBenefit.discountReferenceId,
+      discountAmountPaise: discountBenefit.creditAmountPaise,
+      discountTargetCourseTitle: discountBenefit.targetCourseTitle,
     });
 
     const appSettings = await getSettings();

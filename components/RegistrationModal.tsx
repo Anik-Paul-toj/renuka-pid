@@ -705,7 +705,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               {isArtistry && (
                 <div className="rounded-lg border border-[#444C38]/20 bg-[#F7F4EC] p-3 text-xs space-y-1.5">
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#444C38]">
-                    Foundation Booking Reference (To claim <span className="font-price font-semibold tabular-nums">₹990</span> Credit)
+                    Foundation Booking Reference (To claim {creditInfo?.creditAmountPaise ? `₹${(creditInfo.creditAmountPaise / 100).toLocaleString("en-IN")} ` : ""}Course Credit)
                   </label>
                   <input
                     type="text"

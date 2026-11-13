@@ -19,10 +19,86 @@ export interface CreditEligibilityResult {
   payableAmountPaise: number;
 }
 
+export interface CourseDiscountBenefit {
+  isEligible: boolean;
+  creditAmountPaise: number;
+  discountReferenceId?: string | null;
+  targetCourseId?: string;
+  targetCourseTitle?: string;
+  description?: string;
+}
+
 // Fallback constant IDs from migration
 export const FOUNDATION_COURSE_ID = "e1111111-2222-3333-4444-555555555555";
 export const ARTISTRY_COURSE_ID = "e2222222-2222-3333-4444-555555555555";
-export const DEFAULT_CREDIT_AMOUNT_PAISE = 99000; // ₹990 in paise
+
+/**
+ * Determines whether a purchased course qualifies for the upgrade credit.
+ * The discount amount is dynamic and equals the authoritative Watercolour Foundation course price
+ * at the time the student purchases the course (e.g. ₹599, ₹990, ₹1,499, ₹2,499).
+ * Preserves strict business rules:
+ * - Roadmap Masterclass: No upgrade discount
+ * - Watercolour Foundation: Eligible for dynamic Foundation credit towards Artistry + Foundation
+ * - Artistry + Foundation: No additional upgrade credit
+ */
+export function getCourseDiscountBenefit(
+  course?: {
+    id?: string | null;
+    slug?: string | null;
+    title?: string | null;
+    offer_price_paise?: number | null;
+  } | null,
+  booking?: {
+    booking_reference?: string | null;
+    amount_paise?: number | null;
+    original_amount_paise?: number | null;
+  } | string | null
+): CourseDiscountBenefit {
+  if (!course) {
+    return { isEligible: false, creditAmountPaise: 0 };
+  }
+
+  const isFoundation =
+    course.slug === "watercolour-foundation" ||
+    course.id === FOUNDATION_COURSE_ID;
+
+  if (isFoundation) {
+    let earnedPaise = 0;
+    let refId: string | null = null;
+
+    if (typeof booking === "object" && booking !== null) {
+      refId = booking.booking_reference || null;
+      if (typeof booking.amount_paise === "number" && booking.amount_paise > 0) {
+        earnedPaise = booking.amount_paise;
+      } else if (typeof booking.original_amount_paise === "number" && booking.original_amount_paise > 0) {
+        earnedPaise = booking.original_amount_paise;
+      }
+    } else if (typeof booking === "string") {
+      refId = booking;
+    }
+
+    if (earnedPaise === 0 && typeof course.offer_price_paise === "number" && course.offer_price_paise > 0) {
+      earnedPaise = course.offer_price_paise;
+    }
+
+    const earnedRupees = Math.round(earnedPaise / 100);
+    const amountLabel = earnedRupees > 0 ? `₹${earnedRupees.toLocaleString("en-IN")}` : "full course";
+
+    return {
+      isEligible: true,
+      creditAmountPaise: earnedPaise,
+      discountReferenceId: refId,
+      targetCourseId: ARTISTRY_COURSE_ID,
+      targetCourseTitle: "WATERCOLOUR ARTISTRY + FOUNDATION COURSE",
+      description: `Eligible for ${amountLabel} credit towards Artistry + Foundation`,
+    };
+  }
+
+  return {
+    isEligible: false,
+    creditAmountPaise: 0,
+  };
+}
 
 /**
  * Retrieves the active credit rule for a target course.
@@ -47,13 +123,27 @@ export async function getCreditRuleForTargetCourse(targetCourseId: string) {
 
   // Baseline fallback for default rule: Foundation -> Artistry
   if (targetCourseId === ARTISTRY_COURSE_ID) {
+    let fallbackAmount = 99000;
+    try {
+      const { data: fc } = await adminClient
+        .from("courses")
+        .select("offer_price_paise")
+        .eq("id", FOUNDATION_COURSE_ID)
+        .maybeSingle();
+      if (fc?.offer_price_paise) {
+        fallbackAmount = fc.offer_price_paise;
+      }
+    } catch {
+      // fallback
+    }
+
     return {
       id: "c1111111-3333-4444-5555-666666666666",
       source_course_id: FOUNDATION_COURSE_ID,
       target_course_id: ARTISTRY_COURSE_ID,
-      credit_amount_paise: DEFAULT_CREDIT_AMOUNT_PAISE,
+      credit_amount_paise: fallbackAmount,
       is_active: true,
-      description: "Default Foundation to Artistry credit",
+      description: "Default Foundation to Artistry credit dynamically matching Foundation course price",
     };
   }
 
@@ -300,16 +390,16 @@ export async function checkCreditEligibility(
 
     if (!creditActive) {
       // Found an eligible qualifying Foundation purchase whose credit is free to use!
-      // Credit is capped at what the customer actually paid for Foundation, the rule limit, and the course price
-      const foundationPaidPaise =
+      // The credit amount is authoritatively derived from the student's Foundation purchase:
+      // What the student paid/earned for the Foundation course at the time of purchase (e.g. ₹599, ₹990, ₹1,499, ₹2,499)
+      const foundationEarnedPaise =
         typeof qb.amount_paise === "number" && qb.amount_paise > 0
           ? qb.amount_paise
-          : rule.credit_amount_paise;
-      const creditAmountPaise = Math.min(
-        rule.credit_amount_paise,
-        foundationPaidPaise,
-        originalAmountPaise
-      );
+          : (typeof (qb as any).original_amount_paise === "number" && (qb as any).original_amount_paise > 0
+              ? (qb as any).original_amount_paise
+              : (qb as any).cohort_batches?.courses?.offer_price_paise || 0);
+
+      const creditAmountPaise = Math.min(foundationEarnedPaise, originalAmountPaise);
       const payableAmountPaise = Math.max(0, originalAmountPaise - creditAmountPaise);
 
       // Generate tamper-proof Identity Verification Token

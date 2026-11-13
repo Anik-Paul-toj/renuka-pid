@@ -544,9 +544,9 @@ export function CourseDetailPageClient({
                           {isWorkshop ? (
                             <>Complete Live Atelier Access • Zoom Interactive Paint-Along</>
                           ) : isFoundation ? (
-                            <>Includes <span className="font-price font-semibold tabular-nums">₹990</span> credit toward subsequent Artistry + Foundation course</>
+                            <>Includes <span className="font-price font-semibold tabular-nums">₹{course.offerPrice.toLocaleString("en-IN")}</span> credit toward subsequent Artistry + Foundation course</>
                           ) : (
-                            <>Foundation Students: <span className="font-price font-semibold tabular-nums">₹990</span> Credit automatically applied at checkout (Pay <span className="font-price font-bold tabular-nums">₹9,000</span>)</>
+                            <>Foundation Students: Foundation course credit automatically applied at checkout</>
                           )}
                         </span>
                       </div>

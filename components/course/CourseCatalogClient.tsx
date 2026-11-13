@@ -481,7 +481,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 text-[0.7rem] text-[#3E522D] font-bold">
                     <Sparkles className="size-3 text-[#B93821] shrink-0" />
-                    <span>Includes <span className="font-price font-semibold tabular-nums">₹990</span> credit toward subsequent Artistry course</span>
+                    <span>Includes <span className="font-price font-semibold tabular-nums">₹{foundationCourse.offerPrice.toLocaleString("en-IN")}</span> credit toward subsequent Artistry course</span>
                   </div>
                 </div>
 
@@ -623,7 +623,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 text-[0.7rem] text-[#3E522D] font-bold">
                     <Sparkles className="size-3 text-[#B93821] shrink-0" />
-                    <span>Foundation Alumni: <span className="font-price font-semibold tabular-nums">₹990</span> Credit applied (Pay <span className="font-price font-bold tabular-nums">₹9,000</span>)</span>
+                    <span>Foundation Alumni: <span className="font-price font-semibold tabular-nums">₹{foundationCourse.offerPrice.toLocaleString("en-IN")}</span> Credit applied (Pay <span className="font-price font-bold tabular-nums">₹{Math.max(0, artistryCourse.offerPrice - foundationCourse.offerPrice).toLocaleString("en-IN")}</span>)</span>
                   </div>
                 </div>
 

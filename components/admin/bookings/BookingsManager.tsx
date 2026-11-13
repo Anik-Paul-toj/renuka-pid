@@ -658,6 +658,154 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                   </div>
                 </div>
 
+                {/* 2b. Upgrade Discount Benefit Card (for eligible Foundation bookings) */}
+                {bookingDetail.discountBenefit?.isEligible && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#68705A] mb-2.5">
+                      Upgrade Discount Benefit {bookingDetail.discountBenefit.creditAmountPaise ? `(₹${Math.round(bookingDetail.discountBenefit.creditAmountPaise / 100).toLocaleString("en-IN")} Credit)` : ""}
+                    </h3>
+                    <div className="rounded-lg bg-[#FAF8F2] p-4 border border-[#A2AD91]/40 shadow-xs space-y-3 text-xs">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pb-2.5 border-b border-[#464137]/10">
+                        <div>
+                          <span className="block text-[#6F6B61] text-[0.68rem]">Original Course Price</span>
+                          <span className="font-semibold text-[#292923]">
+                            {bookingDetail.discountBenefit.originalCoursePricePaise
+                              ? `₹${Math.round(bookingDetail.discountBenefit.originalCoursePricePaise / 100).toLocaleString("en-IN")}`
+                              : "—"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[#6F6B61] text-[0.68rem]">Earned Discount</span>
+                          <span className="font-semibold text-emerald-800">
+                            {bookingDetail.discountBenefit.creditAmountPaise
+                              ? `₹${Math.round(bookingDetail.discountBenefit.creditAmountPaise / 100).toLocaleString("en-IN")}`
+                              : "—"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[#6F6B61] text-[0.68rem]">Reference ID</span>
+                          <span className="font-mono font-bold text-[#292923]">
+                            {bookingDetail.discountBenefit.referenceIdIssued || "—"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[#6F6B61] text-[0.68rem]">Status</span>
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded text-[0.68rem] font-bold uppercase tracking-wider ${
+                              bookingDetail.discountBenefit.redemptionStatus === "redeemed"
+                                ? "bg-blue-100 text-blue-800"
+                                : bookingDetail.discountBenefit.redemptionStatus === "reserved"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-emerald-100 text-emerald-800"
+                            }`}
+                          >
+                            {bookingDetail.discountBenefit.redemptionStatus === "redeemed"
+                              ? "Redeemed"
+                              : bookingDetail.discountBenefit.redemptionStatus === "reserved"
+                              ? "Reserved"
+                              : "Available"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[0.72rem] text-[#6F6B61]">
+                        <div>
+                          <span className="text-[#6F6B61]">Credit Owner: </span>
+                          <span className="font-medium text-[#292923]">
+                            {bookingDetail.discountBenefit.creditOwner || bookingDetail.customer.fullName}
+                          </span>
+                        </div>
+                        {bookingDetail.discountBenefit.targetBookingReference && (
+                          <div>
+                            Redeemed on Artistry booking: <strong className="font-mono text-[#292923]">{bookingDetail.discountBenefit.targetBookingReference}</strong>
+                            {bookingDetail.discountBenefit.redeemedAt && (
+                              <span> on {new Date(bookingDetail.discountBenefit.redeemedAt).toLocaleDateString("en-IN")}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2c. Notification Delivery Card */}
+                {bookingDetail.notifications && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#68705A] mb-2.5">
+                      Notification Dispatch Status
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      {/* Email Notification */}
+                      <div className="p-3.5 rounded-lg bg-[#FFFFFF] border border-[#464137]/15 shadow-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[#292923] flex items-center gap-1.5">
+                            <Mail className="size-3.5 text-[#68705A]" />
+                            <span>Email Confirmation</span>
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[0.62rem] font-bold uppercase tracking-wider ${
+                              bookingDetail.notifications.email?.status === "sent" ||
+                              bookingDetail.notifications.email?.status === "delivered" ||
+                              bookingDetail.notifications.email?.status === "read"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : bookingDetail.notifications.email?.status === "failed"
+                                ? "bg-rose-100 text-rose-800"
+                                : "bg-zinc-100 text-zinc-600"
+                            }`}
+                          >
+                            {bookingDetail.notifications.email?.status || "Not sent"}
+                          </span>
+                        </div>
+                        {bookingDetail.notifications.email?.sentAt && (
+                          <div className="text-[0.68rem] text-[#6F6B61]">
+                            Sent: {new Date(bookingDetail.notifications.email.sentAt).toLocaleString("en-IN")}
+                          </div>
+                        )}
+                        {bookingDetail.notifications.email?.errorMessage && (
+                          <div className="text-[0.68rem] text-rose-700 bg-rose-50 p-1.5 rounded border border-rose-200">
+                            Error: {bookingDetail.notifications.email.errorMessage}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* WhatsApp Notification */}
+                      <div className="p-3.5 rounded-lg bg-[#FFFFFF] border border-[#464137]/15 shadow-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[#292923] flex items-center gap-1.5">
+                            <MessageSquare className="size-3.5 text-[#68705A]" />
+                            <span>WhatsApp Confirmation</span>
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[0.62rem] font-bold uppercase tracking-wider ${
+                              bookingDetail.notifications.whatsapp?.status === "sent" ||
+                              bookingDetail.notifications.whatsapp?.status === "delivered" ||
+                              bookingDetail.notifications.whatsapp?.status === "read"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : bookingDetail.notifications.whatsapp?.status === "skipped"
+                                ? "bg-amber-100 text-amber-800"
+                                : bookingDetail.notifications.whatsapp?.status === "failed"
+                                ? "bg-rose-100 text-rose-800"
+                                : "bg-zinc-100 text-zinc-600"
+                            }`}
+                          >
+                            {bookingDetail.notifications.whatsapp?.status || "Not sent"}
+                          </span>
+                        </div>
+                        {bookingDetail.notifications.whatsapp?.sentAt && (
+                          <div className="text-[0.68rem] text-[#6F6B61]">
+                            Sent: {new Date(bookingDetail.notifications.whatsapp.sentAt).toLocaleString("en-IN")}
+                          </div>
+                        )}
+                        {bookingDetail.notifications.whatsapp?.errorMessage && (
+                          <div className="text-[0.68rem] text-rose-700 bg-rose-50 p-1.5 rounded border border-rose-200">
+                            Reason: {bookingDetail.notifications.whatsapp.errorMessage}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* 3. Associated Payments Card */}
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-[#68705A] mb-2.5">

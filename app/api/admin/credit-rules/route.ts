@@ -68,7 +68,7 @@ export async function GET() {
           credit_amount_paise: 99000,
           creditAmountRupees: 990,
           is_active: true,
-          description: "One-way Foundation course credit of ₹990 toward Artistry + Foundation",
+          description: "One-way Foundation course credit dynamically matching Foundation purchase price toward Artistry + Foundation",
           sourceCourse: {
             id: "e1111111-2222-3333-4444-555555555555",
             title: "WATERCOLOUR FOUNDATION",
