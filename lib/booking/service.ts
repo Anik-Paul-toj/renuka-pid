@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateBookingInput } from "@/lib/validations/booking";
 import { verifyCreditVerificationToken } from "@/lib/course-credit/identity";
-import { isRegistrationDeadlineExpired, isBatchDateAnnounced } from "@/lib/batches-admin/format";
+import { isRegistrationDeadlineExpired, isBatchDateAnnounced, calculateRegistrationClosingDateTime } from "@/lib/batches-admin/format";
 import { parseCourseDetails } from "@/lib/courses-admin/service";
 import crypto from "crypto";
 
@@ -208,10 +208,17 @@ export async function processBooking(
     (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
     2;
 
+  const closing = calculateRegistrationClosingDateTime(
+    batchData.start_date,
+    batchData.start_time,
+    registrationClosesBeforeHours
+  );
+
   const lastRegDate =
     batchData.last_registration_date ||
-    (courseDetails as any)?.batchSchedule?.lastRegistrationDate ||
-    batchData.start_date;
+    closing?.closingDateStr ||
+    batchData.start_date ||
+    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
 
   if (
     isRegistrationDeadlineExpired(lastRegDate, new Date(), {

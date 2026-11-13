@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { consumeCreditForBooking } from "@/lib/course-credit/service";
-import { isRegistrationDeadlineExpired, isBatchDateAnnounced } from "@/lib/batches-admin/format";
+import { isRegistrationDeadlineExpired, isBatchDateAnnounced, calculateRegistrationClosingDateTime } from "@/lib/batches-admin/format";
 import { parseCourseDetails } from "@/lib/courses-admin/service";
 import { sendBookingConfirmationEmail } from "@/lib/notifications/service";
 import { sendBookingConfirmationWhatsApp } from "@/lib/whatsapp/service";
@@ -236,10 +236,20 @@ export async function createOrderForBooking(
       (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
       2;
 
-    const isExpired = isRegistrationDeadlineExpired(
+    const closing = calculateRegistrationClosingDateTime(
+      cohortBatch.start_date,
+      cohortBatch.start_time,
+      registrationClosesBeforeHours
+    );
+
+    const effectiveDeadline =
       cohortBatch.last_registration_date ||
-        (courseDetails as any)?.batchSchedule?.lastRegistrationDate ||
-        cohortBatch.start_date,
+      closing?.closingDateStr ||
+      cohortBatch.start_date ||
+      (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
+
+    const isExpired = isRegistrationDeadlineExpired(
+      effectiveDeadline,
       new Date(),
       {
         startDate: cohortBatch.start_date,

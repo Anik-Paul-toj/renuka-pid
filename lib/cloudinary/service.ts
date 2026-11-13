@@ -1,4 +1,6 @@
 import "server-only";
+import fs from "node:fs";
+import path from "node:path";
 import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 
 function getCloudinaryCredentials() {
@@ -10,8 +12,6 @@ function getCloudinaryCredentials() {
   } = {};
 
   try {
-    const fs = require("node:fs");
-    const path = require("node:path");
     const envPath = path.resolve(process.cwd(), ".env.local");
     if (fs.existsSync(envPath)) {
       const content = fs.readFileSync(envPath, "utf8");

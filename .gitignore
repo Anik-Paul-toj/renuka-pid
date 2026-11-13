@@ -50,3 +50,6 @@ supabase/.temp/
 # scripts
 scripts/
 scripts/.env.local
+
+# qa reports and testing artifacts
+qa-reports/

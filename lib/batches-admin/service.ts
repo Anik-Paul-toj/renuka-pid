@@ -150,14 +150,13 @@ export async function getBatchByCourseId(
     registrationClosesBeforeHours
   );
 
-  // Derive lastRegistrationDate with priority: DB column > metadata fallback > calculated > startDate
-  const fallbackMetaDeadline =
-    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
+  // Derive lastRegistrationDate with priority: DB column > calculated closing date > startDate
+  // Only fall back to legacy course description metadata if batch has no active DB date
   const lastRegistrationDate =
     batchData.last_registration_date ||
-    fallbackMetaDeadline ||
     closing?.closingDateStr ||
-    batchData.start_date;
+    batchData.start_date ||
+    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
 
   const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
@@ -331,13 +330,11 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
     registrationClosesBeforeHours
   );
 
-  const fallbackMetaDeadline =
-    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
   const lastRegistrationDate =
     batchData.last_registration_date ||
-    fallbackMetaDeadline ||
     closing?.closingDateStr ||
-    batchData.start_date;
+    batchData.start_date ||
+    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
 
   const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
