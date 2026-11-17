@@ -17,17 +17,17 @@ import { PriceDisplay } from "@/components/ui/PriceDisplay";
 import { isBatchDateAnnounced } from "@/lib/batches-admin/format";
 
 /**
- * Returns true when a cohort course (Foundation / Artistry) has no announced
- * batch date yet, so enrolment must be disabled.
+ * Returns true when a course has no announced batch date or status is TBA.
  */
-function isCohortEnrolmentTBA(course: AdminCourseData): boolean {
-  const isCohortCourse =
-    course.slug === "watercolour-foundation" ||
-    course.slug === "watercolour-artistry-foundation";
-  if (!isCohortCourse) return false;
-  // No batch at all, or batch exists but start date is not announced
-  return !isBatchDateAnnounced(course.activeBatch?.startDate ?? null);
+function isCourseEnrolmentTBA(course: AdminCourseData): boolean {
+  if (!course.activeBatch) return true;
+  if (course.activeBatch.status === "tba") return true;
+  if (!isBatchDateAnnounced(course.activeBatch.startDate)) return true;
+  if (course.activeBatch.startDate === "TBA") return true;
+  return false;
 }
+
+const isCohortEnrolmentTBA = isCourseEnrolmentTBA;
 
 interface CourseCatalogClientProps {
   courses: AdminCourseData[];
@@ -74,10 +74,11 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
         (batch.seatsRemaining !== undefined && batch.seatsRemaining <= 0)
     );
     const isClosed = !batch.isEnrollmentOpen || batch.isExpired || isSoldOut;
+    const isTBA = isCourseEnrolmentTBA(course);
     const statusLabel = isSoldOut
       ? "This batch is fully booked. Registration is now closed."
-      : isCohortTBA
-      ? "Enrolment Opening Soon"
+      : isTBA
+      ? "To Be Announced"
       : isClosed
       ? "Registration Closed"
       : "Open for Registration";
@@ -92,7 +93,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
           <div className="flex items-center gap-1.5">
             <span
               className={`size-2 rounded-full ${
-                isClosed ? "bg-[#6F6B61]" : "bg-[#444C38] animate-pulse"
+                isClosed || isTBA ? "bg-[#6F6B61]" : "bg-[#444C38] animate-pulse"
               }`}
             />
             <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#444C38]">
@@ -105,7 +106,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
               className={`px-2 py-0.5 rounded text-[0.64rem] font-bold uppercase tracking-wider ${
                 isSoldOut
                   ? "bg-[#B93821]/15 text-[#B93821] border border-[#B93821]/30"
-                  : isClosed
+                  : isClosed || isTBA
                   ? "bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25"
                   : "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
               }`}
@@ -115,7 +116,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
+        <div className={`grid grid-cols-1 ${isTBA ? "sm:grid-cols-1" : "sm:grid-cols-3"} gap-2.5 sm:gap-3 text-xs`}>
           {/* Start Date */}
           <div className="flex items-start gap-2">
             <div className="size-7 rounded-md bg-[#444C38]/10 border border-[#444C38]/20 flex items-center justify-center text-[#444C38] shrink-0 mt-0.5">
@@ -130,52 +131,54 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   isStartingSoonCourse ? "text-[#3E522D] tracking-wide" : "text-[#14120E]"
                 }`}
               >
-                {isCohortTBA
-                  ? "DATE TO BE ANNOUNCED"
-                  : batch.formattedStartDate || batch.startDate || "TBA"}
+                {isTBA
+                  ? "To Be Announced"
+                  : batch.formattedStartDate || batch.startDate || "To Be Announced"}
               </span>
             </div>
           </div>
 
-          {/* Registration Deadline */}
-          <div className="flex items-start gap-2">
-            <div className="size-7 rounded-md bg-[#B93821]/10 border border-[#B93821]/20 flex items-center justify-center text-[#B93821] shrink-0 mt-0.5">
-              <Hourglass className="size-3.5" />
-            </div>
-            <div>
-              <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
-                Last Date
-              </span>
-              <span
-                className={`font-bold text-[0.78rem] block leading-tight ${
-                  isClosed ? "text-[#6F6B61] line-through" : "text-[#B93821]"
-                }`}
-              >
-                {isCohortTBA
-                  ? "To be announced"
-                  : batch.formattedLastRegistrationDate ||
-                    batch.lastRegistrationDate ||
-                    batch.startDate ||
-                    "TBA"}
-              </span>
-            </div>
-          </div>
+          {!isTBA && (
+            <>
+              {/* Registration Deadline */}
+              <div className="flex items-start gap-2">
+                <div className="size-7 rounded-md bg-[#B93821]/10 border border-[#B93821]/20 flex items-center justify-center text-[#B93821] shrink-0 mt-0.5">
+                  <Hourglass className="size-3.5" />
+                </div>
+                <div>
+                  <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
+                    Last Date
+                  </span>
+                  <span
+                    className={`font-bold text-[0.78rem] block leading-tight ${
+                      isClosed ? "text-[#6F6B61] line-through" : "text-[#B93821]"
+                    }`}
+                  >
+                    {batch.formattedLastRegistrationDate ||
+                      batch.lastRegistrationDate ||
+                      batch.startDate ||
+                      "To Be Announced"}
+                  </span>
+                </div>
+              </div>
 
-          {/* Batch Timing */}
-          <div className="flex items-start gap-2">
-            <div className="size-7 rounded-md bg-[#1E3A5F]/10 border border-[#1E3A5F]/20 flex items-center justify-center text-[#1E3A5F] shrink-0 mt-0.5">
-              <Clock className="size-3.5" />
-            </div>
-            <div>
-              <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
-                Batch Timing
-              </span>
-              <span className="font-bold text-[#14120E] text-[0.78rem] block leading-tight">
-                {batch.formattedTiming ||
-                  (batch.startTime ? `${batch.startTime} IST` : "TBA")}
-              </span>
-            </div>
-          </div>
+              {/* Batch Timing */}
+              <div className="flex items-start gap-2">
+                <div className="size-7 rounded-md bg-[#1E3A5F]/10 border border-[#1E3A5F]/20 flex items-center justify-center text-[#1E3A5F] shrink-0 mt-0.5">
+                  <Clock className="size-3.5" />
+                </div>
+                <div>
+                  <span className="text-[0.62rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
+                    Batch Timing
+                  </span>
+                  <span className="font-bold text-[#14120E] text-[0.78rem] block leading-tight">
+                    {batch.formattedTiming ||
+                      (batch.startTime ? `${batch.startTime} IST` : "TBA")}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -357,6 +360,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                   <button
                     onClick={() => handleOpenBooking(masterclassCourse)}
                     disabled={
+                      isCourseEnrolmentTBA(masterclassCourse) ||
                       masterclassCourse.activeBatch?.isExpired ||
                       !masterclassCourse.activeBatch?.isEnrollmentOpen ||
                       masterclassCourse.activeBatch?.isSoldOut
@@ -364,9 +368,13 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     className="btn-course-enrol flex-1 sm:flex-none"
                   >
                     <span>
-                      {masterclassCourse.activeBatch?.isExpired ||
-                      !masterclassCourse.activeBatch?.isEnrollmentOpen
+                      {isCourseEnrolmentTBA(masterclassCourse)
+                        ? "Dates To Be Announced"
+                        : masterclassCourse.activeBatch?.isExpired ||
+                          !masterclassCourse.activeBatch?.isEnrollmentOpen
                         ? "Registration Closed"
+                        : masterclassCourse.details?.registrationMode === "free" || masterclassCourse.offerPrice === 0
+                        ? "Enrol for Free"
                         : "Enrol Now"}
                     </span>
                   </button>
@@ -513,7 +521,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                         foundationCourse.activeBatch.seatsRemaining <= 0)
                         ? "Batch Full"
                         : isCohortEnrolmentTBA(foundationCourse)
-                        ? "Enrolment Opening Soon"
+                        ? "Dates To Be Announced"
                         : foundationCourse.activeBatch?.isExpired ||
                           !foundationCourse.activeBatch?.isEnrollmentOpen
                         ? "Registration Closed"
@@ -655,7 +663,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                         artistryCourse.activeBatch.seatsRemaining <= 0)
                         ? "Batch Full"
                         : isCohortEnrolmentTBA(artistryCourse)
-                        ? "Enrolment Opening Soon"
+                        ? "Dates To Be Announced"
                         : artistryCourse.activeBatch?.isExpired ||
                           !artistryCourse.activeBatch?.isEnrollmentOpen
                         ? "Registration Closed"

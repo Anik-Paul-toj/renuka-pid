@@ -249,12 +249,26 @@ export async function processBooking(
   }
 
   // Authoritative course pricing from database
-  const originalAmountPaise = course.offer_price_paise;
+  let originalAmountPaise = course.offer_price_paise;
   const currency = course.currency || "INR";
   const courseTitle = course.title;
   const normalizedEmail = input.email.trim().toLowerCase();
   const trimmedName = input.fullName.trim();
   const formattedPhone = input.phone && input.phone.trim().length > 0 ? input.phone.trim() : null;
+
+  // Check if course is Roadmap Masterclass and configured for Free Registration Mode
+  const isMasterclass =
+    course.slug === "the-watercolour" ||
+    course.slug === "the-watercolour-roadmap" ||
+    course.id === "11111111-1111-1111-1111-111111111111";
+
+  const isFreeMasterclass =
+    isMasterclass &&
+    (courseDetails?.registrationMode === "free" || course.offer_price_paise === 0);
+
+  if (isFreeMasterclass) {
+    originalAmountPaise = 0;
+  }
 
   // Release any expired pending reservations before evaluating eligibility and seats
   try {

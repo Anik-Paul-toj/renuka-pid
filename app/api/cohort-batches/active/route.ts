@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getBatchByCourseId } from "@/lib/batches-admin/service";
+import { parseCourseDetails } from "@/lib/courses-admin/details";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,24 @@ export async function GET(request: NextRequest) {
       courseData = c;
     }
 
+    const courseDetails = courseData?.slug
+      ? parseCourseDetails(courseData.slug, courseData.description)
+      : null;
+
+    const isMasterclass =
+      courseData?.slug === "the-watercolour" ||
+      courseData?.slug === "the-watercolour-roadmap" ||
+      courseData?.id === "11111111-1111-1111-1111-111111111111" ||
+      batchSchedule.courseSlug === "the-watercolour" ||
+      batchSchedule.courseSlug === "the-watercolour-roadmap";
+
+    const isFreeRegistration =
+      isMasterclass &&
+      (courseDetails?.registrationMode === "free" || courseData?.offer_price_paise === 0);
+
+    const effectiveOfferPricePaise = isFreeRegistration ? 0 : courseData?.offer_price_paise ?? 9900;
+    const effectiveOfferPrice = isFreeRegistration ? 0 : Math.round(effectiveOfferPricePaise / 100);
+
     const isRegistrationClosed =
       !batchSchedule.isEnrollmentOpen ||
       batchSchedule.isExpired ||
@@ -97,29 +116,35 @@ export async function GET(request: NextRequest) {
           formattedLastRegistrationDate:
             batchSchedule.formattedLastRegistrationDate,
           formattedTiming: batchSchedule.formattedTiming,
+          offerPrice: effectiveOfferPrice,
+          offerPricePaise: effectiveOfferPricePaise,
+          registrationMode: isFreeRegistration ? "free" : "paid",
           course: courseData
             ? {
                 id: courseData.id,
                 title: courseData.title,
                 slug: courseData.slug,
                 description: courseData.description,
+                details: courseDetails,
                 originalPricePaise: courseData.original_price_paise,
-                offerPricePaise: courseData.offer_price_paise,
+                offerPricePaise: effectiveOfferPricePaise,
                 originalPrice: Math.round(
                   courseData.original_price_paise / 100
                 ),
-                offerPrice: Math.round(courseData.offer_price_paise / 100),
+                offerPrice: effectiveOfferPrice,
                 currency: courseData.currency,
                 durationMinutes: courseData.duration_minutes,
                 isActive: courseData.is_active,
+                registrationMode: isFreeRegistration ? "free" : "paid",
               }
             : {
                 id: batchSchedule.courseId,
                 title: batchSchedule.courseTitle,
                 slug: batchSchedule.courseSlug,
                 originalPrice: 599,
-                offerPrice: 99,
+                offerPrice: effectiveOfferPrice,
                 currency: "INR",
+                registrationMode: isFreeRegistration ? "free" : "paid",
               },
         },
       },

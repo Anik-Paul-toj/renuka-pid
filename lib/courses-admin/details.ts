@@ -137,6 +137,7 @@ export const DEFAULT_WORKSHOP_DETAILS: CourseContentDetails = {
   scheduleNote:
     "Conducted live on Zoom in comfortable Hinglish. Meeting link, calendar invite, and preparation details are emailed immediately upon enrollment.",
   ctaText: "Enrol in Masterclass",
+  registrationMode: "paid",
 };
 
 /**

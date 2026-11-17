@@ -60,12 +60,16 @@ export function CourseDetailPageClient({
         ))
   );
 
-  // For Foundation and Artistry: enrolment is blocked until a date is announced.
+  // Date is considered TBA if explicitly tba or if the start date is unannounced
   const isCohortCourse =
     course.slug === "watercolour-foundation" ||
     course.slug === "watercolour-artistry-foundation";
-  const isTBAEnrolment =
-    isCohortCourse && !isBatchDateAnnounced(activeBatch?.startDate ?? null);
+  const isTBAEnrolment = Boolean(
+    activeBatch?.status === "tba" ||
+      !isBatchDateAnnounced(activeBatch?.startDate ?? null) ||
+      activeBatch?.startDate === "TBA" ||
+      (isCohortCourse && !isBatchDateAnnounced(activeBatch?.startDate ?? null))
+  );
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between selection:bg-[#444C38]/20">
@@ -308,55 +312,57 @@ export function CourseDetailPageClient({
                           }`}
                         >
                           {isTBAEnrolment
-                            ? "DATE TO BE ANNOUNCED"
+                            ? "To Be Announced"
                             : activeBatch.formattedStartDate ||
                               activeBatch.startDate ||
-                              "To be announced"}
+                              "To Be Announced"}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-2.5">
-                      <div className="size-8 rounded-lg bg-[#B93821]/10 border border-[#B93821]/20 flex items-center justify-center text-[#B93821] shrink-0 mt-0.5">
-                        <Hourglass className="size-4" />
-                      </div>
-                      <div>
-                        <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
-                          Last Date for Registration
-                        </span>
-                        <span
-                          className={`font-bold text-xs sm:text-sm block ${
-                            isRegistrationClosed
-                              ? "text-[#6F6B61] line-through"
-                              : "text-[#B93821]"
-                          }`}
-                        >
-                          {isTBAEnrolment
-                            ? "To be announced"
-                            : activeBatch.formattedLastRegistrationDate ||
-                              activeBatch.lastRegistrationDate ||
-                              activeBatch.startDate ||
-                              "To be announced"}
-                        </span>
-                      </div>
-                    </div>
+                    {!isTBAEnrolment && (
+                      <>
+                        <div className="flex items-start gap-2.5">
+                          <div className="size-8 rounded-lg bg-[#B93821]/10 border border-[#B93821]/20 flex items-center justify-center text-[#B93821] shrink-0 mt-0.5">
+                            <Hourglass className="size-4" />
+                          </div>
+                          <div>
+                            <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
+                              Last Date for Registration
+                            </span>
+                            <span
+                              className={`font-bold text-xs sm:text-sm block ${
+                                isRegistrationClosed
+                                  ? "text-[#6F6B61] line-through"
+                                  : "text-[#B93821]"
+                              }`}
+                            >
+                              {activeBatch.formattedLastRegistrationDate ||
+                                activeBatch.lastRegistrationDate ||
+                                activeBatch.startDate ||
+                                "To Be Announced"}
+                            </span>
+                          </div>
+                        </div>
 
-                    <div className="flex items-start gap-2.5">
-                      <div className="size-8 rounded-lg bg-[#1E3A5F]/10 border border-[#1E3A5F]/20 flex items-center justify-center text-[#1E3A5F] shrink-0 mt-0.5">
-                        <Clock className="size-4" />
-                      </div>
-                      <div>
-                        <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
-                          Batch Timing
-                        </span>
-                        <span className="font-bold text-[#14120E] text-xs sm:text-sm block">
-                          {activeBatch.formattedTiming ||
-                            (activeBatch.startTime
-                              ? `${activeBatch.startTime} IST`
-                              : "TBA")}
-                        </span>
-                      </div>
-                    </div>
+                        <div className="flex items-start gap-2.5">
+                          <div className="size-8 rounded-lg bg-[#1E3A5F]/10 border border-[#1E3A5F]/20 flex items-center justify-center text-[#1E3A5F] shrink-0 mt-0.5">
+                            <Clock className="size-4" />
+                          </div>
+                          <div>
+                            <span className="text-[0.64rem] uppercase tracking-wider font-bold text-[#6F6B61] block leading-none mb-1">
+                              Batch Timing
+                            </span>
+                            <span className="font-bold text-[#14120E] text-xs sm:text-sm block">
+                              {activeBatch.formattedTiming ||
+                                (activeBatch.startTime
+                                  ? `${activeBatch.startTime} IST`
+                                  : "TBA")}
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -568,16 +574,18 @@ export function CourseDetailPageClient({
                               {activeBatch.isSoldOut
                                 ? "This batch is fully booked. Registration is now closed."
                                 : isTBAEnrolment
-                                ? "Enrolment Opening Soon"
+                                ? "To Be Announced"
                                 : isRegistrationClosed
                                 ? "Registration Closed"
                                 : "Open for Registration"}
                             </span>
                           </div>
-                          <div className="text-[0.68rem] text-[#6F6B61] flex flex-wrap gap-x-2.5">
-                            <span>Last Registration: <strong>{isTBAEnrolment ? "To be announced" : (activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate)}</strong></span>
-                            <span>Timing: <strong>{activeBatch.formattedTiming || activeBatch.startTime || "To be announced"}</strong></span>
-                          </div>
+                          {!isTBAEnrolment && (
+                            <div className="text-[0.68rem] text-[#6F6B61] flex flex-wrap gap-x-2.5">
+                              <span>Last Registration: <strong>{activeBatch.formattedLastRegistrationDate || activeBatch.lastRegistrationDate}</strong></span>
+                              <span>Timing: <strong>{activeBatch.formattedTiming || activeBatch.startTime || "To be announced"}</strong></span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -591,9 +599,11 @@ export function CourseDetailPageClient({
                         {activeBatch.isSoldOut
                           ? "Batch Full"
                           : isTBAEnrolment
-                          ? "Enrolment Opening Soon"
+                          ? "Dates To Be Announced"
                           : isRegistrationClosed
                           ? "Registration Closed"
+                          : details.registrationMode === "free"
+                          ? "Enrol for Free"
                           : details.ctaText ||
                             (isWorkshop
                               ? "Enrol in Masterclass"

@@ -119,6 +119,15 @@ Renuka Aggarwal`,
   },
 ];
 
+interface BatchStudent {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string | null;
+  bookingReference: string;
+  createdAt: string;
+}
+
 export function BroadcastManager({
   initialData,
   courses,
@@ -142,6 +151,11 @@ export function BroadcastManager({
   const [subject, setSubject] = useState(activePreset.subject);
   const [messageBody, setMessageBody] = useState(activePreset.body);
   const [isEditingCustomText, setIsEditingCustomText] = useState(false);
+
+  // Batch Students Segmentation state
+  const [batchStudents, setBatchStudents] = useState<BatchStudent[]>([]);
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [isLoadingStudents, setIsLoadingStudents] = useState<boolean>(false);
 
   // When preset changes, update values
   const handlePresetChange = (presetId: string) => {
@@ -200,6 +214,38 @@ export function BroadcastManager({
     );
   }, [availableBatches, selectedBatchId]);
 
+  // Fetch students for selected batch to enable date-wise segmentation
+  useEffect(() => {
+    if (audience !== "batch" || !selectedBatchId) {
+      setBatchStudents([]);
+      setSelectedStudentIds([]);
+      return;
+    }
+
+    let isCancelled = false;
+    setIsLoadingStudents(true);
+
+    fetch(`/api/admin/broadcast/batch-students?batchId=${encodeURIComponent(selectedBatchId)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isCancelled && data.success && Array.isArray(data.students)) {
+          setBatchStudents(data.students);
+          // By default, select all students in the batch
+          setSelectedStudentIds(data.students.map((s: BatchStudent) => s.id));
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load batch students:", err);
+      })
+      .finally(() => {
+        if (!isCancelled) setIsLoadingStudents(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [audience, selectedBatchId]);
+
   // 4. Server-Side Recipient Count Resolution
   const [recipientCount, setRecipientCount] = useState<number>(0);
   const [isResolvingCount, setIsResolvingCount] = useState<boolean>(false);
@@ -229,8 +275,12 @@ export function BroadcastManager({
       time: formattedTime,
       joinLink: selectedBatch?.zoom_join_url || "https://zoom.us/j/1234567890",
       confirmedOnly: audience === "confirmed",
+      selectedCustomerIds:
+        audience === "batch" && selectedStudentIds.length > 0
+          ? selectedStudentIds
+          : null,
     };
-  }, [audience, selectedCourseId, selectedBatchId, selectedCourse, selectedBatch, subject]);
+  }, [audience, selectedCourseId, selectedBatchId, selectedCourse, selectedBatch, subject, selectedStudentIds]);
 
   // Query server-side recipient count whenever filter changes
   useEffect(() => {
@@ -517,6 +567,88 @@ export function BroadcastManager({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* 4b. DATE-WISE STUDENT SEGMENTATION & SELECTION */}
+        {audience === "batch" && (
+          <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 space-y-3">
+            <div className="flex items-center justify-between border-b border-stone-200 pb-2">
+              <div>
+                <span className="text-xs font-bold text-stone-800 block">
+                  Registered Students in Selected Batch Date
+                </span>
+                <span className="text-[0.7rem] text-stone-500">
+                  {isLoadingStudents
+                    ? "Loading students..."
+                    : `${selectedStudentIds.length} of ${batchStudents.length} students selected`}
+                </span>
+              </div>
+
+              {batchStudents.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedStudentIds.length === batchStudents.length) {
+                      setSelectedStudentIds([]);
+                    } else {
+                      setSelectedStudentIds(batchStudents.map((s) => s.id));
+                    }
+                  }}
+                  className="text-xs font-semibold text-amber-700 hover:text-amber-900 cursor-pointer"
+                >
+                  {selectedStudentIds.length === batchStudents.length
+                    ? "Deselect All"
+                    : "Select All"}
+                </button>
+              )}
+            </div>
+
+            {isLoadingStudents ? (
+              <p className="text-xs text-stone-500 italic py-2">Fetching confirmed students for this batch...</p>
+            ) : batchStudents.length === 0 ? (
+              <p className="text-xs text-stone-500 italic py-2">
+                No confirmed registered students found for this batch date.
+              </p>
+            ) : (
+              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 divide-y divide-stone-100">
+                {batchStudents.map((student) => {
+                  const isChecked = selectedStudentIds.includes(student.id);
+                  return (
+                    <label
+                      key={student.id}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-stone-100/80 cursor-pointer transition-colors text-xs"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedStudentIds((prev) => [...prev, student.id]);
+                            } else {
+                              setSelectedStudentIds((prev) => prev.filter((id) => id !== student.id));
+                            }
+                          }}
+                          className="rounded border-stone-300 text-amber-600 focus:ring-amber-500 size-4"
+                        />
+                        <div>
+                          <span className="font-semibold text-stone-800 block">
+                            {student.fullName}
+                          </span>
+                          <span className="text-[0.68rem] text-stone-500 block">
+                            {student.email} {student.phone ? `• ${student.phone}` : ""}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[0.65rem] font-mono text-stone-400">
+                        {student.bookingReference}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

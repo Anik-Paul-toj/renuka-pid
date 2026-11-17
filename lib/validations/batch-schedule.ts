@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const batchStatusEnum = z.enum(["open", "closed", "upcoming", "completed"]);
+export const batchStatusEnum = z.enum(["open", "closed", "upcoming", "completed", "tba", "announced"]);
 export type BatchStatus = z.infer<typeof batchStatusEnum>;
 
 export const batchScheduleSchema = z
@@ -12,14 +12,21 @@ export const batchScheduleSchema = z
       .max(120, "Batch name must be at most 120 characters."),
     startDate: z
       .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be in YYYY-MM-DD format."),
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be in YYYY-MM-DD format.")
+      .or(z.literal("TBA"))
+      .or(z.literal("tba"))
+      .optional()
+      .nullable(),
     endDate: z
       .string()
+      .trim()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "End date must be in YYYY-MM-DD format.")
       .optional()
       .nullable(),
     lastRegistrationDate: z
       .string()
+      .trim()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Last registration date must be in YYYY-MM-DD format.")
       .optional()
       .nullable(),
@@ -34,8 +41,9 @@ export const batchScheduleSchema = z
     startTime: z
       .string()
       .trim()
-      .min(1, "Batch start time is required.")
-      .max(50, "Batch start time must be at most 50 characters."),
+      .max(50, "Batch start time must be at most 50 characters.")
+      .optional()
+      .nullable(),
     endTime: z
       .string()
       .trim()
@@ -50,6 +58,20 @@ export const batchScheduleSchema = z
       .optional(),
   })
   .superRefine((data, ctx) => {
+    // If status is TBA, skip date/deadline constraints
+    if (data.status === "tba") {
+      return;
+    }
+
+    if (!data.startDate || data.startDate === "TBA" || data.startDate === "tba") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["startDate"],
+        message: "Start date is required when batch status is announced or open.",
+      });
+      return;
+    }
+
     // Constraint: The registration deadline must not be after the batch start date.
     if (data.lastRegistrationDate && data.startDate) {
       if (data.lastRegistrationDate > data.startDate) {

@@ -178,13 +178,15 @@ export async function resolveBroadcastRecipients(
       .eq("id", filter.batchId)
       .maybeSingle();
 
+    // Strictly target confirmed bookings for this specific batch date (exclude cancelled/failed)
     let bookingQuery = adminClient
       .from("bookings")
       .select("customer_id, status, customers(id, full_name, email, phone, whatsapp_phone)")
-      .eq("batch_id", filter.batchId);
+      .eq("batch_id", filter.batchId)
+      .eq("status", "confirmed");
 
-    if (filter.confirmedOnly) {
-      bookingQuery = bookingQuery.eq("status", "confirmed");
+    if (filter.selectedCustomerIds && filter.selectedCustomerIds.length > 0) {
+      bookingQuery = bookingQuery.in("customer_id", filter.selectedCustomerIds);
     }
 
     const { data: bookings, error } = await bookingQuery;

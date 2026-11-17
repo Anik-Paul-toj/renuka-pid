@@ -105,6 +105,7 @@ export function CourseManager({
     whyDescription: c?.details?.whyDescription || "",
     whyCallout: c?.details?.whyCallout || "",
     ctaText: c?.details?.ctaText || "Enrol Now",
+    registrationMode: ((c?.details as any)?.registrationMode as "paid" | "free") || "paid",
   });
 
   const [formData, setFormData] = useState(buildFormData(activeCourse));
@@ -316,6 +317,9 @@ export function CourseManager({
             whyDescription: formData.whyDescription.trim(),
             whyCallout: formData.whyCallout.trim(),
             ctaText: formData.ctaText.trim(),
+            registrationMode: isLandingPageWorkshop
+              ? formData.registrationMode || "paid"
+              : "paid",
           };
 
       const res = await fetch(`/api/admin/courses/${activeCourse.id}`, {
@@ -324,9 +328,7 @@ export function CourseManager({
         body: JSON.stringify({
           title: formData.title.trim(),
           slug: formData.slug.trim(),
-          description: isLandingPageWorkshop
-            ? formData.description?.trim() || ""
-            : JSON.stringify(detailsPayload),
+          description: JSON.stringify(detailsPayload),
           durationMinutes: Number(formData.durationMinutes),
           originalPrice: Number(formData.originalPrice),
           offerPrice: Number(formData.offerPrice),
@@ -1214,6 +1216,83 @@ export function CourseManager({
                   </span>
                 </div>
               </div>
+
+              {/* Roadmap Masterclass Registration Mode Toggle */}
+              {isLandingPageWorkshop && (
+                <div className="p-4 rounded-lg bg-[#FAF8F2] border border-[#444C38]/20 space-y-2 mt-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h4 className="font-serif text-sm font-bold text-[#14120E]">
+                        Registration Mode (Roadmap Masterclass Only)
+                      </h4>
+                      <p className="text-xs text-[#6F6B61]">
+                        Switch between standard paid Razorpay registration or 100% Free registration mode.
+                      </p>
+                    </div>
+                    <span
+                      className={`inline-block px-2.5 py-1 rounded text-[0.68rem] font-bold uppercase tracking-wider ${
+                        formData.registrationMode === "free"
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : "bg-blue-100 text-blue-800 border border-blue-300"
+                      }`}
+                    >
+                      {formData.registrationMode === "free" ? "Free Mode Active" : "Paid Mode Active"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <label
+                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                        formData.registrationMode === "paid"
+                          ? "bg-white border-[#68705A] shadow-xs"
+                          : "bg-[#F7F4EC] border-[#444C38]/20 hover:bg-white"
+                      } ${!isEditing ? "opacity-75 cursor-not-allowed" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="registrationMode"
+                        disabled={!isEditing}
+                        checked={formData.registrationMode === "paid"}
+                        onChange={() => handleInputChange("registrationMode", "paid")}
+                        className="mt-0.5 text-[#68705A] focus:ring-[#68705A]"
+                      />
+                      <div>
+                        <span className="font-bold text-xs text-[#14120E] block">
+                          Paid Registration (₹{formData.offerPrice})
+                        </span>
+                        <span className="text-[0.68rem] text-[#6F6B61] block">
+                          Students complete checkout via Razorpay payment gateway.
+                        </span>
+                      </div>
+                    </label>
+
+                    <label
+                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                        formData.registrationMode === "free"
+                          ? "bg-emerald-50 border-emerald-600 shadow-xs"
+                          : "bg-[#F7F4EC] border-[#444C38]/20 hover:bg-white"
+                      } ${!isEditing ? "opacity-75 cursor-not-allowed" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="registrationMode"
+                        disabled={!isEditing}
+                        checked={formData.registrationMode === "free"}
+                        onChange={() => handleInputChange("registrationMode", "free")}
+                        className="mt-0.5 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <div>
+                        <span className="font-bold text-xs text-emerald-900 block">
+                          Free Registration (₹0)
+                        </span>
+                        <span className="text-[0.68rem] text-emerald-700 block">
+                          Direct ₹0 auto-confirmation without Razorpay checkout. Consumes 1 seat atomically.
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              )}
 
               {/* Course Credit Rule Management */}
               <div className="mt-6 pt-4 border-t border-[#464137]/15 space-y-4">

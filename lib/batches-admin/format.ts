@@ -8,7 +8,7 @@ export const IST_TIMEZONE = "Asia/Kolkata";
  * Formats a YYYY-MM-DD date string into a friendly, artistic date (e.g., "01 Nov 2026").
  */
 export function formatBatchDateIST(dateStr?: string | null): string {
-  if (!dateStr) return "To be announced";
+  if (!dateStr || !isBatchDateAnnounced(dateStr)) return "To Be Announced";
   try {
     const [year, month, day] = dateStr.split("-").map(Number);
     if (!year || !month || !day) return dateStr;
@@ -29,7 +29,7 @@ export function formatBatchDateIST(dateStr?: string | null): string {
  * Formats a YYYY-MM-DD date string into a full weekday date (e.g., "Saturday, 14 November 2026").
  */
 export function formatBatchDateWithWeekdayIST(dateStr?: string | null): string {
-  if (!dateStr) return "To be announced";
+  if (!dateStr || !isBatchDateAnnounced(dateStr)) return "To Be Announced";
   try {
     const [year, month, day] = dateStr.split("-").map(Number);
     if (!year || !month || !day) return dateStr;
@@ -509,7 +509,7 @@ export function isBatchRegistrationOpen(
 export function isBatchDateAnnounced(startDate?: string | null): boolean {
   if (!startDate || startDate.trim() === "") return false;
   const normalized = startDate.trim().toUpperCase();
-  const sentinels = ["TBA", "0000-00-00", "N/A", "NONE", "NULL", "UNKNOWN"];
+  const sentinels = ["TBA", "0000-00-00", "2099-12-31", "1970-01-01", "N/A", "NONE", "NULL", "UNKNOWN"];
   if (sentinels.includes(normalized)) return false;
   // Ensure it looks like a real YYYY-MM-DD date
   return /^\d{4}-\d{2}-\d{2}$/.test(startDate.trim());

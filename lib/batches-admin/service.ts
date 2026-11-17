@@ -47,6 +47,118 @@ export interface SafeBatchScheduleData {
 }
 
 /**
+ * Formats a raw database batch row into SafeBatchScheduleData.
+ * Respects TBA status, completed status, date announcement rules, and date-specific inventory.
+ */
+export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
+  const course = batchData.courses;
+  const courseDetails = course?.slug
+    ? parseCourseDetails(course.slug, course.description)
+    : null;
+
+  const savedStatus = (courseDetails as any)?.batchSchedule?.status;
+
+  const registrationClosesBeforeHours =
+    batchData.registration_closes_before_hours ??
+    (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
+    2;
+
+  const closing = calculateRegistrationClosingDateTime(
+    batchData.start_date,
+    batchData.start_time,
+    registrationClosesBeforeHours
+  );
+
+  const lastRegistrationDate =
+    batchData.last_registration_date ||
+    closing?.closingDateStr ||
+    batchData.start_date ||
+    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
+
+  const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
+  const isSoldOut = seatsRemaining <= 0;
+  const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate, new Date(), {
+    startDate: batchData.start_date,
+    startTime: batchData.start_time,
+    registrationClosesBeforeHours,
+  });
+
+  const dateAnnounced = isBatchDateAnnounced(batchData.start_date);
+  const isTba = savedStatus === "tba" || !dateAnnounced;
+  const isCompleted = savedStatus === "completed";
+
+  // Enrollment is open ONLY if explicitly open, date announced, not TBA, not completed, not expired, not sold out
+  const isEnrollmentOpen =
+    batchData.is_enrollment_open &&
+    !isTba &&
+    !isCompleted &&
+    !isExpired &&
+    !isSoldOut;
+
+  // Derive batch status
+  let status: BatchStatus = "open";
+  if (isTba) {
+    status = "tba";
+  } else if (isCompleted) {
+    status = "completed";
+  } else if (savedStatus === "upcoming" || savedStatus === "announced") {
+    status = "upcoming";
+  } else if (!batchData.is_enrollment_open || isExpired || isSoldOut) {
+    status = "closed";
+  } else {
+    status = "open";
+  }
+
+  const isWorkshop =
+    course?.slug === "the-watercolour" ||
+    course?.slug === "the-watercolour-roadmap";
+
+  const coverImageUrl =
+    batchData.cover_image_url ||
+    (course as any)?.cover_image_url ||
+    courseDetails?.coverImage ||
+    (course?.slug && COURSE_IMAGES[course.slug]) ||
+    (isWorkshop ? null : "/images/foundation.jpeg");
+
+  const coverImagePublicId =
+    batchData.cover_image_public_id ||
+    (course as any)?.cover_image_public_id ||
+    courseDetails?.coverImagePublicId ||
+    null;
+
+  return {
+    id: batchData.id,
+    courseId: batchData.course_id,
+    courseTitle: course?.title,
+    courseSlug: course?.slug,
+    batchName: batchData.batch_name,
+    startDate: isTba ? "TBA" : batchData.start_date,
+    endDate: isTba ? null : batchData.end_date,
+    lastRegistrationDate: isTba ? "" : lastRegistrationDate,
+    registrationClosesBeforeHours: isTba ? undefined : registrationClosesBeforeHours,
+    calculatedClosingDateTimeFormatted: isTba ? undefined : closing?.closingDateTimeFormatted,
+    calculatedClosingTime: isTba ? undefined : closing?.closingTimeStr,
+    startTime: isTba ? "" : batchData.start_time,
+    endTime: isTba ? "" : batchData.end_time,
+    timezone: batchData.timezone || "Asia/Kolkata",
+    totalSeats: batchData.total_seats,
+    seatsBooked: batchData.seats_booked,
+    seatsRemaining,
+    isEnrollmentOpen,
+    status,
+    isExpired: isTba ? false : isExpired,
+    isSoldOut,
+    formattedStartDate: isTba ? "To Be Announced" : formatBatchDateIST(batchData.start_date),
+    formattedLastRegistrationDate: isTba ? "" : formatBatchDateIST(lastRegistrationDate),
+    formattedTiming: isTba ? "" : formatBatchTimeIST(batchData.start_time, batchData.end_time),
+    coverImageUrl,
+    coverImagePublicId,
+    createdAt: batchData.created_at,
+    updatedAt: batchData.updated_at,
+  };
+}
+
+/**
  * Helper to safely extract batch from database with column fallback resilience (e.g. PGRST204 / 42703)
  */
 export async function getBatchByCourseId(
@@ -134,106 +246,160 @@ export async function getBatchByCourseId(
     return null;
   }
 
-  const course = batchData.courses;
-  const courseDetails = course?.slug
-    ? parseCourseDetails(course.slug, course.description)
-    : null;
+  return formatBatchRecord(batchData);
+}
 
-  const registrationClosesBeforeHours =
-    batchData.registration_closes_before_hours ??
-    (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
-    2;
+/**
+ * Retrieves all batches for a specific course (maintaining date-specific capacity).
+ */
+export async function getBatchesByCourseId(
+  courseId: string
+): Promise<SafeBatchScheduleData[]> {
+  const supabase = createAdminClient();
 
-  const closing = calculateRegistrationClosingDateTime(
-    batchData.start_date,
-    batchData.start_time,
-    registrationClosesBeforeHours
-  );
+  let batchesData: any[] = [];
+  const { data: primaryData, error: primaryErr } = await supabase
+    .from("cohort_batches")
+    .select(
+      `
+      id,
+      course_id,
+      batch_name,
+      start_date,
+      end_date,
+      last_registration_date,
+      registration_closes_before_hours,
+      start_time,
+      end_time,
+      timezone,
+      total_seats,
+      seats_booked,
+      is_enrollment_open,
+      created_at,
+      updated_at,
+      courses (
+        id,
+        title,
+        slug,
+        description
+      )
+    `
+    )
+    .eq("course_id", courseId)
+    .order("start_date", { ascending: true });
 
-  // Derive lastRegistrationDate with priority: DB column > calculated closing date > startDate
-  // Only fall back to legacy course description metadata if batch has no active DB date
-  const lastRegistrationDate =
-    batchData.last_registration_date ||
-    closing?.closingDateStr ||
-    batchData.start_date ||
-    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
+  if (!primaryErr && primaryData) {
+    batchesData = primaryData;
+  } else {
+    const { data: fallbackData } = await supabase
+      .from("cohort_batches")
+      .select(
+        `
+        id,
+        course_id,
+        batch_name,
+        start_date,
+        end_date,
+        start_time,
+        end_time,
+        timezone,
+        total_seats,
+        seats_booked,
+        is_enrollment_open,
+        created_at,
+        updated_at,
+        courses (
+          id,
+          title,
+          slug,
+          description
+        )
+      `
+      )
+      .eq("course_id", courseId)
+      .order("start_date", { ascending: true });
 
-  const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
-  const isSoldOut = seatsRemaining <= 0;
-  const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate, new Date(), {
-    startDate: batchData.start_date,
-    startTime: batchData.start_time,
-    registrationClosesBeforeHours,
-  });
-
-  // For Foundation and Artistry cohort courses: enrolment is only open when the
-  // admin has explicitly opened registration AND a real start date has been announced.
-  const isCohortCourse =
-    course?.slug === "watercolour-foundation" ||
-    course?.slug === "watercolour-artistry-foundation";
-  const dateAnnounced = isCohortCourse
-    ? isBatchDateAnnounced(batchData.start_date)
-    : true;
-
-  // isEnrollmentOpen is false if: DB flag is off, date not announced (cohort), expired, or sold out
-  const isEnrollmentOpen =
-    batchData.is_enrollment_open && dateAnnounced && !isExpired && !isSoldOut;
-
-  // Derive batch status
-  let status: BatchStatus = "open";
-  if (!batchData.is_enrollment_open || !dateAnnounced) {
-    status = "closed";
-  } else if (isExpired || isSoldOut) {
-    status = "closed";
+    if (fallbackData) {
+      batchesData = fallbackData;
+    }
   }
 
-  const isWorkshop =
-    course?.slug === "the-watercolour" ||
-    course?.slug === "the-watercolour-roadmap";
+  return batchesData.map(formatBatchRecord);
+}
 
-  const coverImageUrl =
-    batchData.cover_image_url ||
-    (course as any)?.cover_image_url ||
-    courseDetails?.coverImage ||
-    (course?.slug && COURSE_IMAGES[course.slug]) ||
-    (isWorkshop ? null : "/images/foundation.jpeg");
+/**
+ * Creates a brand-new batch with its own independent capacity.
+ * Starts with zero registrations (seats_booked = 0).
+ */
+export async function createBatch(
+  courseId: string,
+  rawInput: BatchScheduleInput,
+  _createdByEmail?: string
+): Promise<SafeBatchScheduleData> {
+  const supabase = createAdminClient();
 
-  const coverImagePublicId =
-    batchData.cover_image_public_id ||
-    (course as any)?.cover_image_public_id ||
-    courseDetails?.coverImagePublicId ||
-    null;
+  const validation = batchScheduleSchema.safeParse(rawInput);
+  if (!validation.success) {
+    const firstIssue = validation.error.issues[0];
+    throw new Error(firstIssue?.message || "Invalid batch input.");
+  }
+  const input = validation.data;
 
-  return {
-    id: batchData.id,
-    courseId: batchData.course_id,
-    courseTitle: course?.title,
-    courseSlug: course?.slug,
-    batchName: batchData.batch_name,
-    startDate: batchData.start_date,
-    endDate: batchData.end_date,
-    lastRegistrationDate,
-    registrationClosesBeforeHours,
-    calculatedClosingDateTimeFormatted: closing?.closingDateTimeFormatted,
-    calculatedClosingTime: closing?.closingTimeStr,
-    startTime: batchData.start_time,
-    endTime: batchData.end_time,
-    timezone: batchData.timezone || "Asia/Kolkata",
-    totalSeats: batchData.total_seats,
-    seatsBooked: batchData.seats_booked,
-    seatsRemaining,
-    isEnrollmentOpen,
-    status,
-    isExpired,
-    isSoldOut,
-    formattedStartDate: formatBatchDateIST(batchData.start_date),
-    formattedLastRegistrationDate: formatBatchDateIST(lastRegistrationDate),
-    formattedTiming: formatBatchTimeIST(batchData.start_time, batchData.end_time),
-    coverImageUrl,
-    coverImagePublicId,
-    createdAt: batchData.created_at,
-    updatedAt: batchData.updated_at,
+  const nowIso = new Date().toISOString();
+  const isTba = input.status === "tba";
+  const effectiveStartDate =
+    isTba || !input.startDate || input.startDate === "TBA" || input.startDate === "tba"
+      ? "2099-12-31"
+      : input.startDate;
+
+  const isEnrollmentOpen = !isTba && input.status !== "completed" && (input.status === "open" || input.status === "upcoming");
+  const totalSeats = input.totalSeats && input.totalSeats > 0 ? input.totalSeats : 50;
+
+  const insertPayload: any = {
+    course_id: courseId,
+    batch_name: input.batchName,
+    start_date: effectiveStartDate,
+    end_date: input.endDate || null,
+    start_time: input.startTime || "6:30 PM",
+    end_time: input.endTime || "8:30 PM",
+    timezone: "Asia/Kolkata",
+    total_seats: totalSeats,
+    seats_booked: 0, // Starts fresh with zero registrations!
+    is_enrollment_open: isEnrollmentOpen,
+    created_at: nowIso,
+    updated_at: nowIso,
   };
+
+  if (input.lastRegistrationDate) {
+    insertPayload.last_registration_date = input.lastRegistrationDate;
+  }
+  if (input.registrationClosesBeforeHours) {
+    insertPayload.registration_closes_before_hours = input.registrationClosesBeforeHours;
+  }
+
+  const { data: created, error } = await supabase
+    .from("cohort_batches")
+    .insert(insertPayload)
+    .select(`*, courses (id, title, slug, description)`)
+    .single();
+
+  if (error || !created) {
+    // If optional columns failed, fallback insert without them
+    delete insertPayload.last_registration_date;
+    delete insertPayload.registration_closes_before_hours;
+    const { data: retryCreated, error: retryErr } = await supabase
+      .from("cohort_batches")
+      .insert(insertPayload)
+      .select(`*, courses (id, title, slug, description)`)
+      .single();
+
+    if (retryErr || !retryCreated) {
+      throw new Error(`Failed to create batch: ${retryErr?.message || error?.message}`);
+    }
+    return formatBatchRecord(retryCreated);
+  }
+
+  return formatBatchRecord(created);
 }
 
 /**
@@ -314,102 +480,7 @@ export async function getBatchById(batchId: string): Promise<SafeBatchScheduleDa
 
   if (!batchData) return null;
 
-  const course = batchData.courses;
-  const courseDetails = course?.slug
-    ? parseCourseDetails(course.slug, course.description)
-    : null;
-
-  const registrationClosesBeforeHours =
-    batchData.registration_closes_before_hours ??
-    (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
-    2;
-
-  const closing = calculateRegistrationClosingDateTime(
-    batchData.start_date,
-    batchData.start_time,
-    registrationClosesBeforeHours
-  );
-
-  const lastRegistrationDate =
-    batchData.last_registration_date ||
-    closing?.closingDateStr ||
-    batchData.start_date ||
-    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
-
-  const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
-  const isSoldOut = seatsRemaining <= 0;
-  const isExpired = isRegistrationDeadlineExpired(lastRegistrationDate, new Date(), {
-    startDate: batchData.start_date,
-    startTime: batchData.start_time,
-    registrationClosesBeforeHours,
-  });
-
-  // For Foundation and Artistry cohort courses: enrolment is only open when the
-  // admin has explicitly opened registration AND a real start date has been announced.
-  const isCohortCourse =
-    course?.slug === "watercolour-foundation" ||
-    course?.slug === "watercolour-artistry-foundation";
-  const dateAnnounced = isCohortCourse
-    ? isBatchDateAnnounced(batchData.start_date)
-    : true;
-
-  const isEnrollmentOpen =
-    batchData.is_enrollment_open && dateAnnounced && !isExpired && !isSoldOut;
-
-  let status: BatchStatus = "open";
-  if (!batchData.is_enrollment_open || !dateAnnounced) {
-    status = "closed";
-  } else if (isExpired || isSoldOut) {
-    status = "closed";
-  }
-
-  const isWorkshop =
-    course?.slug === "the-watercolour" ||
-    course?.slug === "the-watercolour-roadmap";
-
-  const coverImageUrl =
-    batchData.cover_image_url ||
-    (course as any)?.cover_image_url ||
-    courseDetails?.coverImage ||
-    (course?.slug && COURSE_IMAGES[course.slug]) ||
-    (isWorkshop ? null : "/images/foundation.jpeg");
-
-  const coverImagePublicId =
-    batchData.cover_image_public_id ||
-    (course as any)?.cover_image_public_id ||
-    courseDetails?.coverImagePublicId ||
-    null;
-
-  return {
-    id: batchData.id,
-    courseId: batchData.course_id,
-    courseTitle: course?.title,
-    courseSlug: course?.slug,
-    batchName: batchData.batch_name,
-    startDate: batchData.start_date,
-    endDate: batchData.end_date,
-    lastRegistrationDate,
-    registrationClosesBeforeHours,
-    calculatedClosingDateTimeFormatted: closing?.closingDateTimeFormatted,
-    calculatedClosingTime: closing?.closingTimeStr,
-    startTime: batchData.start_time,
-    endTime: batchData.end_time,
-    timezone: batchData.timezone || "Asia/Kolkata",
-    totalSeats: batchData.total_seats,
-    seatsBooked: batchData.seats_booked,
-    seatsRemaining,
-    isEnrollmentOpen,
-    status,
-    isExpired,
-    isSoldOut,
-    formattedStartDate: formatBatchDateIST(batchData.start_date),
-    formattedLastRegistrationDate: formatBatchDateIST(lastRegistrationDate),
-    formattedTiming: formatBatchTimeIST(batchData.start_time, batchData.end_time),
-    coverImageUrl,
-    coverImagePublicId,
-    createdAt: batchData.created_at,
-    updatedAt: batchData.updated_at,
-  };
+  return formatBatchRecord(batchData);
 }
 
 /**
@@ -445,34 +516,44 @@ export async function updateBatchSchedule(
     }
   }
 
+  const isTba = input.status === "tba";
+  const effectiveStartDate =
+    isTba && (!input.startDate || input.startDate === "TBA" || input.startDate === "tba")
+      ? "2099-12-31"
+      : input.startDate || "2099-12-31";
+
   // Ensure end date is not earlier than start date
   let effectiveEndDate = input.endDate || null;
-  if (effectiveEndDate && effectiveEndDate < input.startDate) {
-    effectiveEndDate = input.startDate;
+  if (effectiveEndDate && effectiveEndDate < effectiveStartDate) {
+    effectiveEndDate = effectiveStartDate;
   }
 
   const registrationClosesBeforeHours = input.registrationClosesBeforeHours ?? 2;
   const closing = calculateRegistrationClosingDateTime(
-    input.startDate,
+    effectiveStartDate,
     input.startTime,
     registrationClosesBeforeHours
   );
 
   const derivedLastRegDate =
-    input.lastRegistrationDate || closing?.closingDateStr || input.startDate;
+    input.lastRegistrationDate || closing?.closingDateStr || effectiveStartDate;
 
   // Determine is_enrollment_open
-  const isEnrollmentOpen = input.status === "open" || input.status === "upcoming";
+  const isEnrollmentOpen =
+    !isTba &&
+    input.status !== "completed" &&
+    input.status !== "closed" &&
+    (input.status === "open" || input.status === "upcoming");
   const nowIso = new Date().toISOString();
 
   let updatedRow: any = null;
 
   const fullUpdatePayload: any = {
     batch_name: input.batchName,
-    start_date: input.startDate,
+    start_date: effectiveStartDate,
     end_date: effectiveEndDate,
-    start_time: input.startTime,
-    end_time: input.endTime || null,
+    start_time: input.startTime || "6:30 PM",
+    end_time: input.endTime || "8:30 PM",
     last_registration_date: derivedLastRegDate,
     registration_closes_before_hours: registrationClosesBeforeHours,
     is_enrollment_open: isEnrollmentOpen,
@@ -575,44 +656,5 @@ export async function updateBatchSchedule(
     console.warn("Revalidation warning:", revalErr);
   }
 
-  const seatsRemaining = Math.max(0, updatedRow.total_seats - updatedRow.seats_booked);
-  const isSoldOut = seatsRemaining <= 0;
-  const isExpired = isRegistrationDeadlineExpired(
-    derivedLastRegDate,
-    new Date(),
-    {
-      startDate: input.startDate,
-      startTime: input.startTime,
-      registrationClosesBeforeHours,
-    }
-  );
-
-  return {
-    id: updatedRow.id,
-    courseId: updatedRow.course_id,
-    courseTitle: updatedRow.courses?.title,
-    courseSlug: updatedRow.courses?.slug,
-    batchName: updatedRow.batch_name,
-    startDate: updatedRow.start_date,
-    endDate: updatedRow.end_date,
-    lastRegistrationDate: derivedLastRegDate,
-    registrationClosesBeforeHours,
-    calculatedClosingDateTimeFormatted: closing?.closingDateTimeFormatted,
-    calculatedClosingTime: closing?.closingTimeStr,
-    startTime: updatedRow.start_time,
-    endTime: updatedRow.end_time,
-    timezone: updatedRow.timezone || "Asia/Kolkata",
-    totalSeats: updatedRow.total_seats,
-    seatsBooked: updatedRow.seats_booked,
-    seatsRemaining,
-    isEnrollmentOpen: isEnrollmentOpen && !isExpired && !isSoldOut,
-    status: input.status,
-    isExpired,
-    isSoldOut,
-    formattedStartDate: formatBatchDateIST(updatedRow.start_date),
-    formattedLastRegistrationDate: formatBatchDateIST(derivedLastRegDate),
-    formattedTiming: formatBatchTimeIST(updatedRow.start_time, updatedRow.end_time),
-    createdAt: updatedRow.created_at,
-    updatedAt: updatedRow.updated_at,
-  };
+  return formatBatchRecord(updatedRow);
 }

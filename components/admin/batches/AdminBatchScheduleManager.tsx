@@ -40,7 +40,7 @@ interface BatchFormData {
   registrationClosesBeforeHours: number;
   startTime: string;
   endTime: string;
-  status: "open" | "closed" | "upcoming" | "completed";
+  status: "open" | "closed" | "upcoming" | "completed" | "tba";
   totalSeats: number;
   seatsBooked: number;
 }
@@ -368,10 +368,10 @@ export function AdminBatchScheduleManager({
     if (!formData.batchName.trim()) {
       errors.batchName = "Batch name is required.";
     }
-    if (!formData.startDate) {
+    if (!formData.startDate && formData.status !== "tba") {
       errors.startDate = "Batch start date is required.";
     }
-    if (!formData.startTime.trim()) {
+    if (!formData.startTime.trim() && formData.status !== "tba") {
       errors.startTime = "Batch start time is required.";
     }
 
@@ -928,14 +928,16 @@ export function AdminBatchScheduleManager({
                             | "closed"
                             | "upcoming"
                             | "completed"
+                            | "tba"
                         )
                       }
                       className="w-full rounded-lg bg-[#F7F4EC] border border-[#464137]/20 px-3 py-2 text-xs text-[#292923] font-semibold focus:outline-hidden focus:ring-1 focus:ring-[#68705A]"
                     >
-                      <option value="open">🟢 Open for Registration</option>
-                      <option value="upcoming">🟡 Upcoming (Announced)</option>
+                      <option value="tba">⚪ To Be Announced (TBA)</option>
+                      <option value="upcoming">🟡 Announced / Scheduled</option>
+                      <option value="open">🟢 Registration Open</option>
                       <option value="closed">🔴 Registration Closed</option>
-                      <option value="completed">⚪ Completed</option>
+                      <option value="completed">⚫ Completed</option>
                     </select>
                     <span className="text-[0.66rem] text-[#6F6B61] mt-0.5 block">
                       Controls whether the booking engine accepts payments.

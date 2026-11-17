@@ -40,6 +40,8 @@ export const courseDetailsSchema = z.object({
   whyDescription: z.string().trim().optional(),
   whyCallout: z.string().trim().optional(),
   ctaText: z.string().trim().optional(),
+  // Registration Mode: Paid (Razorpay) vs Free (Instant ₹0 confirmation)
+  registrationMode: z.enum(["paid", "free"]).default("paid").optional(),
 });
 
 export type CourseContentDetails = z.infer<typeof courseDetailsSchema>;

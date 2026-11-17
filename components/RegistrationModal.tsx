@@ -143,6 +143,21 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     }
   };
 
+  const isMasterclass =
+    courseSlug === "the-watercolour" ||
+    courseSlug === "the-watercolour-roadmap" ||
+    activeBatch?.courseSlug === "the-watercolour" ||
+    activeBatch?.courseSlug === "the-watercolour-roadmap";
+
+  const isFreeMode = Boolean(
+    (isMasterclass && (activeBatch as any)?.registrationMode === "free") ||
+    (isMasterclass && (activeBatch as any)?.course?.details?.registrationMode === "free") ||
+    (isMasterclass && (activeBatch as any)?.course?.registrationMode === "free") ||
+    coursePrice === 0 ||
+    activeBatch?.offerPrice === 0 ||
+    activeBatch?.offerPricePaise === 0
+  );
+
   // Fetch active cohort batch details on mount and when modal opens or courseSlug changes
   useEffect(() => {
     if (isOpen) {
@@ -838,7 +853,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <span>Retry Payment</span>
                     <ArrowRight className="size-4" />
                   </>
-                ) : (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0) || (coursePrice && coursePrice > 0) ? (
+                ) : !isFreeMode && ((activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0) || (coursePrice && coursePrice > 0)) ? (
                   <>
                     <span className="font-price tabular-nums">
                       Proceed to Payment • ₹
@@ -850,7 +865,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </>
                 ) : (
                   <>
-                    <span>Confirm Free Reservation</span>
+                    <span>Complete Free Registration • ₹0</span>
                     <ArrowRight className="size-4" />
                   </>
                 )}

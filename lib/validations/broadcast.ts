@@ -20,6 +20,7 @@ export const targetFilterSchema = z.object({
   time: z.string().nullable().optional(),
   joinLink: z.string().nullable().optional(),
   confirmedOnly: z.boolean().nullable().optional(),
+  selectedCustomerIds: z.array(z.string()).nullable().optional(),
 });
 
 export type TargetFilterInput = z.infer<typeof targetFilterSchema>;
