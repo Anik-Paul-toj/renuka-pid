@@ -41,6 +41,7 @@ export async function sendBookingConfirmationEmail(
       booking_reference,
       status,
       amount_paise,
+      original_amount_paise,
       currency,
       customer_id,
       batch_id,
@@ -66,7 +67,8 @@ export async function sendBookingConfirmationEmail(
           slug,
           title,
           description,
-          duration_minutes
+          duration_minutes,
+          offer_price_paise
         )
       ),
       payments (

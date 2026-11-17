@@ -469,12 +469,13 @@ export async function getBookingDetailsById(
       let redeemedAt: string | null = null;
 
       const originalCoursePricePaise =
+        (booking as any).original_amount_paise ||
         (course as any)?.price_paise ||
         (course as any)?.offer_price_paise ||
         booking.amount_paise;
       let creditAmountPaise =
-        booking.amount_paise ||
         (booking as any).original_amount_paise ||
+        booking.amount_paise ||
         (course as any)?.offer_price_paise;
 
       try {

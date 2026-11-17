@@ -68,10 +68,10 @@ export function getCourseDiscountBenefit(
 
     if (typeof booking === "object" && booking !== null) {
       refId = booking.booking_reference || null;
-      if (typeof booking.amount_paise === "number" && booking.amount_paise > 0) {
+      if (typeof (booking as any).original_amount_paise === "number" && (booking as any).original_amount_paise > 0) {
+        earnedPaise = (booking as any).original_amount_paise;
+      } else if (typeof booking.amount_paise === "number" && booking.amount_paise > 0) {
         earnedPaise = booking.amount_paise;
-      } else if (typeof booking.original_amount_paise === "number" && booking.original_amount_paise > 0) {
-        earnedPaise = booking.original_amount_paise;
       }
     } else if (typeof booking === "string") {
       refId = booking;
@@ -252,6 +252,7 @@ export async function checkCreditEligibility(
       status,
       seat_released,
       amount_paise,
+      original_amount_paise,
       cohort_batches!inner (
         course_id,
         courses (
@@ -391,13 +392,14 @@ export async function checkCreditEligibility(
     if (!creditActive) {
       // Found an eligible qualifying Foundation purchase whose credit is free to use!
       // The credit amount is authoritatively derived from the student's Foundation purchase:
-      // What the student paid/earned for the Foundation course at the time of purchase (e.g. ₹599, ₹990, ₹1,499, ₹2,499)
+      // The voucher amount is authoritatively derived from the Foundation fee applicable at purchase:
+      // A separately discounted payment (amount_paise) does not reduce the voucher below the applicable Foundation purchase fee (original_amount_paise).
       const foundationEarnedPaise =
-        typeof qb.amount_paise === "number" && qb.amount_paise > 0
-          ? qb.amount_paise
-          : (typeof (qb as any).original_amount_paise === "number" && (qb as any).original_amount_paise > 0
-              ? (qb as any).original_amount_paise
-              : (qb as any).cohort_batches?.courses?.offer_price_paise || 0);
+        typeof (qb as any).original_amount_paise === "number" && (qb as any).original_amount_paise > 0
+          ? (qb as any).original_amount_paise
+          : typeof qb.amount_paise === "number" && qb.amount_paise > 0
+            ? qb.amount_paise
+            : (qb as any).cohort_batches?.courses?.offer_price_paise || 0;
 
       const creditAmountPaise = Math.min(foundationEarnedPaise, originalAmountPaise);
       const payableAmountPaise = Math.max(0, originalAmountPaise - creditAmountPaise);
