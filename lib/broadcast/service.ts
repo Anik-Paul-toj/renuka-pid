@@ -11,6 +11,11 @@ import { getSettings } from "@/lib/settings/service";
 import { getWhatsAppTransport } from "@/lib/whatsapp/client";
 import { isValidWhatsAppNumber, normalizeWhatsAppNumber } from "@/lib/whatsapp/meta-adapter";
 import { buildMetaTemplateComponents } from "@/lib/whatsapp/templates";
+import {
+  formatBatchDateFullMonthIST,
+  formatBatchTimeIST,
+  formatBatchDateIST,
+} from "@/lib/batches-admin/format";
 
 export interface ResolvedRecipient {
   customerId: string;
@@ -612,25 +617,32 @@ export async function sendBroadcast(
   let successfulSends = 0;
   let failedSends = 0;
 
-  const defaultDate = targetFilter.date || "28 October 2026";
-  const defaultTime = targetFilter.time || "6:30 PM – 8:30 PM";
-  const defaultJoinLink = targetFilter.joinLink || "https://zoom.us/j/1234567890";
-  const courseTitle = targetFilter.courseName || "The WATERCOLOUR Roadmap: One-Day Masterclass";
-  const batchName = targetFilter.batchName || "Live Masterclass — 28 Oct 2026";
+  const defaultDate = targetFilter.date || "";
+  const defaultTime = targetFilter.time || "";
+  const defaultJoinLink = targetFilter.joinLink || "";
+  const courseTitle = targetFilter.courseName || "Renuka Art Studio Masterclass";
+  const batchName = targetFilter.batchName || "Upcoming Batch";
 
   const appSettings = await getSettings();
 
   // 4. Dispatch to each recipient sequentially
   for (const recipient of recipients) {
     try {
+      const recipientDate = recipient.startDate
+        ? formatBatchDateFullMonthIST(recipient.startDate)
+        : defaultDate || "To be announced";
+      const recipientTime = recipient.startTime
+        ? formatBatchTimeIST(recipient.startTime, recipient.endTime)
+        : defaultTime || "To be announced";
+
       // Resolve personalizations
       const recipientName = recipient.fullName || "Student";
       const resolvedSubject = (targetFilter.subject || "Studio Announcement")
         .replace(/\[Student Name\]|\{\{student_name\}\}/gi, recipientName)
         .replace(/\[Course Name\]|\{\{course_name\}\}/gi, recipient.courseTitle || courseTitle)
         .replace(/\[Batch Name\]|\{\{batch_name\}\}/gi, recipient.batchName || batchName)
-        .replace(/\[Date\]|\{\{date\}\}/gi, recipient.startDate || defaultDate)
-        .replace(/\[Time\]|\{\{time\}\}/gi, defaultTime)
+        .replace(/\[Date\]|\{\{date\}\}/gi, recipientDate)
+        .replace(/\[Time\]|\{\{time\}\}/gi, recipientTime)
         .replace(/\[Join Link\]|\[Zoom Link\]|\{\{zoom_link\}\}/gi, recipient.zoomJoinUrl || defaultJoinLink);
 
       // Clean unescaped newlines and replace template tags
@@ -640,8 +652,8 @@ export async function sendBroadcast(
         .replace(/\[Student Name\]|\{\{student_name\}\}/gi, recipientName)
         .replace(/\[Course Name\]|\{\{course_name\}\}/gi, recipient.courseTitle || courseTitle)
         .replace(/\[Batch Name\]|\{\{batch_name\}\}/gi, recipient.batchName || batchName)
-        .replace(/\[Date\]|\{\{date\}\}/gi, recipient.startDate || defaultDate)
-        .replace(/\[Time\]|\{\{time\}\}/gi, defaultTime)
+        .replace(/\[Date\]|\{\{date\}\}/gi, recipientDate)
+        .replace(/\[Time\]|\{\{time\}\}/gi, recipientTime)
         .replace(/\[Join Link\]|\[Zoom Link\]|\{\{zoom_link\}\}/gi, recipient.zoomJoinUrl || defaultJoinLink)
         .replace(/\[Booking Reference\]|\{\{booking_reference\}\}/gi, "N/A");
 
@@ -771,8 +783,8 @@ export async function sendBroadcast(
                 .replace(/\[Student Name\]|\{\{student_name\}\}/gi, recipientName)
                 .replace(/\[Course Name\]|\{\{course_name\}\}/gi, recipient.courseTitle || courseTitle)
                 .replace(/\[Batch Name\]|\{\{batch_name\}\}/gi, recipient.batchName || batchName)
-                .replace(/\[Date\]|\{\{date\}\}/gi, recipient.startDate || defaultDate)
-                .replace(/\[Time\]|\{\{time\}\}/gi, defaultTime)
+                .replace(/\[Date\]|\{\{date\}\}/gi, recipientDate)
+                .replace(/\[Time\]|\{\{time\}\}/gi, recipientTime)
                 .replace(/\[Join Link\]|\[Zoom Link\]|\{\{zoom_link\}\}/gi, recipient.zoomJoinUrl || defaultJoinLink);
             });
           }
@@ -781,8 +793,8 @@ export async function sendBroadcast(
             templateParams = [
               recipientName,
               recipient.courseTitle || courseTitle,
-              recipient.startDate || defaultDate,
-              recipient.startTime || defaultTime,
+              recipientDate,
+              recipientTime,
               recipient.zoomJoinUrl || defaultJoinLink,
             ];
           }

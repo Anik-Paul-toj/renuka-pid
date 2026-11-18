@@ -17,8 +17,9 @@ export const StickyBottomBar: React.FC<StickyBottomBarProps> = ({ activeBatch })
 
   return (
     <aside
+      data-floating-bar="true"
       aria-label="Floating registration bar"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#464137]/15 bg-[#F7F4EC]/95 backdrop-blur-md shadow-sm"
+      className="sticky-bottom-bar fixed inset-x-0 bottom-0 z-40 border-t border-[#464137]/15 bg-[#F7F4EC]/95 backdrop-blur-md shadow-sm"
     >
       <div className="mx-auto flex max-w-6xl items-center justify-center gap-4 px-6 py-3">
         {/* Date & Urgency info (desktop) */}

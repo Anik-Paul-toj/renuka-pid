@@ -5,14 +5,48 @@
 export const IST_TIMEZONE = "Asia/Kolkata";
 
 /**
- * Formats a YYYY-MM-DD date string into a friendly, artistic date (e.g., "01 Nov 2026").
+ * Extracts [year, month, day] integers from a date-only string (YYYY-MM-DD) or ISO string.
+ * Completely immune to local browser or server timezone offset shifts.
+ * Returns null if invalid or unannounced.
+ */
+export function extractDateParts(dateStr?: string | null): [number, number, number] | null {
+  if (!dateStr) return null;
+  const clean = dateStr.trim();
+  if (
+    !clean ||
+    clean === "TBA" ||
+    clean === "tba" ||
+    clean.startsWith("2099-12-31")
+  ) {
+    return null;
+  }
+  const dateOnly = clean.includes("T") ? clean.split("T")[0] : clean.slice(0, 10);
+  const parts = dateOnly.split("-").map(Number);
+  if (
+    parts.length < 3 ||
+    !parts[0] ||
+    !parts[1] ||
+    !parts[2] ||
+    isNaN(parts[0]) ||
+    isNaN(parts[1]) ||
+    isNaN(parts[2])
+  ) {
+    return null;
+  }
+  return [parts[0], parts[1], parts[2]];
+}
+
+/**
+ * Formats a date string into a friendly, artistic date strictly in IST (e.g., "05 Dec 2026").
+ * Preserves the exact calendar date with zero timezone drift.
  */
 export function formatBatchDateIST(dateStr?: string | null): string {
   if (!dateStr || !isBatchDateAnnounced(dateStr)) return "To Be Announced";
+  const parts = extractDateParts(dateStr);
+  if (!parts) return "To Be Announced";
   try {
-    const [year, month, day] = dateStr.split("-").map(Number);
-    if (!year || !month || !day) return dateStr;
-    // Construct in UTC at noon to prevent local browser shift
+    const [year, month, day] = parts;
+    // Construct in UTC at noon (12:00 UTC = 17:30 IST) to safely eliminate local browser shift
     const d = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
     return new Intl.DateTimeFormat("en-IN", {
       timeZone: IST_TIMEZONE,
@@ -26,13 +60,35 @@ export function formatBatchDateIST(dateStr?: string | null): string {
 }
 
 /**
- * Formats a YYYY-MM-DD date string into a full weekday date (e.g., "Saturday, 14 November 2026").
+ * Formats a date string into a full month date strictly in IST (e.g., "05 December 2026").
+ */
+export function formatBatchDateFullMonthIST(dateStr?: string | null): string {
+  if (!dateStr || !isBatchDateAnnounced(dateStr)) return "To Be Announced";
+  const parts = extractDateParts(dateStr);
+  if (!parts) return "To Be Announced";
+  try {
+    const [year, month, day] = parts;
+    const d = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+    return new Intl.DateTimeFormat("en-IN", {
+      timeZone: IST_TIMEZONE,
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return dateStr;
+  }
+}
+
+/**
+ * Formats a date string into a full weekday date strictly in IST (e.g., "Saturday, 05 December 2026").
  */
 export function formatBatchDateWithWeekdayIST(dateStr?: string | null): string {
   if (!dateStr || !isBatchDateAnnounced(dateStr)) return "To Be Announced";
+  const parts = extractDateParts(dateStr);
+  if (!parts) return "To Be Announced";
   try {
-    const [year, month, day] = dateStr.split("-").map(Number);
-    if (!year || !month || !day) return dateStr;
+    const [year, month, day] = parts;
     const d = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
     return new Intl.DateTimeFormat("en-IN", {
       timeZone: IST_TIMEZONE,
@@ -47,24 +103,87 @@ export function formatBatchDateWithWeekdayIST(dateStr?: string | null): string {
 }
 
 /**
- * Formats batch timing with start and optional end time and IST label.
- * Example: "6:30 PM – 8:00 PM IST"
+ * Normalizes clock time strings: cleans spacing around AM/PM, removes extra IST tags.
+ * Example: "11:00AM" -> "11:00 AM", "06:30 PM IST" -> "6:30 PM"
+ */
+export function normalizeTimeIST(timeStr?: string | null): string {
+  if (!timeStr) return "";
+  let clean = timeStr.trim();
+  clean = clean.replace(/\s*(ist|asia\/kolkata)\s*$/i, "").trim();
+  clean = clean.replace(/(\d)(am|pm)/gi, "$1 $2").toUpperCase();
+  // Strip leading zero in hour if present e.g. "06:30 PM" -> "6:30 PM" for clean natural display
+  clean = clean.replace(/^0(\d:\d{2}\s*(?:AM|PM))/i, "$1");
+  return clean;
+}
+
+/**
+ * Formats batch timing with start and optional end time and canonical IST label.
+ * Example: "11:00 AM – 1:00 PM IST"
  */
 export function formatBatchTimeIST(startTime?: string | null, endTime?: string | null): string {
-  if (!startTime) return "TBA";
-  let start = startTime.trim();
-  let end = endTime ? endTime.trim() : "";
+  if (!startTime || !startTime.trim()) return "To be announced";
+  const start = normalizeTimeIST(startTime);
+  const end = endTime ? normalizeTimeIST(endTime) : "";
 
-  // Strip trailing IST to prevent duplicates
-  start = start.replace(/\s*ist\s*$/i, "").trim();
-  if (end) {
-    end = end.replace(/\s*ist\s*$/i, "").trim();
-  }
-
+  if (!start) return "To be announced";
   if (!end || end === start) {
     return `${start} IST`;
   }
   return `${start} – ${end} IST`;
+}
+
+/**
+ * Formats an actual ISO timestamp (e.g. created_at, sent_at) strictly in Asia/Kolkata timezone.
+ */
+export function formatTimestampIST(
+  timestamp?: string | number | Date | null,
+  options?: Intl.DateTimeFormatOptions
+): string {
+  if (!timestamp) return "";
+  try {
+    const d = typeof timestamp === "object" && timestamp instanceof Date ? timestamp : new Date(timestamp);
+    if (isNaN(d.getTime())) return String(timestamp);
+    return new Intl.DateTimeFormat("en-IN", {
+      timeZone: IST_TIMEZONE,
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      ...options,
+    }).format(d);
+  } catch {
+    return String(timestamp);
+  }
+}
+
+/**
+ * Formats an actual ISO timestamp into distinct date and time components strictly in Asia/Kolkata timezone.
+ */
+export function formatTimestampDateTimeIST(
+  timestamp?: string | number | Date | null
+): { date: string; time: string } {
+  if (!timestamp) return { date: "", time: "" };
+  try {
+    const d = typeof timestamp === "object" && timestamp instanceof Date ? timestamp : new Date(timestamp);
+    if (isNaN(d.getTime())) return { date: String(timestamp), time: "" };
+    const date = new Intl.DateTimeFormat("en-IN", {
+      timeZone: IST_TIMEZONE,
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+    const time = new Intl.DateTimeFormat("en-IN", {
+      timeZone: IST_TIMEZONE,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d);
+    return { date, time: `${time} IST` };
+  } catch {
+    return { date: String(timestamp), time: "" };
+  }
 }
 
 /**

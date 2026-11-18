@@ -5,6 +5,7 @@ import { sendTransactionalEmail } from "@/lib/notifications/email";
 import { getSettings } from "@/lib/settings/service";
 import { getCourseDiscountBenefit } from "@/lib/course-credit/service";
 import { parseCourseDetails } from "@/lib/courses-admin/service";
+import { formatBatchDateIST, formatBatchTimeIST } from "@/lib/batches-admin/format";
 
 export interface NotificationServiceResult {
   success: boolean;
@@ -177,12 +178,13 @@ export async function sendBookingConfirmationEmail(
       durationText = `${course.duration_minutes} Mins`;
     }
 
-    const startDateText =
-      batch?.start_date && batch.start_date.trim() ? batch.start_date : "To be announced";
-    const startTimeText =
-      batch?.start_time && batch.start_time.trim() ? batch.start_time : "To be announced";
-    const endTimeText =
-      batch?.end_time && batch.end_time.trim() ? batch.end_time : "";
+    const startDateText = batch?.start_date
+      ? formatBatchDateIST(batch.start_date)
+      : "To be announced";
+    const startTimeText = batch?.start_time
+      ? formatBatchTimeIST(batch.start_time, batch.end_time)
+      : "To be announced";
+    const endTimeText = "";
 
     // 5. Evaluate Dynamic Course Upgrade Credit Benefit
     const discountBenefit = getCourseDiscountBenefit(

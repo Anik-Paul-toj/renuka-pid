@@ -218,15 +218,15 @@ export const workshopData: WorkshopData = {
   transformationAfter: "“I Painted This Myself.”",
   format: "One-Day Masterclass",
   focus: "To Fix Basics",
-  date: "Saturday, 28 October 2026",
-  time: "6:30 PM – 8:30 PM IST",
+  date: "Saturday, 28 November 2026",
+  time: "11:00 AM – 1:00 PM IST",
   language: "HINGLISH",
   duration: "120 Minutes",
   platform: "Zoom",
   // NOTE: Static offline fallback only. Live prices are managed dynamically from the Admin Panel via Supabase courses table.
   originalPrice: 599,
   offerPrice: 199,
-  registrationDeadline: "2026-10-28T18:30:00+05:30",
+  registrationDeadline: "2026-11-28T11:00:00+05:30",
   cta: "BOOK NOW",
   handwrittenPhrase: "Art heals. Always.",
 };

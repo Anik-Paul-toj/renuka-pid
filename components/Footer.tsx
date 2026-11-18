@@ -28,7 +28,11 @@ export const Footer: React.FC = () => {
   const whatsappUrl = `https://wa.me/${intlNumber}`;
 
   return (
-    <footer id="contact" className="border-t border-[#464137]/10 bg-[#F7F4EC] py-14 pb-28 sm:pb-32">
+    <footer
+      id="contact"
+      data-site-footer="true"
+      className="site-footer border-t border-[#464137]/10 bg-[#F7F4EC] py-14 pb-28 sm:pb-32"
+    >
       <div className="mx-auto max-w-6xl space-y-8 px-6">
         {/* Top Row: Brand & Nav Links */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-[#464137]/15">

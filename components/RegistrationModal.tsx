@@ -602,9 +602,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       />
 
       {/* Centering Wrapper ensuring the top and bottom of modal are never cut off on smaller screens */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center p-3 sm:p-6 py-8 pointer-events-none">
+      <div className="relative z-10 flex min-h-full items-start sm:items-center justify-center p-3 sm:p-6 py-6 sm:py-10 pointer-events-none">
         {/* Modal Container */}
-        <div className="paper-card pointer-events-auto relative w-full max-w-lg my-auto max-h-[calc(100vh-3rem)] overflow-y-auto rounded-xl bg-[#FAF8F2] p-5 sm:p-6 shadow-2xl border border-[#464137]/15 z-10 custom-scrollbar">
+        <div className="paper-card pointer-events-auto relative w-full max-w-lg my-auto rounded-2xl bg-[#FAF8F2] p-5 sm:p-7 shadow-2xl border border-[#464137]/15 z-10">
         {/* Close button - hidden/disabled while payment is locked */}
         {!isPaymentLocked && (
           <button
@@ -612,10 +612,10 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               if (isPaymentLocked) return;
               handleReset();
             }}
-            className="absolute right-4 top-4 grid size-8 place-items-center rounded-full bg-[#EEE9DE] text-[#6F6B61] transition-colors hover:text-[#292923]"
+            className="absolute right-3.5 top-3.5 sm:right-5 sm:top-5 grid size-8 sm:size-9 place-items-center rounded-full bg-[#EEE9DE] text-[#6F6B61] transition-colors hover:text-[#292923] hover:bg-[#E3DDD1] z-20"
             aria-label="Close registration modal"
           >
-            <X className="size-4" />
+            <X className="size-4 sm:size-4.5" />
           </button>
         )}
 

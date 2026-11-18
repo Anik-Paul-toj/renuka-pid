@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
   Sparkles,
@@ -24,6 +25,11 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
   const [activeTab, setActiveTab] = useState<"all" | GalleryCategory>("all");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [failedImageIds, setFailedImageIds] = useState<Set<string>>(new Set());
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Partition images by category
   const artistImages = images.filter((img) => img.category === "artist_gallery");
@@ -327,10 +333,10 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
       </div>
 
       {/* Lightbox Modal (High-Resolution Artwork Preview) */}
-      {currentLightboxImage && (
+      {currentLightboxImage && mounted && createPortal(
         <div
           onClick={() => setLightboxIndex(null)}
-          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
         >
           {/* Close Button */}
           <button
@@ -401,7 +407,8 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
               </p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );

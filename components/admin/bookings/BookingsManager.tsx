@@ -28,6 +28,10 @@ import {
   AdminBookingsListResult,
   AdminBookingDetail,
 } from "@/lib/bookings-admin/service";
+import {
+  formatBatchDateIST,
+  formatBatchTimeIST,
+} from "@/lib/batches-admin/format";
 
 interface BookingsManagerProps {
   initialData: AdminBookingsListResult;
@@ -306,7 +310,7 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
               <option value="all">All Cohort Batches</option>
               {availableBatches.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.batchName} ({b.startDate})
+                  {b.batchName} ({formatBatchDateIST(b.startDate)})
                 </option>
               ))}
             </select>
@@ -380,7 +384,7 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                     <td className="px-5 py-4 space-y-0.5 max-w-[200px]">
                       <div className="font-semibold text-[#292923] truncate">{booking.courseTitle}</div>
                       <div className="text-[0.68rem] text-[#6F6B61] truncate">{booking.batchName}</div>
-                      <div className="text-[0.65rem] text-[#68705A] font-medium">{booking.startDate}</div>
+                      <div className="text-[0.65rem] text-[#68705A] font-medium">{formatBatchDateIST(booking.startDate)}</div>
                     </td>
 
                     {/* Booking Status */}
@@ -436,6 +440,7 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                     {/* Date */}
                     <td suppressHydrationWarning className="px-5 py-4 text-[0.68rem] text-[#6F6B61] whitespace-nowrap">
                       {new Date(booking.createdAt).toLocaleDateString("en-IN", {
+                        timeZone: "Asia/Kolkata",
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -632,7 +637,7 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                       <div>
                         <span className="block text-[#6F6B61] text-[0.68rem]">Schedule:</span>
                         <span className="font-semibold text-[#292923]">
-                          {bookingDetail.batch.startDate} ({bookingDetail.batch.startTime} – {bookingDetail.batch.endTime})
+                          {formatBatchDateIST(bookingDetail.batch.startDate)} ({formatBatchTimeIST(bookingDetail.batch.startTime, bookingDetail.batch.endTime)})
                         </span>
                       </div>
                       <div>

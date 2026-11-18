@@ -485,6 +485,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                         <div suppressHydrationWarning className="text-[0.68rem] text-[#6F6B61] mt-0.5">
                           Joined{" "}
                           {new Date(student.createdAt).toLocaleDateString("en-IN", {
+                            timeZone: "Asia/Kolkata",
                             month: "short",
                             day: "numeric",
                             year: "numeric",
@@ -826,6 +827,7 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
                               </span>
                               <span suppressHydrationWarning className="text-[0.68rem] text-[#6F6B61]">
                                 {new Date(booking.createdAt).toLocaleDateString("en-IN", {
+                                  timeZone: "Asia/Kolkata",
                                   month: "short",
                                   day: "numeric",
                                   year: "numeric",

@@ -6,6 +6,11 @@ import {
   BroadcastsListResult,
 } from "@/lib/broadcast/service";
 import {
+  formatBatchDateFullMonthIST,
+  formatBatchTimeIST,
+  formatBatchDateIST,
+} from "@/lib/batches-admin/format";
+import {
   AudienceType,
   TargetFilterInput,
 } from "@/lib/validations/broadcast";
@@ -323,16 +328,12 @@ export function BroadcastManager({
   // Target Filter object
   const targetFilter: TargetFilterInput = useMemo(() => {
     const formattedDate = selectedBatch?.start_date
-      ? new Date(selectedBatch.start_date + "T00:00:00").toLocaleDateString("en-IN", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })
-      : "28 October 2026";
+      ? formatBatchDateFullMonthIST(selectedBatch.start_date)
+      : "";
 
     const formattedTime = selectedBatch
-      ? `${selectedBatch.start_time} – ${selectedBatch.end_time}`
-      : "6:30 PM – 8:30 PM";
+      ? formatBatchTimeIST(selectedBatch.start_time, selectedBatch.end_time)
+      : "";
 
     return {
       audience,

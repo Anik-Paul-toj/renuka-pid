@@ -204,7 +204,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      data-site-header="true"
+      className={`site-header sticky top-0 z-50 w-full transition-all duration-300 ${
         isScrolled
           ? "border-b border-[#464137]/15 bg-[#FAF8F2]/95 backdrop-blur-md shadow-xs"
           : isHome

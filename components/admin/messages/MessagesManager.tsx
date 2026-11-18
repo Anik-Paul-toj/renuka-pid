@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { MessageTemplateRecord } from "@/lib/messages-admin/service";
+import { formatBatchDateFullMonthIST, normalizeTimeIST } from "@/lib/batches-admin/format";
 import {
   Mail,
   MessageSquare,
@@ -68,42 +69,16 @@ function uiToDbText(text: string): string {
     .replace(/\[Payment Reference\]/gi, "{{payment_reference}}");
 }
 
-// Helper to format date cleanly: 2026-10-28 -> 28 October 2026
+// Helper to format date cleanly strictly in Asia/Kolkata
 function formatBatchDate(dateStr?: string | null): string {
-  if (!dateStr) return "28 October 2026";
-  const trimmed = dateStr.trim();
-  if (/[a-zA-Z]/.test(trimmed)) return trimmed;
-  try {
-    const d = new Date(trimmed + "T00:00:00");
-    if (isNaN(d.getTime())) return trimmed;
-    return d.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  } catch {
-    return trimmed;
-  }
+  if (!dateStr) return "To Be Announced";
+  return formatBatchDateFullMonthIST(dateStr);
 }
 
-// Helper to format time cleanly without ever duplicating AM/PM
+// Helper to format time cleanly strictly in Asia/Kolkata
 function cleanTimeFormat(timeStr?: string | null): string {
   if (!timeStr) return "";
-  const trimmed = timeStr.trim();
-  // If already contains AM/PM, clean up any accidental duplicates
-  if (/AM|PM/i.test(trimmed)) {
-    return trimmed.replace(/\s+(AM|PM)\s+(AM|PM)/gi, " $1");
-  }
-  const parts = trimmed.split(":");
-  if (parts.length >= 2) {
-    let hours = parseInt(parts[0], 10);
-    const minutes = parts[1];
-    const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    return `${hours}:${minutes} ${ampm}`;
-  }
-  return trimmed;
+  return normalizeTimeIST(timeStr);
 }
 
 export function MessagesManager({

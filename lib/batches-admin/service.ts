@@ -12,6 +12,7 @@ import {
   isRegistrationDeadlineExpired,
   isBatchDateAnnounced,
   calculateRegistrationClosingDateTime,
+  getTodayISTString,
 } from "./format";
 import { parseCourseDetails, COURSE_IMAGES } from "@/lib/courses-admin/details";
 
@@ -58,11 +59,14 @@ export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
     ? parseCourseDetails(course.slug, course.description)
     : null;
 
-  const savedStatus = (courseDetails as any)?.batchSchedule?.status;
+  // Retrieve batch-specific metadata if stored by batch ID; fallback to course level only for single legacy batch
+  const batchMeta =
+    (courseDetails as any)?.batchSchedules?.[batchData.id] ||
+    (courseDetails as any)?.batchSchedule;
 
   const registrationClosesBeforeHours =
     batchData.registration_closes_before_hours ??
-    (courseDetails as any)?.batchSchedule?.registrationClosesBeforeHours ??
+    batchMeta?.registrationClosesBeforeHours ??
     2;
 
   const closing = calculateRegistrationClosingDateTime(
@@ -75,7 +79,7 @@ export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
     batchData.last_registration_date ||
     closing?.closingDateStr ||
     batchData.start_date ||
-    (courseDetails as any)?.batchSchedule?.lastRegistrationDate;
+    batchMeta?.lastRegistrationDate;
 
   const seatsRemaining = Math.max(0, batchData.total_seats - batchData.seats_booked);
   const isSoldOut = seatsRemaining <= 0;
@@ -86,30 +90,32 @@ export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
   });
 
   const dateAnnounced = isBatchDateAnnounced(batchData.start_date);
-  const isTba = savedStatus === "tba" || !dateAnnounced;
-  const isCompleted = savedStatus === "completed";
+  const isTba = !dateAnnounced || batchData.start_date === "2099-12-31" || batchData.start_date === "TBA";
+
+  // Per-batch status derivation: strictly isolated to this batch record
+  let status: BatchStatus = "open";
+  if (isTba) {
+    status = "tba";
+  } else if (!batchData.is_enrollment_open) {
+    const today = getTodayISTString();
+    if (batchData.start_date < today) {
+      status = "completed";
+    } else {
+      status = "closed";
+    }
+  } else if (isExpired || isSoldOut) {
+    status = "closed";
+  } else {
+    status = "open";
+  }
 
   // Enrollment is open ONLY if explicitly open, date announced, not TBA, not completed, not expired, not sold out
   const isEnrollmentOpen =
     batchData.is_enrollment_open &&
     !isTba &&
-    !isCompleted &&
+    status !== "completed" &&
     !isExpired &&
     !isSoldOut;
-
-  // Derive batch status
-  let status: BatchStatus = "open";
-  if (isTba) {
-    status = "tba";
-  } else if (isCompleted) {
-    status = "completed";
-  } else if (savedStatus === "upcoming" || savedStatus === "announced") {
-    status = "upcoming";
-  } else if (!batchData.is_enrollment_open || isExpired || isSoldOut) {
-    status = "closed";
-  } else {
-    status = "open";
-  }
 
   const isWorkshop =
     course?.slug === "the-watercolour" ||
@@ -207,11 +213,12 @@ export async function getBatchByCourseId(
     `
     )
     .eq("course_id", courseId)
-    .order("start_date", { ascending: true })
-    .limit(1);
+    .order("start_date", { ascending: true });
+
+  let rawList: any[] = [];
 
   if (!primaryErr && primaryData && primaryData.length > 0) {
-    batchData = primaryData[0];
+    rawList = primaryData;
   } else if (
     primaryErr &&
     (primaryErr.code === "42703" ||
@@ -245,16 +252,36 @@ export async function getBatchByCourseId(
       `
       )
       .eq("course_id", courseId)
-      .order("start_date", { ascending: true })
-      .limit(1);
+      .order("start_date", { ascending: true });
 
     if (fallbackData && fallbackData.length > 0) {
-      batchData = fallbackData[0];
+      rawList = fallbackData;
     }
   }
 
-  if (!batchData) {
+  if (rawList.length === 0) {
     return null;
+  }
+
+  // Canonical Batch Resolution:
+  // 1. Prioritize open, unexpired batches starting on or after today (Asia/Kolkata)
+  // 2. Otherwise pick any open batch
+  // 3. Otherwise pick the most recently scheduled / updated batch (never an ancient past batch)
+  const today = getTodayISTString();
+  const openBatches = rawList.filter((b: any) => b.is_enrollment_open);
+  const upcomingOpen = openBatches.filter(
+    (b: any) => isBatchDateAnnounced(b.start_date) && b.start_date >= today
+  );
+
+  if (upcomingOpen.length > 0) {
+    batchData = upcomingOpen[0];
+  } else if (openBatches.length > 0) {
+    batchData = openBatches[0];
+  } else {
+    const sortedByLatest = [...rawList].sort((a: any, b: any) =>
+      (b.start_date || "").localeCompare(a.start_date || "")
+    );
+    batchData = sortedByLatest[0];
   }
 
   return formatBatchRecord(batchData);
@@ -597,17 +624,18 @@ export async function updateBatchSchedule(
     fullUpdatePayload.total_seats = input.totalSeats;
   }
 
-  // Helper to persist in course metadata JSON
+  // Helper to persist in course metadata JSON without corrupting sibling batches
   const saveCourseMetadata = async (course: any) => {
     if (!course) return;
     try {
       const details = parseCourseDetails(course.slug, course.description);
-      (details as any).batchSchedule = {
+      (details as any).batchSchedules = (details as any).batchSchedules || {};
+      (details as any).batchSchedules[batchId] = {
         lastRegistrationDate: derivedLastRegDate,
         registrationClosesBeforeHours,
         batchName: input.batchName,
         status: input.status,
-        registrationMode: input.registrationMode || (details as any)?.batchSchedule?.registrationMode || "paid",
+        registrationMode: input.registrationMode || "paid",
         updatedAt: nowIso,
       };
       if (input.registrationMode) {

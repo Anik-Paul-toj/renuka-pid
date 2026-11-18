@@ -466,7 +466,13 @@ body {
 /* Modal Active State: Hide header, footer, and floating bar when any modal is open */
 body.modal-open header,
 body.modal-open footer,
-body.modal-open aside[aria-label="Floating registration bar"] {
+body.modal-open [data-site-header],
+body.modal-open [data-site-footer],
+body.modal-open .site-header,
+body.modal-open .site-footer,
+body.modal-open aside[aria-label="Floating registration bar"],
+body.modal-open [data-floating-bar],
+body.modal-open .sticky-bottom-bar {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;

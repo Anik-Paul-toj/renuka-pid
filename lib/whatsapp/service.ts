@@ -13,6 +13,7 @@ import {
   resolveWhatsAppGroupUrl,
 } from "./group";
 import { getActiveConfirmationTemplate } from "./template-management";
+import { formatBatchDateIST, formatBatchTimeIST } from "@/lib/batches-admin/format";
 
 export interface WhatsAppServiceResult {
   success: boolean;
@@ -316,10 +317,11 @@ export async function sendBookingConfirmationWhatsApp(
     const courseTitle = (course?.title || "Live Masterclass").trim();
     const bookingRef = booking.booking_reference.trim();
 
-    const startDateText =
-      batch?.start_date && batch.start_date.trim() ? batch.start_date : "To be announced";
+    const startDateText = batch?.start_date
+      ? formatBatchDateIST(batch.start_date)
+      : "To be announced";
     const timingText = batch?.start_time
-      ? `${batch.start_time}${batch.end_time ? ` – ${batch.end_time}` : ""} ${batch.timezone || "IST"}`
+      ? formatBatchTimeIST(batch.start_time, batch.end_time)
       : "To be announced";
 
     let templateParams: string[] = [];
@@ -499,9 +501,11 @@ export async function sendUpcomingClassReminderWhatsApp(options: {
 
     const course = (batch as any).courses;
     const courseTitle = course?.title || "Watercolour Masterclass";
-    const batchDate = batch.start_date || "Upcoming Date";
+    const batchDate = batch.start_date
+      ? formatBatchDateIST(batch.start_date)
+      : "Upcoming Date";
     const batchTime = batch.start_time
-      ? `${batch.start_time}${batch.end_time ? " – " + batch.end_time : ""} ${batch.timezone || "IST"}`
+      ? formatBatchTimeIST(batch.start_time, batch.end_time)
       : "Check email for timing";
     const joinLink = batch.zoom_join_url || "Link shared via confirmation email";
 
