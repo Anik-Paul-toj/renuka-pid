@@ -43,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const isHome = pathname === "/";
   const isCourse = pathname?.startsWith("/course");
+  const isCourseCatalog = pathname === "/course" || pathname === "/course/";
 
   // If isRegistrationClosed is not explicitly provided, check Roadmap batch status (fail-safe: defaults to closed)
   const [internalRoadmapClosed, setInternalRoadmapClosed] = useState<boolean | null>(null);
@@ -268,35 +269,37 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right CTA Button & Mobile Menu Toggle */}
         <div className="flex items-center gap-3">
-          <div>
-            {effectiveRegistrationClosed ? (
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none text-xs opacity-60 cursor-not-allowed bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25 hover:bg-[#6F6B61]/15 hover:text-[#6F6B61] pointer-events-none uppercase font-bold tracking-wider"
-              >
-                <span>Registration Closed</span>
-              </button>
-            ) : onOpenModal ? (
-              <button
-                type="button"
-                onClick={onOpenModal}
-                className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none text-xs uppercase font-bold tracking-wider"
-              >
-                <span>Book Now</span>
-                <ArrowRight className="size-3.5" />
-              </button>
-            ) : (
-              <Link
-                href="/course"
-                className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none inline-flex items-center gap-1.5 text-xs uppercase font-bold tracking-wider"
-              >
-                <span>Book Now</span>
-                <ArrowRight className="size-3.5" />
-              </Link>
-            )}
-          </div>
+          {!isCourseCatalog && (
+            <div>
+              {effectiveRegistrationClosed ? (
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none text-xs opacity-60 cursor-not-allowed bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25 hover:bg-[#6F6B61]/15 hover:text-[#6F6B61] pointer-events-none uppercase font-bold tracking-wider"
+                >
+                  <span>Registration Closed</span>
+                </button>
+              ) : onOpenModal ? (
+                <button
+                  type="button"
+                  onClick={onOpenModal}
+                  className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none text-xs uppercase font-bold tracking-wider"
+                >
+                  <span>Book Now</span>
+                  <ArrowRight className="size-3.5" />
+                </button>
+              ) : (
+                <Link
+                  href="/course"
+                  className="btn-studio px-4 sm:px-5 py-2 sm:py-2.5 shadow-none inline-flex items-center gap-1.5 text-xs uppercase font-bold tracking-wider"
+                >
+                  <span>Book Now</span>
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              )}
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <button

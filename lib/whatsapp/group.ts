@@ -23,20 +23,29 @@ export interface WhatsAppGroupResolveOptions {
 
 /**
  * Explicit list of course slugs eligible to display the WhatsApp group invitation.
- * Only 'Watercolour Foundation' and 'Watercolour Artistry + Foundation' are eligible.
+ * ONLY 'Watercolour Artistry + Foundation' is eligible.
+ * Masterclass and Watercolour Foundation are strictly NOT eligible.
  */
 export const WHATSAPP_ELIGIBLE_COURSE_SLUGS = [
-  "watercolour-foundation",
   "watercolour-artistry-foundation",
 ] as const;
 
 /**
  * Explicit list of course IDs eligible for the WhatsApp group invitation.
+ * ONLY Watercolour Artistry + Foundation ID is eligible.
  */
 export const WHATSAPP_ELIGIBLE_COURSE_IDS = [
-  "e1111111-2222-3333-4444-555555555555", // Watercolour Foundation
   "e2222222-2222-3333-4444-555555555555", // Watercolour Artistry + Foundation
 ] as const;
+
+/**
+ * Slugs and ID for Watercolour Foundation (which is explicitly NOT eligible for WhatsApp group).
+ */
+export const FOUNDATION_COURSE_SLUGS = [
+  "watercolour-foundation",
+] as const;
+
+export const FOUNDATION_COURSE_ID = "e1111111-2222-3333-4444-555555555555";
 
 /**
  * Slugs and ID for The WATERCOLOUR Roadmap masterclass (which is explicitly NOT eligible).
@@ -59,10 +68,12 @@ export interface CourseEligibilityParams {
  * Uses stable course ID and slug (not display title or fragile text comparison).
  * 
  * Returns true ONLY for:
- * 1. Watercolour Foundation (slug: "watercolour-foundation")
- * 2. Watercolour Artistry + Foundation (slug: "watercolour-artistry-foundation")
+ * 1. Watercolour Artistry + Foundation (slug: "watercolour-artistry-foundation")
  * 
- * Returns false for The WATERCOLOUR Roadmap masterclass and any unverified/unmatched course.
+ * Returns false for:
+ * - The WATERCOLOUR Roadmap masterclass
+ * - Watercolour Foundation (Foundation students receive email confirmation & voucher, not group link)
+ * - Any unverified or unmatched course.
  */
 export function isWhatsAppGroupEligibleCourse(
   params?: CourseEligibilityParams | null
@@ -80,7 +91,15 @@ export function isWhatsAppGroupEligibleCourse(
     return false;
   }
 
-  // Check if matches eligible slug
+  // If identified as Watercolour Foundation, explicitly return false
+  if (
+    (normalizedId && normalizedId === FOUNDATION_COURSE_ID) ||
+    (normalizedSlug && FOUNDATION_COURSE_SLUGS.includes(normalizedSlug as any))
+  ) {
+    return false;
+  }
+
+  // Check if matches eligible slug (Watercolour Artistry + Foundation)
   if (
     normalizedSlug &&
     WHATSAPP_ELIGIBLE_COURSE_SLUGS.includes(normalizedSlug as any)
@@ -88,7 +107,7 @@ export function isWhatsAppGroupEligibleCourse(
     return true;
   }
 
-  // Check if matches eligible ID
+  // Check if matches eligible ID (Watercolour Artistry + Foundation)
   if (
     normalizedId &&
     WHATSAPP_ELIGIBLE_COURSE_IDS.includes(normalizedId as any)
@@ -100,11 +119,19 @@ export function isWhatsAppGroupEligibleCourse(
 }
 
 /**
- * Resolves the appropriate WhatsApp group invitation link for a booking or course.
+ * Resolves the appropriate WhatsApp group invitation link for an eligible booking or course.
+ * If the course is not eligible (Masterclass or Foundation), returns an empty string to prevent leakage.
  */
 export function resolveWhatsAppGroupUrl(
   options?: WhatsAppGroupResolveOptions
 ): string {
+  if (
+    options?.courseSlug &&
+    !isWhatsAppGroupEligibleCourse({ courseSlug: options.courseSlug })
+  ) {
+    return "";
+  }
+
   if (options?.batchMetadata?.whatsappGroupUrl?.trim()) {
     return options.batchMetadata.whatsappGroupUrl.trim();
   }

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   ArrowLeft,
@@ -33,6 +34,18 @@ export function CourseDetailPageClient({
   activeBatch,
 }: CourseDetailPageClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const payToken =
+    searchParams?.get("payToken") ||
+    searchParams?.get("linkToken") ||
+    searchParams?.get("token") ||
+    undefined;
+
+  useEffect(() => {
+    if (payToken) {
+      setIsModalOpen(true);
+    }
+  }, [payToken]);
 
   const isWorkshop =
     course.slug === "the-watercolour" ||
@@ -633,6 +646,7 @@ export function CourseDetailPageClient({
         courseTitle={course.title}
         coursePrice={course.offerPrice}
         batchId={activeBatch?.id}
+        paymentLinkToken={payToken}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { consumeCreditForBooking } from "@/lib/course-credit/service";
+import { markPaymentLinkPaid } from "@/lib/payment-links/service";
 import { isRegistrationDeadlineExpired, isBatchDateAnnounced, calculateRegistrationClosingDateTime } from "@/lib/batches-admin/format";
 import { parseCourseDetails } from "@/lib/courses-admin/service";
 import { sendBookingConfirmationEmail } from "@/lib/notifications/service";
@@ -676,6 +677,9 @@ export async function verifyPayment(input: {
     // Atomically consume any reserved course credit permanently
     await consumeCreditForBooking(booking.id);
 
+    // Reconcile and mark any associated payment link as paid
+    await markPaymentLinkPaid({ bookingReference: booking.booking_reference }).catch(() => {});
+
     // Trigger transactional notifications asynchronously (failure isolation)
     try {
       sendBookingConfirmationEmail(booking.id).catch((e) =>
@@ -797,6 +801,19 @@ export async function handleWebhookEvent(
 
       // Atomically consume any reserved course credit permanently
       await consumeCreditForBooking(payment.booking_id);
+
+      // Reconcile and mark any associated payment link as paid
+      if (payment.booking_id) {
+        const { data: bData } = await adminClient
+          .from("bookings")
+          .select("booking_reference")
+          .eq("id", payment.booking_id)
+          .maybeSingle();
+
+        if (bData?.booking_reference) {
+          await markPaymentLinkPaid({ bookingReference: bData.booking_reference }).catch(() => {});
+        }
+      }
 
       // Trigger transactional notifications asynchronously (failure isolation)
       try {

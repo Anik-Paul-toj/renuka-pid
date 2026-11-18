@@ -16,6 +16,11 @@ interface RegistrationModalProps {
   courseSlug?: string;
   courseTitle?: string;
   coursePrice?: number;
+  initialName?: string;
+  initialEmail?: string;
+  initialPhone?: string;
+  paymentLinkToken?: string;
+  lockedAmountPaise?: number;
 }
 
 interface ActiveBatchInfo {
@@ -73,11 +78,16 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   courseSlug,
   courseTitle,
   coursePrice,
+  initialName,
+  initialEmail,
+  initialPhone,
+  paymentLinkToken,
+  lockedAmountPaise,
 }) => {
   const { hero } = useLandingContent();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(initialName || "");
+  const [email, setEmail] = useState(initialEmail || "");
+  const [phone, setPhone] = useState(initialPhone || "");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -99,6 +109,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     message?: string;
   } | null>(null);
   const [, setIsCheckingCredit] = useState(false);
+
+  // Sync initial student details from props (e.g. from shareable payment link)
+  useEffect(() => {
+    if (initialName && !name) setName(initialName);
+    if (initialEmail && !email) setEmail(initialEmail);
+    if (initialPhone && !phone) setPhone(initialPhone);
+  }, [initialName, initialEmail, initialPhone]);
 
   // Helper to fetch active batch
   const fetchActiveBatch = async (): Promise<ActiveBatchInfo | null> => {
@@ -272,6 +289,20 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, isPaymentLocked]);
+
+  // Lock body scroll and apply modal-open class when modal is open to completely hide header/footer and prevent background scrolling
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.body.classList.add("modal-open");
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.classList.remove("modal-open");
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -488,6 +519,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           phone: phone.trim() || undefined,
           batchId: resolvedBatchId,
           creditVerificationToken: creditInfo?.eligible ? creditInfo.creditVerificationToken : undefined,
+          paymentLinkToken: paymentLinkToken || undefined,
           agreeTerms: true,
         }),
       });
@@ -544,7 +576,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[100] overflow-y-auto overflow-x-hidden"
     >
       {/* Backdrop */}
       <div
@@ -552,12 +584,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           if (isPaymentLocked) return;
           handleReset();
         }}
-        className="fixed inset-0 bg-[#292923]/50 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-[#14120E]/75 backdrop-blur-sm transition-opacity"
         aria-hidden="true"
       />
 
-      {/* Modal Container */}
-      <div className="paper-card relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-xl bg-[#FAF8F2] p-5 sm:p-6 shadow-2xl border border-[#464137]/15 z-10 custom-scrollbar">
+      {/* Centering Wrapper ensuring the top and bottom of modal are never cut off on smaller screens */}
+      <div className="flex min-h-full items-center justify-center p-3 sm:p-6 pointer-events-none">
+        {/* Modal Container */}
+        <div className="paper-card pointer-events-auto relative w-full max-w-lg my-auto max-h-[calc(100vh-2.5rem)] overflow-y-auto rounded-xl bg-[#FAF8F2] p-5 sm:p-6 shadow-2xl border border-[#464137]/15 z-10 custom-scrollbar">
         {/* Close button - hidden/disabled while payment is locked */}
         {!isPaymentLocked && (
           <button
@@ -718,10 +752,17 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               </div>
 
               {isArtistry && (
-                <div className="rounded-lg border border-[#444C38]/20 bg-[#F7F4EC] p-3 text-xs space-y-1.5">
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#444C38]">
-                    Foundation Booking Reference (To claim {creditInfo?.creditAmountPaise ? `₹${(creditInfo.creditAmountPaise / 100).toLocaleString("en-IN")} ` : ""}Course Credit)
-                  </label>
+                <div className="rounded-lg border border-[#444C38]/25 bg-[#FAF8F2] p-3.5 text-xs space-y-2 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#444C38]">
+                      Foundation Coupon / Reference ID
+                    </label>
+                    {creditInfo?.eligible && (
+                      <span className="text-[10px] font-bold text-[#3E522D] bg-[#3E522D]/10 px-2 py-0.5 rounded">
+                        ₹{(creditInfo.creditAmountPaise / 100).toLocaleString("en-IN")} Discount Applied
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
                     placeholder="e.g. REF-KYZ8A1-7F3A"
@@ -734,10 +775,10 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                         setPendingBookingRef(null);
                       }
                     }}
-                    className="w-full rounded-md border border-[#464137]/20 bg-[#FAF8F2] px-3.5 py-2 text-xs text-[#14120E] font-mono outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
+                    className="w-full rounded-md border border-[#464137]/20 bg-white px-3.5 py-2 text-xs text-[#14120E] font-mono tracking-wider outline-none transition-all placeholder:text-[#5E5A50] focus:border-[#444C38] focus:ring-1 focus:ring-[#444C38]"
                   />
                   <p className="text-[10px] text-[#6F6B61]">
-                    Enter the booking reference from your Watercolour Foundation purchase confirmation receipt to verify and apply your credit.
+                    Purchased Watercolour Foundation earlier? Enter your Foundation booking reference ID (coupon code) to redeem your full Foundation course credit toward Artistry.
                   </p>
                   {foundationBookingRef.trim().length >= 3 && creditInfo && !creditInfo.eligible && creditInfo.message && (
                     <p className="text-[11px] text-[#B93821] font-medium pt-0.5">
@@ -760,7 +801,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[#3E522D] font-bold">
-                    <span>Foundation credit:</span>
+                    <span>Foundation coupon credit:</span>
                     <span className="font-price tabular-nums font-bold">
                       −₹{(creditInfo.creditAmountPaise / 100).toLocaleString("en-IN")}
                     </span>
@@ -773,7 +814,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-[#3E522D] font-bold pt-0.5">
                     <Sparkles className="size-3 text-[#B93821] shrink-0" />
-                    <span>Foundation course credit applied.</span>
+                    <span>Foundation course credit applied successfully.</span>
                   </div>
                 </div>
               )}
@@ -853,12 +894,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <span>Retry Payment</span>
                     <ArrowRight className="size-4" />
                   </>
-                ) : !isFreeMode && ((activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0) || (coursePrice && coursePrice > 0)) ? (
+                ) : !isFreeMode && ((activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0) || (coursePrice && coursePrice > 0) || lockedAmountPaise) ? (
                   <>
                     <span className="font-price tabular-nums">
                       Proceed to Payment • ₹
                       {creditInfo?.eligible
                         ? (creditInfo.payableAmountPaise / 100).toLocaleString("en-IN")
+                        : lockedAmountPaise
+                        ? (lockedAmountPaise / 100).toLocaleString("en-IN")
                         : (activeBatch?.offerPrice ?? coursePrice)?.toLocaleString("en-IN")}
                     </span>
                     <ArrowRight className="size-4" />
@@ -977,5 +1020,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         )}
       </div>
     </div>
-  );
+  </div>
+);
 };

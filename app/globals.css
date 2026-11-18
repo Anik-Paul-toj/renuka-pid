@@ -462,3 +462,14 @@ body {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
+
+/* Modal Active State: Hide header, footer, and floating bar when any modal is open */
+body.modal-open header,
+body.modal-open footer,
+body.modal-open aside[aria-label="Floating registration bar"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+

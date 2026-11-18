@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateBookingInput } from "@/lib/validations/booking";
 import { verifyCreditVerificationToken } from "@/lib/course-credit/identity";
+import { validatePaymentLinkToken } from "@/lib/payment-links/service";
 import { isRegistrationDeadlineExpired, isBatchDateAnnounced, calculateRegistrationClosingDateTime } from "@/lib/batches-admin/format";
 import { parseCourseDetails } from "@/lib/courses-admin/service";
 import crypto from "crypto";
@@ -277,7 +278,7 @@ export async function processBooking(
     // Continue if RPC not available
   }
 
-  // 2. Identity-Verified Credit Entitlement Evaluation
+  // 2. Identity-Verified Credit & Benefit Entitlement Evaluation
   let creditApplied = false;
   let discountAmountPaise = 0;
   let payableAmountPaise = originalAmountPaise;
@@ -286,6 +287,42 @@ export async function processBooking(
   let tokenNonce: string | null = null;
   let creditMessage: string | null = null;
 
+  // Handle Shareable Payment Link Token:
+  // Strictly locks payable amount, course, and batch. Rejects invalid or expired links.
+  if (input.paymentLinkToken) {
+    const linkValidation = await validatePaymentLinkToken(input.paymentLinkToken);
+    if (!linkValidation.valid || !linkValidation.paymentLink) {
+      return {
+        success: false,
+        error: {
+          code: "INVALID_INPUT",
+          message:
+            linkValidation.error ||
+            "This payment link is invalid, expired, or has been revoked by the administrator.",
+          statusCode: 400,
+        },
+      };
+    }
+
+    const pLink = linkValidation.paymentLink;
+    if (pLink.batchId !== input.batchId) {
+      return {
+        success: false,
+        error: {
+          code: "INVALID_INPUT",
+          message: "The requested batch does not match the payment link.",
+          statusCode: 400,
+        },
+      };
+    }
+
+    // Lock authoritative amount from payment link
+    originalAmountPaise = pLink.amountPaise;
+    payableAmountPaise = pLink.amountPaise;
+  }
+
+  // Handle Foundation-to-Artistry Dynamic Purchase-Price Voucher:
+  // Preserves existing locked dynamic Foundation course credit rules.
   if (input.creditVerificationToken) {
     const tokenResult = await verifyCreditVerificationToken(
       input.creditVerificationToken,

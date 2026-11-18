@@ -23,7 +23,9 @@ import {
   RotateCcw,
   Layers,
   GraduationCap,
+  Link as LinkIcon,
 } from "lucide-react";
+import { AdminPaymentLinksPanel } from "./AdminPaymentLinksPanel";
 import type {
   AdminPaymentListItem,
   AdminPaymentsListResult,
@@ -85,6 +87,9 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
   const [paymentDetail, setPaymentDetail] = useState<AdminPaymentDetail | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+
+  // Active Tab
+  const [activeTab, setActiveTab] = useState<"ledger" | "links">("ledger");
 
   // Debounce search input by 300ms
   useEffect(() => {
@@ -256,7 +261,45 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
         </div>
       </div>
 
-      {/* Reconciliation Summary Cards */}
+      {/* Navigation Tabs */}
+      <div className="flex border-b border-[#464137]/15 gap-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab("ledger")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+            activeTab === "ledger"
+              ? "border-[#444C38] text-[#14120E] bg-[#FAF8F2]/60 rounded-t-lg"
+              : "border-transparent text-[#6F6B61] hover:text-[#14120E]"
+          }`}
+        >
+          <CreditCard className="size-3.5" />
+          <span>Payments Ledger</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("links")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+            activeTab === "links"
+              ? "border-[#444C38] text-[#14120E] bg-[#FAF8F2]/60 rounded-t-lg"
+              : "border-transparent text-[#6F6B61] hover:text-[#14120E]"
+          }`}
+        >
+          <LinkIcon className="size-3.5" />
+          <span>Shareable Payment Links</span>
+        </button>
+      </div>
+
+      {activeTab === "links" && (
+        <AdminPaymentLinksPanel
+          availableCourses={availableCourses}
+          availableBatches={availableBatches}
+        />
+      )}
+
+      {activeTab === "ledger" && (
+        <>
+          {/* Reconciliation Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {/* Total Captured Revenue */}
         <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs flex flex-col justify-between">
@@ -675,6 +718,8 @@ export function PaymentsManager({ initialData }: PaymentsManagerProps) {
           </div>
         </div>
       </div>
+      </>
+      )}
 
       {/* Payment Detail Slide-over / Modal */}
       {selectedPaymentId && (

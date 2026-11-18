@@ -21,6 +21,7 @@ import {
   Eye,
   AlertTriangle,
   Ban,
+  Users,
 } from "lucide-react";
 import {
   AdminBookingListItem,
@@ -801,6 +802,32 @@ export function BookingsManager({ initialData }: BookingsManagerProps) {
                             Reason: {bookingDetail.notifications.whatsapp.errorMessage}
                           </div>
                         )}
+                      </div>
+
+                      {/* WhatsApp Atelier Group Access Eligibility Status */}
+                      <div className="p-3.5 rounded-lg bg-[#FFFFFF] border border-[#464137]/15 shadow-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[#292923] flex items-center gap-1.5">
+                            <Users className="size-3.5 text-[#68705A]" />
+                            <span>WhatsApp Atelier Group Access</span>
+                          </span>
+                          {bookingDetail.course?.slug === "watercolour-artistry-foundation" ||
+                          bookingDetail.course?.title?.toLowerCase().includes("artistry") ? (
+                            <span className="px-2 py-0.5 rounded text-[0.62rem] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                              Artistry Eligible
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded text-[0.62rem] font-bold uppercase tracking-wider bg-stone-100 text-stone-600">
+                              Not Eligible (Masterclass/Foundation)
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[0.68rem] text-[#6F6B61]">
+                          {bookingDetail.course?.slug === "watercolour-artistry-foundation" ||
+                          bookingDetail.course?.title?.toLowerCase().includes("artistry")
+                            ? "Active atelier group invitation link provided strictly to confirmed Artistry students."
+                            : "Per studio rules, WhatsApp group invitations are strictly restricted to the 3-Month Artistry cohort."}
+                        </p>
                       </div>
                     </div>
                   </div>

@@ -51,6 +51,18 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lightboxIndex, images.length]);
 
+  // Lock body scroll and apply modal-open class when lightbox is open
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.body.classList.add("modal-open");
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.classList.remove("modal-open");
+    };
+  }, [lightboxIndex]);
+
   const handleImageError = (id: string) => {
     setFailedImageIds((prev) => new Set(prev).add(id));
   };
@@ -318,7 +330,7 @@ export function GallerySection({ initialImages = [] }: GallerySectionProps) {
       {currentLightboxImage && (
         <div
           onClick={() => setLightboxIndex(null)}
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
         >
           {/* Close Button */}
           <button
