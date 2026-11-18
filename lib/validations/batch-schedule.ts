@@ -51,6 +51,7 @@ export const batchScheduleSchema = z
       .optional()
       .nullable(),
     status: batchStatusEnum.default("open"),
+    registrationMode: z.enum(["paid", "free"]).default("paid").optional(),
     totalSeats: z
       .number()
       .int()

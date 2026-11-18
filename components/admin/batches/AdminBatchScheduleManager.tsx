@@ -41,6 +41,7 @@ interface BatchFormData {
   startTime: string;
   endTime: string;
   status: "open" | "closed" | "upcoming" | "completed" | "tba";
+  registrationMode?: "paid" | "free";
   totalSeats: number;
   seatsBooked: number;
 }
@@ -130,6 +131,7 @@ export function AdminBatchScheduleManager({
     startTime: activeCourse.defaultTiming,
     endTime: activeCourse.defaultEndTime,
     status: "open",
+    registrationMode: "paid",
     totalSeats: 100,
     seatsBooked: 0,
   });
@@ -169,6 +171,7 @@ export function AdminBatchScheduleManager({
           startTime: b.startTime || "6:30 PM",
           endTime: b.endTime || "8:00 PM",
           status: b.status || (b.isEnrollmentOpen ? "open" : "closed"),
+          registrationMode: (b.registrationMode as "paid" | "free") || "paid",
           totalSeats: b.totalSeats || 100,
           seatsBooked: b.seatsBooked || 0,
         };
@@ -197,6 +200,7 @@ export function AdminBatchScheduleManager({
           startTime: "6:30 PM",
           endTime: "8:00 PM",
           status: "open",
+          registrationMode: "paid",
           totalSeats: 100,
           seatsBooked: 0,
         };
@@ -428,6 +432,7 @@ export function AdminBatchScheduleManager({
             startTime: formData.startTime.trim(),
             endTime: formData.endTime ? formData.endTime.trim() : null,
             status: formData.status,
+            registrationMode: formData.registrationMode || "paid",
             totalSeats: Number(formData.totalSeats) || 100,
           }),
         }
@@ -981,6 +986,95 @@ export function AdminBatchScheduleManager({
                   </div>
                 </div>
 
+                {/* 6. Batch Registration Mode (Roadmap Masterclass Free vs Paid Option) */}
+                {activeCourse.slug === "the-watercolour" && (
+                  <div className="p-4 rounded-xl bg-[#F7F4EC] border border-[#68705A]/30 space-y-2.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <label className="block text-xs font-bold text-[#292923]">
+                          Batch Registration Mode (Roadmap Masterclass Only)
+                        </label>
+                        <p className="text-[0.68rem] text-[#6F6B61] mt-0.5">
+                          Configure whether this batch accepts standard paid registration or 100% Free registration.
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-block px-2.5 py-1 rounded text-[0.65rem] font-bold uppercase tracking-wider ${
+                          formData.registrationMode === "free"
+                            ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                            : "bg-blue-100 text-blue-800 border border-blue-300"
+                        }`}
+                      >
+                        {formData.registrationMode === "free" ? "Free Mode Active" : "Paid Mode Active"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <label
+                        className={`flex items-start gap-2.5 p-3 rounded-lg border cursor-pointer transition-all ${
+                          formData.registrationMode === "paid"
+                            ? "bg-white border-[#68705A] shadow-xs ring-1 ring-[#68705A]/30"
+                            : "bg-[#FAF8F2] border-[#444C38]/20 hover:bg-white"
+                        } ${isReadOnly ? "opacity-75 cursor-not-allowed" : ""}`}
+                      >
+                        <input
+                          type="radio"
+                          name="batchRegistrationMode"
+                          disabled={isReadOnly}
+                          checked={formData.registrationMode === "paid"}
+                          onChange={() => handleInputChange("registrationMode", "paid")}
+                          className="mt-0.5 text-[#68705A] focus:ring-[#68705A]"
+                        />
+                        <div>
+                          <span className="font-bold text-xs text-[#14120E] block">
+                            Paid Registration (₹499)
+                          </span>
+                          <span className="text-[0.66rem] text-[#6F6B61] block mt-0.5">
+                            Standard checkout: students complete payment via Razorpay to reserve a seat.
+                          </span>
+                        </div>
+                      </label>
+
+                      <label
+                        className={`flex items-start gap-2.5 p-3 rounded-lg border cursor-pointer transition-all ${
+                          formData.registrationMode === "free"
+                            ? "bg-emerald-50 border-emerald-600 shadow-xs ring-1 ring-emerald-500/40"
+                            : "bg-[#FAF8F2] border-[#444C38]/20 hover:bg-white"
+                        } ${isReadOnly ? "opacity-75 cursor-not-allowed" : ""}`}
+                      >
+                        <input
+                          type="radio"
+                          name="batchRegistrationMode"
+                          disabled={isReadOnly}
+                          checked={formData.registrationMode === "free"}
+                          onChange={() => handleInputChange("registrationMode", "free")}
+                          className="mt-0.5 text-emerald-600 focus:ring-emerald-500"
+                        />
+                        <div>
+                          <span className="font-bold text-xs text-emerald-900 block">
+                            Free Registration (₹0) — This Batch Only
+                          </span>
+                          <span className="text-[0.66rem] text-emerald-700 block mt-0.5">
+                            Direct free seat reservation with instant confirmation and ₹0 payable.
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {activeCourse.slug !== "the-watercolour" && (
+                  <div className="p-3.5 rounded-lg bg-[#F7F4EC] border border-[#464137]/15 flex items-center justify-between text-xs text-[#464137]">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="size-3.5 text-[#68705A]" />
+                      <span className="font-semibold">Course Pricing: Paid Atelier Program</span>
+                    </div>
+                    <span className="text-[0.62rem] font-bold uppercase tracking-wider text-[#3E522D] bg-[#3E522D]/10 px-2 py-0.5 rounded">
+                      Locked Dynamic Pricing
+                    </span>
+                  </div>
+                )}
+
                 {/* Form Action Buttons */}
                 <div className="pt-4 border-t border-[#464137]/10 flex flex-wrap items-center justify-between gap-3">
                   <button
@@ -1148,10 +1242,16 @@ export function AdminBatchScheduleManager({
                   className={`flex-1 text-center py-2 rounded-md text-[0.72rem] font-bold ${
                     isClosed
                       ? "bg-[#6F6B61]/15 text-[#6F6B61] cursor-not-allowed"
+                      : formData.registrationMode === "free" && activeCourse.slug === "the-watercolour"
+                      ? "bg-emerald-700 text-white shadow-xs"
                       : "btn-studio shadow-xs"
                   }`}
                 >
-                  {isClosed ? "Registration Closed" : "Enrol Now"}
+                  {isClosed
+                    ? "Registration Closed"
+                    : formData.registrationMode === "free" && activeCourse.slug === "the-watercolour"
+                    ? "Enrol for Free (₹0)"
+                    : "Enrol Now"}
                 </div>
               </div>
             </div>

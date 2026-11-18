@@ -77,7 +77,11 @@ export async function GET(request: NextRequest) {
 
     const isFreeRegistration =
       isMasterclass &&
-      (courseDetails?.registrationMode === "free" || courseData?.offer_price_paise === 0);
+      (batchSchedule.registrationMode === "free" ||
+        (batchSchedule as any)?.isFreeRegistration ||
+        (courseDetails as any)?.batchSchedule?.registrationMode === "free" ||
+        courseDetails?.registrationMode === "free" ||
+        courseData?.offer_price_paise === 0);
 
     const effectiveOfferPricePaise = isFreeRegistration ? 0 : courseData?.offer_price_paise ?? 9900;
     const effectiveOfferPrice = isFreeRegistration ? 0 : Math.round(effectiveOfferPricePaise / 100);

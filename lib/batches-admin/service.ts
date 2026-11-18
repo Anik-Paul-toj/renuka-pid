@@ -35,6 +35,8 @@ export interface SafeBatchScheduleData {
   seatsRemaining: number;
   isEnrollmentOpen: boolean;
   status: BatchStatus;
+  registrationMode?: "paid" | "free";
+  isFreeRegistration?: boolean;
   isExpired: boolean;
   isSoldOut: boolean;
   formattedStartDate: string;
@@ -113,6 +115,13 @@ export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
     course?.slug === "the-watercolour" ||
     course?.slug === "the-watercolour-roadmap";
 
+  const registrationMode: "paid" | "free" =
+    (courseDetails as any)?.batchSchedule?.registrationMode ||
+    (courseDetails as any)?.registrationMode ||
+    "paid";
+
+  const isFreeRegistration = isWorkshop && registrationMode === "free";
+
   const coverImageUrl =
     batchData.cover_image_url ||
     (course as any)?.cover_image_url ||
@@ -146,6 +155,8 @@ export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
     seatsRemaining,
     isEnrollmentOpen,
     status,
+    registrationMode,
+    isFreeRegistration,
     isExpired: isTba ? false : isExpired,
     isSoldOut,
     formattedStartDate: isTba ? "To Be Announced" : formatBatchDateIST(batchData.start_date),
@@ -396,7 +407,29 @@ export async function createBatch(
     if (retryErr || !retryCreated) {
       throw new Error(`Failed to create batch: ${retryErr?.message || error?.message}`);
     }
-    return formatBatchRecord(retryCreated);
+    const resultRecord = retryCreated;
+    if (input.registrationMode && resultRecord?.courses) {
+      try {
+        const details = parseCourseDetails(resultRecord.courses.slug, resultRecord.courses.description);
+        (details as any).registrationMode = input.registrationMode;
+        if ((details as any).batchSchedule) {
+          (details as any).batchSchedule.registrationMode = input.registrationMode;
+        }
+        await supabase.from("courses").update({ description: JSON.stringify(details), updated_at: nowIso }).eq("id", resultRecord.courses.id);
+      } catch {}
+    }
+    return formatBatchRecord(resultRecord);
+  }
+
+  if (input.registrationMode && created?.courses) {
+    try {
+      const details = parseCourseDetails(created.courses.slug, created.courses.description);
+      (details as any).registrationMode = input.registrationMode;
+      if ((details as any).batchSchedule) {
+        (details as any).batchSchedule.registrationMode = input.registrationMode;
+      }
+      await supabase.from("courses").update({ description: JSON.stringify(details), updated_at: nowIso }).eq("id", created.courses.id);
+    } catch {}
   }
 
   return formatBatchRecord(created);
@@ -574,8 +607,12 @@ export async function updateBatchSchedule(
         registrationClosesBeforeHours,
         batchName: input.batchName,
         status: input.status,
+        registrationMode: input.registrationMode || (details as any)?.batchSchedule?.registrationMode || "paid",
         updatedAt: nowIso,
       };
+      if (input.registrationMode) {
+        (details as any).registrationMode = input.registrationMode;
+      }
       await supabase
         .from("courses")
         .update({

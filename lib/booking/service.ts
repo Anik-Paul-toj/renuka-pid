@@ -265,7 +265,10 @@ export async function processBooking(
 
   const isFreeMasterclass =
     isMasterclass &&
-    (courseDetails?.registrationMode === "free" || course.offer_price_paise === 0);
+    ((courseDetails as any)?.batchSchedule?.registrationMode === "free" ||
+      courseDetails?.registrationMode === "free" ||
+      (batchData as any)?.registrationMode === "free" ||
+      course.offer_price_paise === 0);
 
   if (isFreeMasterclass) {
     originalAmountPaise = 0;
