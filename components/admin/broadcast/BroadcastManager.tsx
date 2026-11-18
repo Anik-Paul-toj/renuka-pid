@@ -21,6 +21,7 @@ import {
   Calendar,
   Clock,
   Video,
+  Sparkles,
 } from "lucide-react";
 
 interface CourseItem {
@@ -173,6 +174,13 @@ export function BroadcastManager({
   const [channel, setChannel] = useState<"email" | "whatsapp">("email");
   const [whatsappStatus, setWhatsappStatus] = useState<{ isConfigured: boolean; message: string } | null>(null);
 
+  // Meta Approved Templates for WhatsApp
+  const [approvedTemplates, setApprovedTemplates] = useState<any[]>([]);
+  const [broadcastPurpose, setBroadcastPurpose] = useState<"batch_reminder" | "upcoming_batches">("batch_reminder");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [useMetaTemplate, setUseMetaTemplate] = useState<boolean>(true);
+  const [templateVariablesMap, setTemplateVariablesMap] = useState<Record<string, string>>({});
+
   useEffect(() => {
     fetch("/api/admin/whatsapp/status")
       .then((res) => res.json())
@@ -182,7 +190,35 @@ export function BroadcastManager({
         }
       })
       .catch(() => {});
+
+    fetch("/api/admin/message-templates/approved")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setApprovedTemplates(data.data);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  // Filter approved templates by selected broadcast purpose (exclude confirmation templates)
+  const purposeFilteredTemplates = useMemo(() => {
+    return approvedTemplates.filter((t) => {
+      const p = t.templatePurpose || t.template_purpose || "batch_reminder";
+      if (p === "confirmation") return false;
+      return p === broadcastPurpose;
+    });
+  }, [approvedTemplates, broadcastPurpose]);
+
+  useEffect(() => {
+    if (purposeFilteredTemplates.length > 0) {
+      if (!purposeFilteredTemplates.some((t) => t.id === selectedTemplateId)) {
+        setSelectedTemplateId(purposeFilteredTemplates[0].id);
+      }
+    } else {
+      setSelectedTemplateId("");
+    }
+  }, [purposeFilteredTemplates, selectedTemplateId]);
 
   // 2. Audience Selection
   const [audience, setAudience] = useState<AudienceType>("batch");
@@ -213,6 +249,40 @@ export function BroadcastManager({
       null
     );
   }, [availableBatches, selectedBatchId]);
+
+  const activeApprovedTemplate = useMemo(() => {
+    return purposeFilteredTemplates.find((t) => t.id === selectedTemplateId) || purposeFilteredTemplates[0] || null;
+  }, [purposeFilteredTemplates, selectedTemplateId]);
+
+  // Synchronize template variable mapping when approved template, course, or batch changes
+  useEffect(() => {
+    if (!activeApprovedTemplate) return;
+    const initialMap: Record<string, string> = {};
+    if (activeApprovedTemplate.variableDefinitions && activeApprovedTemplate.variableDefinitions.length > 0) {
+      for (const v of activeApprovedTemplate.variableDefinitions) {
+        if (v.sourceField === "student_name") initialMap[v.placeholder] = "[Student Name]";
+        else if (v.sourceField === "course_name") initialMap[v.placeholder] = selectedCourse?.title || "[Course Name]";
+        else if (v.sourceField === "batch_name") initialMap[v.placeholder] = selectedBatch?.batch_name || "[Batch Name]";
+        else if (v.sourceField === "batch_date") initialMap[v.placeholder] = "[Date]";
+        else if (v.sourceField === "batch_time") initialMap[v.placeholder] = "[Time]";
+        else if (v.sourceField === "zoom_link") initialMap[v.placeholder] = "[Join Link]";
+        else initialMap[v.placeholder] = v.sampleValue || "";
+      }
+    } else {
+      const bodyComp = activeApprovedTemplate.components?.find((c: any) => c.type === "BODY");
+      const matches = (bodyComp?.text || "").match(/\{\{(\d+)\}\}/g) || [];
+      for (const m of matches) {
+        const num = m.replace(/\D/g, "");
+        if (num === "1") initialMap[m] = "[Student Name]";
+        else if (num === "2") initialMap[m] = selectedCourse?.title || "[Course Name]";
+        else if (num === "3") initialMap[m] = "[Date]";
+        else if (num === "4") initialMap[m] = "[Time]";
+        else if (num === "5") initialMap[m] = "[Join Link]";
+        else initialMap[m] = "Sample Value";
+      }
+    }
+    setTemplateVariablesMap(initialMap);
+  }, [activeApprovedTemplate, selectedCourse, selectedBatch]);
 
   // Fetch students for selected batch to enable date-wise segmentation
   useEffect(() => {
@@ -279,8 +349,25 @@ export function BroadcastManager({
         audience === "batch" && selectedStudentIds.length > 0
           ? selectedStudentIds
           : null,
+      templateId: channel === "whatsapp" && useMetaTemplate ? selectedTemplateId : undefined,
+      templateName: channel === "whatsapp" && useMetaTemplate ? (activeApprovedTemplate?.metaTemplateName || activeApprovedTemplate?.meta_template_name) : undefined,
+      templateLanguage: channel === "whatsapp" && useMetaTemplate ? (activeApprovedTemplate?.language || "en_US") : undefined,
+      templateVariables: channel === "whatsapp" && useMetaTemplate ? templateVariablesMap : undefined,
     };
-  }, [audience, selectedCourseId, selectedBatchId, selectedCourse, selectedBatch, subject, selectedStudentIds]);
+  }, [
+    audience,
+    selectedCourseId,
+    selectedBatchId,
+    selectedCourse,
+    selectedBatch,
+    subject,
+    selectedStudentIds,
+    channel,
+    useMetaTemplate,
+    selectedTemplateId,
+    activeApprovedTemplate,
+    templateVariablesMap,
+  ]);
 
   // Query server-side recipient count whenever filter changes
   useEffect(() => {
@@ -350,6 +437,34 @@ export function BroadcastManager({
   }, [subject, selectedCourse, selectedBatch, targetFilter]);
 
   const previewBody = useMemo(() => {
+    if (channel === "whatsapp" && useMetaTemplate && activeApprovedTemplate) {
+      const headerComp = activeApprovedTemplate.components?.find((c: any) => c.type === "HEADER");
+      const bodyComp = activeApprovedTemplate.components?.find((c: any) => c.type === "BODY");
+      const footerComp = activeApprovedTemplate.components?.find((c: any) => c.type === "FOOTER");
+      const buttonsComp = activeApprovedTemplate.components?.find((c: any) => c.type === "BUTTONS");
+
+      let renderedBody = bodyComp?.text || "";
+      Object.entries(templateVariablesMap).forEach(([placeholder, mapping]) => {
+        const resolved = mapping
+          .replace(/\[Student Name\]/gi, "Renuka (Student Name)")
+          .replace(/\[Course Name\]/gi, selectedCourse?.title || "The WATERCOLOUR Roadmap")
+          .replace(/\[Batch Name\]/gi, selectedBatch?.batch_name || "Live Masterclass")
+          .replace(/\[Date\]/gi, targetFilter.date || "28 October 2026")
+          .replace(/\[Time\]/gi, targetFilter.time || "6:30 PM – 8:30 PM")
+          .replace(/\[Join Link\]/gi, targetFilter.joinLink || "https://zoom.us/j/1234567890");
+        renderedBody = renderedBody.split(placeholder).join(resolved);
+      });
+
+      let fullPreview = "";
+      if (headerComp?.text) fullPreview += `*${headerComp.text}*\n\n`;
+      fullPreview += renderedBody;
+      if (footerComp?.text) fullPreview += `\n\n_${footerComp.text}_`;
+      if (buttonsComp?.buttons?.length) {
+        fullPreview += `\n\n[Buttons: ${buttonsComp.buttons.map((b: any) => b.text).join(" | ")}]`;
+      }
+      return fullPreview;
+    }
+
     return messageBody
       .replace(/\\r\\n/g, "\n")
       .replace(/\\n/g, "\n")
@@ -359,7 +474,16 @@ export function BroadcastManager({
       .replace(/\[Date\]|\{\{date\}\}/gi, targetFilter.date || "28 October 2026")
       .replace(/\[Time\]|\{\{time\}\}/gi, targetFilter.time || "6:30 PM – 8:30 PM")
       .replace(/\[Join Link\]|\[Zoom Link\]|\{\{zoom_link\}\}/gi, targetFilter.joinLink || "https://zoom.us/j/1234567890");
-  }, [messageBody, selectedCourse, selectedBatch, targetFilter]);
+  }, [
+    channel,
+    useMetaTemplate,
+    activeApprovedTemplate,
+    templateVariablesMap,
+    messageBody,
+    selectedCourse,
+    selectedBatch,
+    targetFilter,
+  ]);
 
   // Dispatch Send
   const handleConfirmSend = async () => {
@@ -491,23 +615,219 @@ export function BroadcastManager({
           </div>
         )}
 
-        {/* 1. MESSAGE SELECTOR */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
-            Message
-          </label>
-          <select
-            value={selectedPresetId}
-            onChange={(e) => handlePresetChange(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-stone-900 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 font-medium"
-          >
-            {PRESET_MESSAGES.map((preset) => (
-              <option key={preset.id} value={preset.id}>
-                {preset.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* WhatsApp Template Controls */}
+        {channel === "whatsapp" && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-950 block">
+                  Meta WhatsApp Template Delivery
+                </span>
+                <span className="text-[11px] text-emerald-700">
+                  Deliver via pre-approved Meta WhatsApp Cloud API templates
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setUseMetaTemplate(true)}
+                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                    useMetaTemplate
+                      ? "bg-emerald-700 text-white shadow-sm"
+                      : "bg-white text-emerald-900 border border-emerald-300 hover:bg-emerald-100"
+                  }`}
+                >
+                  Approved Template
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUseMetaTemplate(false)}
+                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                    !useMetaTemplate
+                      ? "bg-emerald-700 text-white shadow-sm"
+                      : "bg-white text-emerald-900 border border-emerald-300 hover:bg-emerald-100"
+                  }`}
+                >
+                  Custom Text
+                </button>
+              </div>
+            </div>
+
+            {useMetaTemplate && (
+              <div className="space-y-3 pt-2 border-t border-emerald-200/70">
+                {approvedTemplates.length === 0 ? (
+                  <div className="bg-white rounded-lg p-3 text-xs border border-emerald-200 flex items-center justify-between">
+                    <span className="text-stone-700">
+                      No approved Meta templates found in the system.
+                    </span>
+                    <a
+                      href="/admin/message-templates"
+                      className="text-emerald-700 font-semibold hover:underline flex items-center gap-1"
+                    >
+                      Manage Templates &rarr;
+                    </a>
+                  </div>
+                ) : (
+                  <>
+                    {/* Template Purpose Selector */}
+                    <div>
+                      <label className="text-xs font-bold text-stone-700 block mb-1.5">
+                        Template Purpose
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setBroadcastPurpose("batch_reminder")}
+                          className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all ${
+                            broadcastPurpose === "batch_reminder"
+                              ? "bg-amber-100/80 border-amber-500 text-amber-950 shadow-xs"
+                              : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="size-3.5 text-amber-700" />
+                            <span>Batch Reminder</span>
+                          </div>
+                          <p className="text-[0.66rem] font-normal text-stone-500 mt-0.5">
+                            Reminders to students of a specific batch date
+                          </p>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setBroadcastPurpose("upcoming_batches")}
+                          className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all ${
+                            broadcastPurpose === "upcoming_batches"
+                              ? "bg-purple-100/80 border-purple-500 text-purple-950 shadow-xs"
+                              : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <Sparkles className="size-3.5 text-purple-700" />
+                            <span>Upcoming Batches</span>
+                          </div>
+                          <p className="text-[0.66rem] font-normal text-stone-500 mt-0.5">
+                            Announcements & new cohort schedule launches
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-bold text-stone-700">
+                          Select Approved {broadcastPurpose === "upcoming_batches" ? "Upcoming Batches" : "Batch Reminder"} Template
+                        </label>
+                        <a
+                          href="/admin/message-templates"
+                          className="text-[11px] text-emerald-700 hover:underline"
+                        >
+                          + Create / Sync Templates
+                        </a>
+                      </div>
+
+                      {purposeFilteredTemplates.length === 0 ? (
+                        <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-600">
+                          No approved {broadcastPurpose === "upcoming_batches" ? "Upcoming Batches" : "Batch Reminder"} templates found.
+                          <a href="/admin/message-templates" className="ml-1 text-emerald-700 font-semibold hover:underline">
+                            Create or sync one &rarr;
+                          </a>
+                        </div>
+                      ) : (
+                        <select
+                          value={selectedTemplateId}
+                          onChange={(e) => setSelectedTemplateId(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-stone-900 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 font-medium"
+                        >
+                          {purposeFilteredTemplates.map((t) => (
+                            <option key={t.id} value={t.id}>
+                              {t.internalTitle || t.internal_title || t.metaTemplateName || t.meta_template_name} ({t.metaTemplateName || t.meta_template_name})
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+
+                    {activeApprovedTemplate && (
+                      <div className="space-y-3 bg-white p-3.5 rounded-xl border border-emerald-100 text-xs">
+                        <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                              APPROVED BY META
+                            </span>
+                            <span className="font-mono text-stone-600 text-[11px]">
+                              {activeApprovedTemplate.metaTemplateName || activeApprovedTemplate.meta_template_name}
+                            </span>
+                          </div>
+                          <span className="text-[10px] uppercase font-bold text-stone-400">
+                            Category: {activeApprovedTemplate.category}
+                          </span>
+                        </div>
+
+                        {/* Dynamic Variables Mapping UI */}
+                        {Object.keys(templateVariablesMap).length > 0 && (
+                          <div className="space-y-2 pt-1">
+                            <span className="font-bold text-stone-700 block">
+                              Dynamic Variables Mapping
+                            </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {Object.entries(templateVariablesMap).map(([placeholder, val]) => (
+                                <div
+                                  key={placeholder}
+                                  className="p-2 rounded-lg bg-stone-50 border border-stone-200 space-y-1"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-mono font-bold text-emerald-800 text-[11px]">
+                                      {placeholder}
+                                    </span>
+                                    <span className="text-[10px] text-stone-400">
+                                      Variable placeholder
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="text"
+                                    value={val}
+                                    onChange={(e) =>
+                                      setTemplateVariablesMap((prev) => ({
+                                        ...prev,
+                                        [placeholder]: e.target.value,
+                                      }))
+                                    }
+                                    className="w-full px-2 py-1 bg-white border border-stone-300 rounded text-xs text-stone-800 focus:outline-none focus:border-emerald-600"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 1. MESSAGE SELECTOR (For Email or Plain WhatsApp) */}
+        {(!useMetaTemplate || channel === "email") && (
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
+              Message Preset
+            </label>
+            <select
+              value={selectedPresetId}
+              onChange={(e) => handlePresetChange(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-stone-900 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 font-medium"
+            >
+              {PRESET_MESSAGES.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* 2. AUDIENCE */}
         <div>
@@ -852,7 +1172,11 @@ export function BroadcastManager({
             <div className="space-y-2.5 bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs text-stone-700">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-stone-500 uppercase tracking-wider">Template:</span>
-                <span className="font-medium text-stone-900 text-right">{messageName}</span>
+                <span className="font-medium text-stone-900 text-right">
+                  {channel === "whatsapp" && useMetaTemplate && activeApprovedTemplate
+                    ? `${activeApprovedTemplate.internalTitle || activeApprovedTemplate.internal_title || activeApprovedTemplate.metaTemplateName || activeApprovedTemplate.meta_template_name} (Meta Approved)`
+                    : messageName}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-stone-500 uppercase tracking-wider">Audience:</span>

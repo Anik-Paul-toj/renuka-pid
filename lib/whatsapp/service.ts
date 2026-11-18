@@ -12,6 +12,7 @@ import {
   isWhatsAppGroupEligibleCourse,
   resolveWhatsAppGroupUrl,
 } from "./group";
+import { getActiveConfirmationTemplate } from "./template-management";
 
 export interface WhatsAppServiceResult {
   success: boolean;
@@ -240,21 +241,25 @@ export async function sendBookingConfirmationWhatsApp(
       courseId: course?.id,
     });
 
-    // 7. Verify Meta Template Approval Status
-    // Never assume a pending template is approved. If unavailable, do not send arbitrary free-form text.
+    // 7. Resolve Active Approved Confirmation Template
+    // Supports course-specific assignments and studio default confirmation template
+    const activeTemplate = await getActiveConfirmationTemplate(course?.id);
+    const templateName = activeTemplate?.metaTemplateName || "booking_confirmation";
+    const languageCode = activeTemplate?.language || "en";
+
+    // Verify Meta Template Approval Status
     if (transport.getApprovedTemplates) {
       try {
         const approvedTemplates = await transport.getApprovedTemplates();
         if (Array.isArray(approvedTemplates) && approvedTemplates.length > 0) {
           const isTemplateApproved = approvedTemplates.some(
             (t) =>
-              t.name === "booking_confirmation" &&
+              t.name === templateName &&
               (t.status?.toUpperCase() === "APPROVED" || t.status?.toUpperCase() === "ACTIVE")
           );
 
           if (!isTemplateApproved) {
-            const skipReason =
-              "Template 'booking_confirmation' is not approved in Meta (PENDING or UNAVAILABLE). WhatsApp notification skipped; detailed confirmation sent via email.";
+            const skipReason = `Template '${templateName}' is not approved in Meta (PENDING or UNAVAILABLE). WhatsApp notification skipped; detailed confirmation sent via email.`;
 
             // Attempt inserting with status 'skipped' (supported post-migration), fallback to 'failed'
             try {
@@ -265,7 +270,7 @@ export async function sendBookingConfirmationWhatsApp(
                 batch_id: batch?.id || null,
                 channel: "whatsapp",
                 message_type: "booking-confirmation-whatsapp",
-                template_name: "booking_confirmation",
+                template_name: templateName,
                 recipient_phone: normalizeWhatsAppNumber(recipientPhone),
                 provider_message_id: null,
                 status: "skipped" as any,
@@ -282,7 +287,7 @@ export async function sendBookingConfirmationWhatsApp(
                 batch_id: batch?.id || null,
                 channel: "whatsapp",
                 message_type: "booking-confirmation-whatsapp",
-                template_name: "booking_confirmation",
+                template_name: templateName,
                 recipient_phone: normalizeWhatsAppNumber(recipientPhone),
                 provider_message_id: null,
                 status: "failed",
@@ -306,14 +311,7 @@ export async function sendBookingConfirmationWhatsApp(
       }
     }
 
-    // 8. Dynamic Variable Mapping for Approved Meta Positional Template: 'booking_confirmation'
-    // Meta Template Text:
-    // "Namaste {{1}}! 🌸 Your seat is reserved for {{2}} on {{3}} at {{4}}. Your booking reference is {{5}}. Check your email for stream details."
-    // Variable {{1}}: Customer name
-    // Variable {{2}}: Course name
-    // Variable {{3}}: Start Date (or graceful fallback)
-    // Variable {{4}}: Timing (or graceful fallback)
-    // Variable {{5}}: Booking reference (acts as unique discount reference ID for eligible Foundation students)
+    // 8. Dynamic Variable Mapping for Approved Meta Confirmation Template
     const customerName = (customer.full_name || "Valued Student").trim();
     const courseTitle = (course?.title || "Live Masterclass").trim();
     const bookingRef = booking.booking_reference.trim();
@@ -324,13 +322,31 @@ export async function sendBookingConfirmationWhatsApp(
       ? `${batch.start_time}${batch.end_time ? ` – ${batch.end_time}` : ""} ${batch.timezone || "IST"}`
       : "To be announced";
 
-    const templateParams = [customerName, courseTitle, startDateText, timingText, bookingRef];
+    let templateParams: string[] = [];
+
+    if (activeTemplate?.variableDefinitions && activeTemplate.variableDefinitions.length > 0) {
+      templateParams = activeTemplate.variableDefinitions.map((v) => {
+        if (v.sourceField === "student_name") return customerName;
+        if (v.sourceField === "course_name") return courseTitle;
+        if (v.sourceField === "batch_name") return batch?.batch_name || courseTitle;
+        if (v.sourceField === "batch_date") return startDateText;
+        if (v.sourceField === "batch_time") return timingText;
+        if (v.sourceField === "booking_reference") return bookingRef;
+        if (v.sourceField === "zoom_link") return batch?.zoom_join_url || "Link sent via email";
+        return v.sampleValue || "";
+      });
+    }
+
+    if (templateParams.length === 0) {
+      // Default 5-parameter positional template structure
+      templateParams = [customerName, courseTitle, startDateText, timingText, bookingRef];
+    }
 
     // 9. Dispatch via Transport using Approved Meta Template
     const sendResult = await transport.sendTemplateMessage({
       to: recipientPhone,
-      templateName: "booking_confirmation",
-      languageCode: "en",
+      templateName,
+      languageCode,
       components: buildMetaTemplateComponents(templateParams),
     });
 
@@ -345,7 +361,7 @@ export async function sendBookingConfirmationWhatsApp(
         batch_id: batch?.id || null,
         channel: "whatsapp",
         message_type: "booking-confirmation-whatsapp",
-        template_name: "booking_confirmation",
+        template_name: templateName,
         recipient_phone: normalizeWhatsAppNumber(recipientPhone),
         provider_message_id: sendResult.providerMessageId || null,
         status: "sent",

@@ -20,6 +20,7 @@ import {
   X,
   ShieldCheck,
   KeyRound,
+  MessageSquareText,
 } from "lucide-react";
 import { AdminProfile } from "@/lib/auth/admin";
 import { StudioLogo } from "@/components/ui/StudioLogo";
@@ -43,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
   { name: "Messages", href: "/admin/messages", icon: Mail },
   { name: "Broadcast", href: "/admin/broadcast", icon: Radio },
+  { name: "Message Templates", href: "/admin/message-templates", icon: MessageSquareText },
   { name: "Notifications", href: "/admin/notifications", icon: Bell },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];

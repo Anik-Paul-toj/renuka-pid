@@ -757,19 +757,41 @@ export async function sendBroadcast(
               ? "booking_confirmation"
               : "upcoming_class_reminder");
 
-          // Template parameters: {{1}} Student, {{2}} Course, {{3}} Date, {{4}} Time, {{5}} Join Link
-          const templateParams = [
-            recipientName,
-            recipient.courseTitle || courseTitle,
-            recipient.startDate || defaultDate,
-            recipient.startTime || defaultTime,
-            recipient.zoomJoinUrl || defaultJoinLink,
-          ];
+          let templateParams: string[] = [];
+          if (targetFilter.templateVariables && typeof targetFilter.templateVariables === "object") {
+            const sortedKeys = Object.keys(targetFilter.templateVariables).sort((a, b) => {
+              const numA = parseInt(a.replace(/\D/g, "")) || 0;
+              const numB = parseInt(b.replace(/\D/g, "")) || 0;
+              return numA - numB;
+            });
 
+            templateParams = sortedKeys.map((k) => {
+              const rawVal = targetFilter.templateVariables![k] || "";
+              return rawVal
+                .replace(/\[Student Name\]|\{\{student_name\}\}/gi, recipientName)
+                .replace(/\[Course Name\]|\{\{course_name\}\}/gi, recipient.courseTitle || courseTitle)
+                .replace(/\[Batch Name\]|\{\{batch_name\}\}/gi, recipient.batchName || batchName)
+                .replace(/\[Date\]|\{\{date\}\}/gi, recipient.startDate || defaultDate)
+                .replace(/\[Time\]|\{\{time\}\}/gi, defaultTime)
+                .replace(/\[Join Link\]|\[Zoom Link\]|\{\{zoom_link\}\}/gi, recipient.zoomJoinUrl || defaultJoinLink);
+            });
+          }
+
+          if (templateParams.length === 0) {
+            templateParams = [
+              recipientName,
+              recipient.courseTitle || courseTitle,
+              recipient.startDate || defaultDate,
+              recipient.startTime || defaultTime,
+              recipient.zoomJoinUrl || defaultJoinLink,
+            ];
+          }
+
+          const templateLanguage = targetFilter.templateLanguage || "en_US";
           let sendResult = await whatsAppTransport.sendTemplateMessage({
             to: normalizedPhone,
             templateName,
-            languageCode: "en",
+            languageCode: templateLanguage,
             components: buildMetaTemplateComponents(templateParams),
           });
 

@@ -15,12 +15,16 @@ export const targetFilterSchema = z.object({
   courseName: z.string().nullable().optional(),
   batchId: z.string().min(1, "Invalid batch identifier").nullable().optional(),
   batchName: z.string().nullable().optional(),
-  subject: z.string().min(1, "Subject is required").max(255, "Subject must be under 255 characters"),
+  subject: z.string().max(255, "Subject must be under 255 characters").optional().default("Studio Announcement"),
   date: z.string().nullable().optional(),
   time: z.string().nullable().optional(),
   joinLink: z.string().nullable().optional(),
   confirmedOnly: z.boolean().nullable().optional(),
   selectedCustomerIds: z.array(z.string()).nullable().optional(),
+  templateId: z.string().nullable().optional(),
+  templateName: z.string().nullable().optional(),
+  templateLanguage: z.string().nullable().optional(),
+  templateVariables: z.record(z.string(), z.string()).nullable().optional(),
 });
 
 export type TargetFilterInput = z.infer<typeof targetFilterSchema>;
