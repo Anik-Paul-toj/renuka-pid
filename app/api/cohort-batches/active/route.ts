@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getBatchByCourseId } from "@/lib/batches-admin/service";
+import { getBatchByCourseId, getBatchById, getBatchesByCourseId } from "@/lib/batches-admin/service";
 import { parseCourseDetails } from "@/lib/courses-admin/details";
+import { isBatchDateAnnounced } from "@/lib/batches-admin/format";
 
 export const dynamic = "force-dynamic";
 
@@ -11,9 +12,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const courseSlug = searchParams.get("courseSlug");
     const courseId = searchParams.get("courseId");
+    const batchId = searchParams.get("batchId");
 
     let targetCourseId = courseId;
     let targetCourse: any = null;
+    let batchSchedule: any = null;
+
+    if (batchId) {
+      batchSchedule = await getBatchById(batchId);
+      if (batchSchedule?.courseId) {
+        targetCourseId = batchSchedule.courseId;
+      }
+    }
 
     if (courseSlug) {
       const { data: c } = await supabase
@@ -31,8 +41,15 @@ export async function GET(request: NextRequest) {
     }
 
     const resolvedCourseId =
-      targetCourseId || "11111111-1111-1111-1111-111111111111";
-    const batchSchedule = await getBatchByCourseId(resolvedCourseId);
+      targetCourseId || (batchSchedule?.courseId ?? "11111111-1111-1111-1111-111111111111");
+
+    if (!batchSchedule) {
+      batchSchedule = await getBatchByCourseId(resolvedCourseId);
+      // Fallback: If courseId was actually a batch ID
+      if (!batchSchedule && courseId) {
+        batchSchedule = await getBatchById(courseId);
+      }
+    }
 
     if (!batchSchedule) {
       return NextResponse.json(
@@ -90,6 +107,32 @@ export async function GET(request: NextRequest) {
       !batchSchedule.isEnrollmentOpen ||
       batchSchedule.isExpired ||
       batchSchedule.isSoldOut;
+
+    let availableBatches: any[] = [];
+    try {
+      const allCourseBatches = await getBatchesByCourseId(resolvedCourseId);
+      availableBatches = allCourseBatches
+        .filter((b) => isBatchDateAnnounced(b.startDate) && b.status !== "completed")
+        .map((b) => ({
+          id: b.id,
+          batchName: b.batchName,
+          startDate: b.startDate,
+          endDate: b.endDate,
+          startTime: b.startTime,
+          endTime: b.endTime,
+          totalSeats: b.totalSeats,
+          seatsBooked: b.seatsBooked,
+          seatsRemaining: b.seatsRemaining,
+          isSoldOut: b.isSoldOut,
+          isEnrollmentOpen: b.isEnrollmentOpen,
+          formattedStartDate: b.formattedStartDate,
+          formattedTiming: b.formattedTiming,
+          lastRegistrationDate: b.lastRegistrationDate,
+          formattedLastRegistrationDate: b.formattedLastRegistrationDate,
+        }));
+    } catch {
+      availableBatches = [];
+    }
 
     return NextResponse.json(
       {
@@ -151,6 +194,7 @@ export async function GET(request: NextRequest) {
                 registrationMode: isFreeRegistration ? "free" : "paid",
               },
         },
+        availableBatches,
       },
       {
         headers: {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, CheckCircle2, Calendar, Clock, Sparkles, ArrowRight, AlertCircle, Hourglass } from "lucide-react";
 import { useLandingContent } from "@/components/LandingContentProvider";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
@@ -41,6 +42,9 @@ interface ActiveBatchInfo {
   formattedLastRegistrationDate?: string;
   formattedTiming?: string;
   courseTitle?: string;
+  totalSeats?: number;
+  seatsBooked?: number;
+  seatsRemaining?: number;
   offerPrice?: number;
   offerPricePaise?: number;
 }
@@ -93,7 +97,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [termsError, setTermsError] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [activeBatch, setActiveBatch] = useState<ActiveBatchInfo | null>(null);
+  const [availableBatches, setAvailableBatches] = useState<ActiveBatchInfo[]>([]);
   const [bookingInfo, setBookingInfo] = useState<ConfirmedBookingInfo | null>(null);
   const [paymentPending, setPaymentPending] = useState(false);
   const [pendingBookingRef, setPendingBookingRef] = useState<string | null>(null);
@@ -120,15 +130,18 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   // Helper to fetch active batch
   const fetchActiveBatch = async (): Promise<ActiveBatchInfo | null> => {
     try {
-      const url = courseSlug
+      const url = propBatchId
+        ? `/api/cohort-batches/active?batchId=${encodeURIComponent(propBatchId)}`
+        : courseSlug
         ? `/api/cohort-batches/active?courseSlug=${encodeURIComponent(courseSlug)}`
-        : propBatchId
-        ? `/api/cohort-batches/active?courseId=${encodeURIComponent(propBatchId)}`
         : "/api/cohort-batches/active";
 
       const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) return null;
       const data = await res.json();
+      if (Array.isArray(data?.availableBatches)) {
+        setAvailableBatches(data.availableBatches);
+      }
       if (data?.success && data?.batch?.id) {
         const batchInfo: ActiveBatchInfo = {
           id: data.batch.id,
@@ -304,7 +317,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const triggerRazorpayCheckout = async (
     bookingRef: string,
@@ -571,12 +584,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     }
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      className="fixed inset-0 z-[100] overflow-y-auto overflow-x-hidden"
+      className="fixed inset-0 z-[9999] overflow-y-auto overflow-x-hidden"
     >
       {/* Backdrop */}
       <div
@@ -584,14 +597,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           if (isPaymentLocked) return;
           handleReset();
         }}
-        className="fixed inset-0 bg-[#14120E]/75 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-[#14120E]/80 backdrop-blur-md transition-opacity pointer-events-auto"
         aria-hidden="true"
       />
 
       {/* Centering Wrapper ensuring the top and bottom of modal are never cut off on smaller screens */}
-      <div className="flex min-h-full items-center justify-center p-3 sm:p-6 pointer-events-none">
+      <div className="relative z-10 flex min-h-screen items-center justify-center p-3 sm:p-6 py-8 pointer-events-none">
         {/* Modal Container */}
-        <div className="paper-card pointer-events-auto relative w-full max-w-lg my-auto max-h-[calc(100vh-2.5rem)] overflow-y-auto rounded-xl bg-[#FAF8F2] p-5 sm:p-6 shadow-2xl border border-[#464137]/15 z-10 custom-scrollbar">
+        <div className="paper-card pointer-events-auto relative w-full max-w-lg my-auto max-h-[calc(100vh-3rem)] overflow-y-auto rounded-xl bg-[#FAF8F2] p-5 sm:p-6 shadow-2xl border border-[#464137]/15 z-10 custom-scrollbar">
         {/* Close button - hidden/disabled while payment is locked */}
         {!isPaymentLocked && (
           <button
@@ -625,6 +638,38 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 ? "Reserve Your Seat"
                 : "Reserve Your Free Seat")}
             </h3>
+
+            {/* Batch Selector if multiple announced batches exist */}
+            {availableBatches.length > 1 && !paymentLinkToken && (
+              <div className="mt-3">
+                <label htmlFor="batch-select" className="block text-[11px] font-bold text-[#444C38] mb-1">
+                  Select Cohort Batch:
+                </label>
+                <select
+                  id="batch-select"
+                  value={activeBatch?.id || ""}
+                  onChange={(e) => {
+                    const selected = availableBatches.find((b) => b.id === e.target.value);
+                    if (selected) {
+                      setActiveBatch((prev) => ({
+                        ...prev,
+                        ...selected,
+                        courseTitle: prev?.courseTitle || courseTitle,
+                        offerPrice: prev?.offerPrice ?? coursePrice,
+                        offerPricePaise: prev?.offerPricePaise ?? (coursePrice ? coursePrice * 100 : undefined),
+                      }));
+                    }
+                  }}
+                  className="w-full rounded-md border border-[#464137]/25 bg-[#F7F4EC] px-2.5 py-1.5 text-xs text-[#14120E] font-medium shadow-xs focus:border-[#444C38] focus:outline-none focus:ring-1 focus:ring-[#444C38]"
+                >
+                  {availableBatches.map((b) => (
+                    <option key={b.id} value={b.id} disabled={b.isSoldOut}>
+                      {b.batchName} ({b.formattedStartDate || b.startDate}) {b.isSoldOut ? "— (SOLD OUT)" : `— ${b.seatsRemaining ?? ((b.totalSeats ?? 0) - (b.seatsBooked ?? 0))} seats left`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Quick Session Details */}
             {(() => {
@@ -714,7 +759,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Maya Sharma"
+                  placeholder="Your Full Name"
                   value={name}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setName(e.target.value)}
@@ -729,7 +774,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 <input
                   type="email"
                   required
-                  placeholder="name@domain.com"
+                  placeholder="Your Email Address"
                   value={email}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setEmail(e.target.value)}
@@ -743,7 +788,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 </label>
                 <input
                   type="tel"
-                  placeholder="+91 98765 43210"
+                  placeholder="Your WhatsApp Number"
                   value={phone}
                   readOnly={isPaymentLocked}
                   onChange={(e) => setPhone(e.target.value)}
@@ -1020,6 +1065,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
         )}
       </div>
     </div>
-  </div>
+  </div>,
+  document.body
 );
 };

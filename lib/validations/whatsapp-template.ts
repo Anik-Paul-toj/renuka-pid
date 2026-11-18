@@ -108,7 +108,7 @@ export const createWhatsAppTemplateSchema = z.object({
   category: templateCategoryEnum.default("UTILITY"),
   templatePurpose: templatePurposeEnum.default("batch_reminder"),
   assignedCourseId: z.string().uuid("Invalid course identifier").nullable().optional(),
-  isDefaultConfirmation: z.boolean().default(false),
+  isDefaultConfirmation: z.boolean().default(false).optional(),
   language: z.string().trim().min(2).max(10).default("en_US"),
   components: z.array(templateComponentSchema).min(1, "At least a BODY component is required"),
   variableDefinitions: z.array(variableDefinitionSchema).default([]),
