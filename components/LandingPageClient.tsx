@@ -77,6 +77,10 @@ export function LandingPageClient({
   const isRegistrationClosed = Boolean(
     isBatchLoading ||
       !activeBatch ||
+      activeBatch.status === "closed" ||
+      activeBatch.status === "tba" ||
+      activeBatch.status === "upcoming" ||
+      activeBatch.status === "completed" ||
       !activeBatch.isEnrollmentOpen ||
       activeBatch.isExpired ||
       activeBatch.isSoldOut ||

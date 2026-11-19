@@ -56,33 +56,83 @@ export function CourseDetailPageClient({
     course.slug === "watercolour-artistry-foundation";
   const details = course.details;
 
-  const isRegistrationClosed = Boolean(
-    !activeBatch ||
-      !activeBatch.isEnrollmentOpen ||
-      activeBatch.isExpired ||
-      activeBatch.isSoldOut ||
-      (activeBatch.lastRegistrationDate &&
-        isRegistrationDeadlineExpired(
-          activeBatch.lastRegistrationDate,
-          new Date(),
-          {
-            startDate: activeBatch.startDate,
-            startTime: activeBatch.startTime,
-            registrationClosesBeforeHours: activeBatch.registrationClosesBeforeHours,
-          }
-        ))
-  );
-
-  // Date is considered TBA if explicitly tba or if the start date is unannounced
   const isCohortCourse =
     course.slug === "watercolour-foundation" ||
     course.slug === "watercolour-artistry-foundation";
+
+  const isSoldOut = Boolean(
+    activeBatch?.isSoldOut ||
+      (activeBatch?.seatsRemaining !== undefined && activeBatch.seatsRemaining <= 0)
+  );
+
   const isTBAEnrolment = Boolean(
     activeBatch?.status === "tba" ||
       !isBatchDateAnnounced(activeBatch?.startDate ?? null) ||
       activeBatch?.startDate === "TBA" ||
       (isCohortCourse && !isBatchDateAnnounced(activeBatch?.startDate ?? null))
   );
+
+  const isUpcoming = activeBatch?.status === "upcoming";
+  const isCompleted = activeBatch?.status === "completed";
+
+  const isDeadlineExpired = Boolean(
+    activeBatch?.lastRegistrationDate &&
+      isRegistrationDeadlineExpired(
+        activeBatch.lastRegistrationDate,
+        new Date(),
+        {
+          startDate: activeBatch.startDate,
+          startTime: activeBatch.startTime,
+          registrationClosesBeforeHours: activeBatch.registrationClosesBeforeHours,
+        }
+      )
+  );
+
+  const isRegistrationClosed = Boolean(
+    !activeBatch ||
+      activeBatch.status === "closed" ||
+      !activeBatch.isEnrollmentOpen ||
+      activeBatch.isExpired ||
+      isDeadlineExpired ||
+      isSoldOut
+  );
+
+  const isEnrollmentDisabled =
+    isSoldOut || isTBAEnrolment || isUpcoming || isCompleted || isRegistrationClosed;
+
+  const detailStatusLabel = isSoldOut
+    ? "This batch is fully booked. Registration is now closed."
+    : isTBAEnrolment
+    ? "To Be Announced"
+    : isUpcoming
+    ? "Registration Opening Soon"
+    : isCompleted
+    ? "Batch Completed"
+    : isRegistrationClosed
+    ? "Registration Closed"
+    : "Open for Registration";
+
+  const detailButtonLabel = isSoldOut
+    ? "Batch Full"
+    : isTBAEnrolment
+    ? "Dates To Be Announced"
+    : isUpcoming
+    ? "Registration Opening Soon"
+    : isCompleted
+    ? "Batch Completed"
+    : isRegistrationClosed
+    ? "Registration Closed"
+    : details.registrationMode === "free" ||
+      course.offerPrice === 0 ||
+      activeBatch?.registrationMode === "free" ||
+      (activeBatch as any)?.isFreeRegistration
+    ? "Enrol for Free"
+    : details.ctaText ||
+      (isWorkshop
+        ? "Enrol in Masterclass"
+        : isFoundation
+        ? "Enrol in Foundation Course"
+        : "Enrol in Artistry Course");
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-[#F7F4EC] text-[#14120E] flex flex-col justify-between selection:bg-[#444C38]/20">
@@ -113,8 +163,8 @@ export function CourseDetailPageClient({
 
       {/* Top Navbar */}
       <Navbar
-        onOpenModal={() => !isRegistrationClosed && !isTBAEnrolment && setIsModalOpen(true)}
-        isRegistrationClosed={isRegistrationClosed || isTBAEnrolment}
+        onOpenModal={() => !isEnrollmentDisabled && setIsModalOpen(true)}
+        isRegistrationClosed={isEnrollmentDisabled}
       />
 
       <main className="relative z-10 flex-1 py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
@@ -293,20 +343,16 @@ export function CourseDetailPageClient({
 
                     <span
                       className={`px-2.5 py-0.5 rounded text-[0.66rem] font-bold uppercase tracking-wider ${
-                        activeBatch.isSoldOut
+                        isSoldOut || isRegistrationClosed
                           ? "bg-[#B93821]/15 text-[#B93821] border border-[#B93821]/30"
-                          : isRegistrationClosed
+                          : isTBAEnrolment || isCompleted
                           ? "bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25"
+                          : isUpcoming
+                          ? "bg-[#B8860B]/15 text-[#855B00] border border-[#B8860B]/30"
                           : "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
                       }`}
                     >
-                      {activeBatch.isSoldOut
-                        ? "This batch is fully booked. Registration is now closed."
-                        : isTBAEnrolment
-                        ? "Enrolment Opening Soon"
-                        : isRegistrationClosed
-                        ? "Registration Closed"
-                        : "Open for Registration"}
+                      {detailStatusLabel}
                     </span>
                   </div>
 
@@ -593,20 +639,16 @@ export function CourseDetailPageClient({
                             </span>
                             <span
                               className={`px-2 py-0.2 rounded text-[0.6rem] font-bold uppercase tracking-wider ${
-                                activeBatch.isSoldOut
+                                isSoldOut || isRegistrationClosed
                                   ? "bg-[#B93821]/15 text-[#B93821]"
-                                  : isRegistrationClosed
+                                  : isTBAEnrolment || isCompleted
                                   ? "bg-[#6F6B61]/15 text-[#6F6B61]"
+                                  : isUpcoming
+                                  ? "bg-[#B8860B]/15 text-[#855B00]"
                                   : "bg-[#3E522D]/15 text-[#3E522D]"
                               }`}
                             >
-                              {activeBatch.isSoldOut
-                                ? "This batch is fully booked. Registration is now closed."
-                                : isTBAEnrolment
-                                ? "To Be Announced"
-                                : isRegistrationClosed
-                                ? "Registration Closed"
-                                : "Open for Registration"}
+                              {detailStatusLabel}
                             </span>
                           </div>
                           {!isTBAEnrolment && (
@@ -620,27 +662,12 @@ export function CourseDetailPageClient({
                     </div>
 
                     <button
-                      onClick={() => !isRegistrationClosed && !isTBAEnrolment && setIsModalOpen(true)}
-                      disabled={isRegistrationClosed || isTBAEnrolment}
+                      onClick={() => !isEnrollmentDisabled && setIsModalOpen(true)}
+                      disabled={isEnrollmentDisabled}
                       className="btn-studio px-8 py-4 text-xs sm:text-sm tracking-wider font-bold shadow-md inline-flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span>
-                        {activeBatch.isSoldOut
-                          ? "Batch Full"
-                          : isTBAEnrolment
-                          ? "Dates To Be Announced"
-                          : isRegistrationClosed
-                          ? "Registration Closed"
-                          : details.registrationMode === "free" || course.offerPrice === 0 || activeBatch?.registrationMode === "free" || (activeBatch as any)?.isFreeRegistration
-                          ? "Enrol for Free"
-                          : details.ctaText ||
-                            (isWorkshop
-                              ? "Enrol in Masterclass"
-                              : isFoundation
-                              ? "Enrol in Foundation Course"
-                              : "Enrol in Artistry Course")}
-                      </span>
-                      <ArrowRight className="size-4" />
+                      <span>{detailButtonLabel}</span>
+                      {!isEnrollmentDisabled && <ArrowRight className="size-4" />}
                     </button>
                   </div>
                 </div>

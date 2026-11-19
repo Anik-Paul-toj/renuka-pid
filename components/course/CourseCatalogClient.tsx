@@ -73,12 +73,20 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
       batch.isSoldOut ||
         (batch.seatsRemaining !== undefined && batch.seatsRemaining <= 0)
     );
-    const isClosed = !batch.isEnrollmentOpen || batch.isExpired || isSoldOut;
-    const isTBA = isCourseEnrolmentTBA(course);
+    const isTBA = isCourseEnrolmentTBA(course) || batch.status === "tba";
+    const isUpcoming = batch.status === "upcoming";
+    const isCompleted = batch.status === "completed";
+    const isClosed =
+      batch.status === "closed" || !batch.isEnrollmentOpen || batch.isExpired || isSoldOut;
+
     const statusLabel = isSoldOut
       ? "This batch is fully booked. Registration is now closed."
       : isTBA
       ? "To Be Announced"
+      : isUpcoming
+      ? "Registration Opening Soon"
+      : isCompleted
+      ? "Batch Completed"
       : isClosed
       ? "Registration Closed"
       : "Open for Registration";
@@ -93,7 +101,11 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
           <div className="flex items-center gap-1.5">
             <span
               className={`size-2 rounded-full ${
-                isClosed || isTBA ? "bg-[#6F6B61]" : "bg-[#444C38] animate-pulse"
+                isSoldOut || isClosed || isTBA || isCompleted
+                  ? "bg-[#6F6B61]"
+                  : isUpcoming
+                  ? "bg-[#B8860B]"
+                  : "bg-[#444C38] animate-pulse"
               }`}
             />
             <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[#444C38]">
@@ -104,10 +116,12 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
           <div className="flex items-center gap-2">
             <span
               className={`px-2 py-0.5 rounded text-[0.64rem] font-bold uppercase tracking-wider ${
-                isSoldOut
+                isSoldOut || isClosed
                   ? "bg-[#B93821]/15 text-[#B93821] border border-[#B93821]/30"
-                  : isClosed || isTBA
+                  : isTBA || isCompleted
                   ? "bg-[#6F6B61]/15 text-[#6F6B61] border border-[#6F6B61]/25"
+                  : isUpcoming
+                  ? "bg-[#B8860B]/15 text-[#855B00] border border-[#B8860B]/30"
                   : "bg-[#3E522D]/15 text-[#3E522D] border border-[#3E522D]/30"
               }`}
             >
@@ -404,27 +418,49 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     <ArrowRight className="size-4" />
                   </Link>
 
-                  <button
-                    onClick={() => handleOpenBooking(masterclassCourse)}
-                    disabled={
+                  {(() => {
+                    const isSoldOut = Boolean(
+                      masterclassCourse.activeBatch?.isSoldOut ||
+                        (masterclassCourse.activeBatch?.seatsRemaining !== undefined &&
+                          masterclassCourse.activeBatch.seatsRemaining <= 0)
+                    );
+                    const isTBA =
                       isCourseEnrolmentTBA(masterclassCourse) ||
-                      masterclassCourse.activeBatch?.isExpired ||
+                      masterclassCourse.activeBatch?.status === "tba";
+                    const isUpcoming = masterclassCourse.activeBatch?.status === "upcoming";
+                    const isCompleted = masterclassCourse.activeBatch?.status === "completed";
+                    const isClosed =
+                      masterclassCourse.activeBatch?.status === "closed" ||
                       !masterclassCourse.activeBatch?.isEnrollmentOpen ||
-                      masterclassCourse.activeBatch?.isSoldOut
-                    }
-                    className="btn-course-enrol flex-1 sm:flex-none"
-                  >
-                    <span>
-                      {isCourseEnrolmentTBA(masterclassCourse)
-                        ? "Dates To Be Announced"
-                        : masterclassCourse.activeBatch?.isExpired ||
-                          !masterclassCourse.activeBatch?.isEnrollmentOpen
-                        ? "Registration Closed"
-                        : isMasterclassFree
-                        ? "Enrol for Free"
-                        : "Enrol Now"}
-                    </span>
-                  </button>
+                      masterclassCourse.activeBatch?.isExpired ||
+                      isSoldOut;
+
+                    const isDisabled = isSoldOut || isTBA || isUpcoming || isCompleted || isClosed;
+
+                    const btnLabel = isSoldOut
+                      ? "Batch Full"
+                      : isTBA
+                      ? "Dates To Be Announced"
+                      : isUpcoming
+                      ? "Registration Opening Soon"
+                      : isCompleted
+                      ? "Batch Completed"
+                      : isClosed
+                      ? "Registration Closed"
+                      : isMasterclassFree
+                      ? "Enrol for Free"
+                      : "Enrol Now";
+
+                    return (
+                      <button
+                        onClick={() => handleOpenBooking(masterclassCourse)}
+                        disabled={isDisabled}
+                        className="btn-course-enrol flex-1 sm:flex-none"
+                      >
+                        <span>{btnLabel}</span>
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -551,31 +587,47 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     <ArrowRight className="size-4" />
                   </Link>
 
-                  <button
-                    onClick={() => handleOpenBooking(foundationCourse)}
-                    disabled={
-                      isCohortEnrolmentTBA(foundationCourse) ||
-                      foundationCourse.activeBatch?.isExpired ||
-                      !foundationCourse.activeBatch?.isEnrollmentOpen ||
+                  {(() => {
+                    const isSoldOut = Boolean(
                       foundationCourse.activeBatch?.isSoldOut ||
-                      (foundationCourse.activeBatch?.seatsRemaining !== undefined &&
-                        foundationCourse.activeBatch.seatsRemaining <= 0)
-                    }
-                    className="btn-course-enrol flex-1 sm:flex-none"
-                  >
-                    <span>
-                      {foundationCourse.activeBatch?.isSoldOut ||
-                      (foundationCourse.activeBatch?.seatsRemaining !== undefined &&
-                        foundationCourse.activeBatch.seatsRemaining <= 0)
-                        ? "Batch Full"
-                        : isCohortEnrolmentTBA(foundationCourse)
-                        ? "Dates To Be Announced"
-                        : foundationCourse.activeBatch?.isExpired ||
-                          !foundationCourse.activeBatch?.isEnrollmentOpen
-                        ? "Registration Closed"
-                        : "Enrol Now"}
-                    </span>
-                  </button>
+                        (foundationCourse.activeBatch?.seatsRemaining !== undefined &&
+                          foundationCourse.activeBatch.seatsRemaining <= 0)
+                    );
+                    const isTBA =
+                      isCohortEnrolmentTBA(foundationCourse) ||
+                      foundationCourse.activeBatch?.status === "tba";
+                    const isUpcoming = foundationCourse.activeBatch?.status === "upcoming";
+                    const isCompleted = foundationCourse.activeBatch?.status === "completed";
+                    const isClosed =
+                      foundationCourse.activeBatch?.status === "closed" ||
+                      !foundationCourse.activeBatch?.isEnrollmentOpen ||
+                      foundationCourse.activeBatch?.isExpired ||
+                      isSoldOut;
+
+                    const isDisabled = isSoldOut || isTBA || isUpcoming || isCompleted || isClosed;
+
+                    const btnLabel = isSoldOut
+                      ? "Batch Full"
+                      : isTBA
+                      ? "Dates To Be Announced"
+                      : isUpcoming
+                      ? "Registration Opening Soon"
+                      : isCompleted
+                      ? "Batch Completed"
+                      : isClosed
+                      ? "Registration Closed"
+                      : "Enrol Now";
+
+                    return (
+                      <button
+                        onClick={() => handleOpenBooking(foundationCourse)}
+                        disabled={isDisabled}
+                        className="btn-course-enrol flex-1 sm:flex-none"
+                      >
+                        <span>{btnLabel}</span>
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -693,31 +745,47 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     <ArrowRight className="size-4" />
                   </Link>
 
-                  <button
-                    onClick={() => handleOpenBooking(artistryCourse)}
-                    disabled={
-                      isCohortEnrolmentTBA(artistryCourse) ||
-                      artistryCourse.activeBatch?.isExpired ||
-                      !artistryCourse.activeBatch?.isEnrollmentOpen ||
+                  {(() => {
+                    const isSoldOut = Boolean(
                       artistryCourse.activeBatch?.isSoldOut ||
-                      (artistryCourse.activeBatch?.seatsRemaining !== undefined &&
-                        artistryCourse.activeBatch.seatsRemaining <= 0)
-                    }
-                    className="btn-course-enrol flex-1 sm:flex-none"
-                  >
-                    <span>
-                      {artistryCourse.activeBatch?.isSoldOut ||
-                      (artistryCourse.activeBatch?.seatsRemaining !== undefined &&
-                        artistryCourse.activeBatch.seatsRemaining <= 0)
-                        ? "Batch Full"
-                        : isCohortEnrolmentTBA(artistryCourse)
-                        ? "Dates To Be Announced"
-                        : artistryCourse.activeBatch?.isExpired ||
-                          !artistryCourse.activeBatch?.isEnrollmentOpen
-                        ? "Registration Closed"
-                        : "Enrol Now"}
-                    </span>
-                  </button>
+                        (artistryCourse.activeBatch?.seatsRemaining !== undefined &&
+                          artistryCourse.activeBatch.seatsRemaining <= 0)
+                    );
+                    const isTBA =
+                      isCohortEnrolmentTBA(artistryCourse) ||
+                      artistryCourse.activeBatch?.status === "tba";
+                    const isUpcoming = artistryCourse.activeBatch?.status === "upcoming";
+                    const isCompleted = artistryCourse.activeBatch?.status === "completed";
+                    const isClosed =
+                      artistryCourse.activeBatch?.status === "closed" ||
+                      !artistryCourse.activeBatch?.isEnrollmentOpen ||
+                      artistryCourse.activeBatch?.isExpired ||
+                      isSoldOut;
+
+                    const isDisabled = isSoldOut || isTBA || isUpcoming || isCompleted || isClosed;
+
+                    const btnLabel = isSoldOut
+                      ? "Batch Full"
+                      : isTBA
+                      ? "Dates To Be Announced"
+                      : isUpcoming
+                      ? "Registration Opening Soon"
+                      : isCompleted
+                      ? "Batch Completed"
+                      : isClosed
+                      ? "Registration Closed"
+                      : "Enrol Now";
+
+                    return (
+                      <button
+                        onClick={() => handleOpenBooking(artistryCourse)}
+                        disabled={isDisabled}
+                        className="btn-course-enrol flex-1 sm:flex-none"
+                      >
+                        <span>{btnLabel}</span>
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

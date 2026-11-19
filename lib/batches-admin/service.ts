@@ -90,12 +90,30 @@ export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
   });
 
   const dateAnnounced = isBatchDateAnnounced(batchData.start_date);
-  const isTba = !dateAnnounced || batchData.start_date === "2099-12-31" || batchData.start_date === "TBA";
+
+  // Check explicit admin status saved in course description metadata for this specific batch
+  const explicitStatus: BatchStatus | undefined =
+    (courseDetails as any)?.batchSchedules?.[batchData.id]?.status ||
+    ((courseDetails as any)?.batchSchedule?.id === batchData.id || !(courseDetails as any)?.batchSchedules
+      ? (courseDetails as any)?.batchSchedule?.status
+      : undefined);
+
+  const isTba =
+    explicitStatus === "tba" ||
+    !dateAnnounced ||
+    batchData.start_date === "2099-12-31" ||
+    batchData.start_date === "TBA";
 
   // Per-batch status derivation: strictly isolated to this batch record
   let status: BatchStatus = "open";
   if (isTba) {
     status = "tba";
+  } else if (explicitStatus === "completed") {
+    status = "completed";
+  } else if (explicitStatus === "closed") {
+    status = "closed";
+  } else if (explicitStatus === "upcoming") {
+    status = "upcoming";
   } else if (!batchData.is_enrollment_open) {
     const today = getTodayISTString();
     if (batchData.start_date < today) {
@@ -111,9 +129,9 @@ export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
 
   // Enrollment is open ONLY if explicitly open, date announced, not TBA, not completed, not expired, not sold out
   const isEnrollmentOpen =
-    batchData.is_enrollment_open &&
+    status === "open" &&
+    Boolean(batchData.is_enrollment_open) &&
     !isTba &&
-    status !== "completed" &&
     !isExpired &&
     !isSoldOut;
 
@@ -280,7 +298,9 @@ export async function getBatchByCourseId(
     batchData = openBatches[0];
   } else {
     const sortedByLatest = [...rawList].sort((a: any, b: any) =>
-      (b.start_date || "").localeCompare(a.start_date || "")
+      (b.updated_at || b.created_at || b.start_date || "").localeCompare(
+        a.updated_at || a.created_at || a.start_date || ""
+      )
     );
     batchData = sortedByLatest[0];
   }
@@ -391,7 +411,7 @@ export async function createBatch(
       ? "2099-12-31"
       : input.startDate;
 
-  const isEnrollmentOpen = !isTba && input.status !== "completed" && (input.status === "open" || input.status === "upcoming");
+  const isEnrollmentOpen = !isTba && input.status === "open";
   const totalSeats = input.totalSeats && input.totalSeats > 0 ? input.totalSeats : 50;
 
   const insertPayload: any = {
@@ -579,7 +599,7 @@ export async function updateBatchSchedule(
 
   const isTba = input.status === "tba";
   const effectiveStartDate =
-    isTba && (!input.startDate || input.startDate === "TBA" || input.startDate === "tba")
+    isTba
       ? "2099-12-31"
       : input.startDate || "2099-12-31";
 
@@ -599,12 +619,8 @@ export async function updateBatchSchedule(
   const derivedLastRegDate =
     input.lastRegistrationDate || closing?.closingDateStr || effectiveStartDate;
 
-  // Determine is_enrollment_open
-  const isEnrollmentOpen =
-    !isTba &&
-    input.status !== "completed" &&
-    input.status !== "closed" &&
-    (input.status === "open" || input.status === "upcoming");
+  // Determine is_enrollment_open: ONLY open when status is explicitly "open"
+  const isEnrollmentOpen = !isTba && input.status === "open";
   const nowIso = new Date().toISOString();
 
   let updatedRow: any = null;
@@ -642,13 +658,25 @@ export async function updateBatchSchedule(
       if (input.registrationMode) {
         (details as any).registrationMode = input.registrationMode;
       }
+      if ((details as any).batchSchedule) {
+        (details as any).batchSchedule.status = input.status;
+        (details as any).batchSchedule.lastRegistrationDate = derivedLastRegDate;
+        if (input.registrationMode) {
+          (details as any).batchSchedule.registrationMode = input.registrationMode;
+        }
+      }
+      const updatedDescription = JSON.stringify(details);
       await supabase
         .from("courses")
         .update({
-          description: JSON.stringify(details),
+          description: updatedDescription,
           updated_at: nowIso,
         })
         .eq("id", course.id);
+
+      if (updatedRow?.courses) {
+        updatedRow.courses.description = updatedDescription;
+      }
     } catch (metaErr) {
       console.warn("Failed to save batch metadata in course JSON:", metaErr);
     }

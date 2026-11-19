@@ -12,6 +12,7 @@ import {
   calculateRegistrationClosingDateTime,
   formatBatchDateWithWeekdayIST,
   formatBatchTimeIST,
+  isBatchDateAnnounced,
 } from "@/lib/batches-admin/format";
 
 interface HeroProps {
@@ -56,6 +57,25 @@ export const Hero: React.FC<HeroProps> = ({
   const [isExpired, setIsExpired] = useState(false);
   const effectiveExpired =
     isRegistrationClosed !== undefined ? isRegistrationClosed : isExpired;
+
+  const isSoldOut = Boolean(
+    activeBatch?.isSoldOut ||
+      (activeBatch?.seatsRemaining !== undefined && activeBatch.seatsRemaining <= 0)
+  );
+  const isTba =
+    activeBatch?.status === "tba" ||
+    activeBatch?.startDate === "TBA" ||
+    !isBatchDateAnnounced(activeBatch?.startDate);
+  const isUpcoming = activeBatch?.status === "upcoming";
+  const isCompleted = activeBatch?.status === "completed";
+  const isClosed =
+    effectiveExpired ||
+    activeBatch?.status === "closed" ||
+    (activeBatch && !activeBatch.isEnrollmentOpen) ||
+    isSoldOut;
+
+  const isButtonDisabled = isSoldOut || isTba || isUpcoming || isCompleted || isClosed;
+
   const [coursePricing, setCoursePricing] = useState<{
     originalPrice: number;
     offerPrice: number;
@@ -98,15 +118,32 @@ export const Hero: React.FC<HeroProps> = ({
   const displayOfferPrice = coursePricing?.offerPrice ?? workshopData.offerPrice;
   const displayDuration = coursePricing?.duration ?? workshopData.duration;
 
-  const displayDate = activeBatch?.startDate
+  const buttonText = isSoldOut
+    ? "BATCH FULL"
+    : isTba
+    ? "DATES TO BE ANNOUNCED"
+    : isUpcoming
+    ? "REGISTRATION OPENING SOON"
+    : isCompleted
+    ? "BATCH COMPLETED"
+    : isClosed
+    ? "REGISTRATION CLOSED"
+    : displayOfferPrice === 0
+    ? "ENROL FOR FREE"
+    : workshopData.cta;
+
+  const displayDate = isTba
+    ? "To Be Announced"
+    : activeBatch?.startDate
     ? formatBatchDateWithWeekdayIST(activeBatch.startDate)
     : activeBatch?.formattedStartDate || workshopData.date;
 
-  const displayTime =
-    activeBatch?.formattedTiming ||
-    (activeBatch?.startTime
-      ? formatBatchTimeIST(activeBatch.startTime, activeBatch.endTime)
-      : workshopData.time);
+  const displayTime = isTba
+    ? "To Be Announced"
+    : activeBatch?.formattedTiming ||
+      (activeBatch?.startTime
+        ? formatBatchTimeIST(activeBatch.startTime, activeBatch.endTime)
+        : workshopData.time);
 
   return (
     <section id="home" className="relative overflow-hidden bg-[#F7F4EC] -mt-[76px] sm:-mt-[88px] lg:-mt-24 pt-[5.75rem] sm:pt-[6.5rem] lg:pt-[7rem] pb-8 sm:pb-10 lg:pb-12">
@@ -299,17 +336,11 @@ export const Hero: React.FC<HeroProps> = ({
             <div className="mt-4 sm:mt-5 flex items-center w-full sm:w-auto">
               <button
                 onClick={onOpenModal}
-                disabled={effectiveExpired}
+                disabled={isButtonDisabled}
                 className="btn-hero-cta w-full sm:w-auto"
               >
-                <span>
-                  {effectiveExpired
-                    ? "REGISTRATION CLOSED"
-                    : displayOfferPrice === 0
-                    ? "ENROL FOR FREE"
-                    : workshopData.cta}
-                </span>
-                {!effectiveExpired && <ArrowRight className="size-[1.125rem] shrink-0" />}
+                <span>{buttonText}</span>
+                {!isButtonDisabled && <ArrowRight className="size-[1.125rem] shrink-0" />}
               </button>
             </div>
 
