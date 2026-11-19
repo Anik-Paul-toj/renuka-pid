@@ -190,7 +190,14 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
         {/* ============================================================== */}
         {/* COURSE 1: THE WATERCOLOUR ROADMAP — ONE-DAY MASTERCLASS        */}
         {/* ============================================================== */}
-        {masterclassCourse && (
+        {masterclassCourse && (() => {
+          const isMasterclassFree =
+            masterclassCourse.offerPrice === 0 ||
+            masterclassCourse.details?.registrationMode === "free" ||
+            masterclassCourse.activeBatch?.registrationMode === "free" ||
+            (masterclassCourse.activeBatch as any)?.isFreeRegistration;
+
+          return (
           <div className="group relative flex flex-col md:flex-row overflow-hidden rounded-2xl bg-[#FAF8F2]/95 backdrop-blur-md border border-[#444C38]/30 shadow-[0_6px_28px_rgba(40,36,28,0.06)] hover:border-[#444C38]/50 hover:shadow-[0_12px_40px_rgba(40,36,28,0.1)] transition-all duration-300">
             {/* Left Side: Course Image or Blank Clean Placeholder (~40% on Desktop/Tablet) */}
             <div className="relative w-full md:w-[38%] lg:w-[40%] min-h-[260px] sm:min-h-[320px] md:min-h-full overflow-hidden bg-gradient-to-br from-[#EFECE4] via-[#EAE5D8] to-[#DFD8C6] shrink-0 border-b md:border-b-0 md:border-r border-[#444C38]/20 flex flex-col items-center justify-center">
@@ -205,6 +212,23 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#14120E]/50 via-transparent to-transparent md:hidden" />
+
+                  {/* Free Mode Overlay: Cleanly covers any embedded price sticker with dynamic backend pricing */}
+                  {isMasterclassFree && (
+                    <div className="absolute top-[20%] right-2.5 sm:right-3.5 z-20 shadow-xl rounded-xl bg-gradient-to-br from-[#2D4A22] to-[#1E3316] text-[#FAF8F2] border-2 border-[#EBE7DC] px-3 sm:px-4 py-2 text-center transform rotate-[-2deg]">
+                      <span className="block text-[0.6rem] font-bold uppercase tracking-widest text-[#C8D1C7] leading-tight">
+                        Special Enrolment
+                      </span>
+                      <span className="block font-price text-xl sm:text-2xl font-black text-white leading-none my-0.5">
+                        FREE
+                      </span>
+                      {masterclassCourse.originalPrice > 0 && (
+                        <span className="block text-[0.62rem] font-semibold text-[#EBE7DC]/90 line-through leading-tight">
+                          instead of ₹{masterclassCourse.originalPrice.toLocaleString("en-IN")}/-
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </>
               ) : (
                 /* Blank, Clean Atelier Placeholder Area with Subtle Watercolor Neutral Aesthetics */
@@ -240,10 +264,15 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
               )}
 
               {/* Badge in top-left */}
-              <div className="absolute top-4 left-4 z-10">
+              <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
                 <span className="rounded-md bg-[#FAF8F2]/95 backdrop-blur-xs px-3 py-1 text-[0.66rem] font-bold uppercase tracking-widest text-[#444C38] border border-[#444C38]/20 shadow-xs">
                   One-Day Masterclass
                 </span>
+                {isMasterclassFree && (
+                  <span className="rounded-md bg-[#3E522D] text-[#FAF8F2] px-3 py-0.5 text-[0.64rem] font-bold uppercase tracking-widest shadow-xs w-fit">
+                    100% Free Seat
+                  </span>
+                )}
               </div>
             </div>
 
@@ -333,17 +362,35 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                     Course Fees
                   </span>
                   <div className="mt-1.5">
-                    <PriceDisplay
-                      amount={masterclassCourse.offerPrice}
-                      originalAmount={masterclassCourse.originalPrice}
-                      size="2xl"
-                      showSuffix
-                      badgeText="Special Offer"
-                    />
+                    {isMasterclassFree ? (
+                      <div className="flex flex-wrap items-baseline gap-2 font-price">
+                        <span className="font-price tracking-tight tabular-nums text-[#3E522D] font-extrabold text-2xl sm:text-3xl drop-shadow-2xs leading-none">
+                          FREE
+                        </span>
+                        <span className="font-price tabular-nums line-through text-[#6F6B61] text-xs sm:text-sm font-semibold leading-none">
+                          ₹{masterclassCourse.originalPrice.toLocaleString("en-IN")}/-
+                        </span>
+                        <span className="rounded-md bg-[#3E522D] text-[#FAF8F2] px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider shadow-2xs">
+                          100% Free • This Batch Only
+                        </span>
+                      </div>
+                    ) : (
+                      <PriceDisplay
+                        amount={masterclassCourse.offerPrice}
+                        originalAmount={masterclassCourse.originalPrice}
+                        size="2xl"
+                        showSuffix
+                        badgeText="Special Offer"
+                      />
+                    )}
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 text-[0.7rem] text-[#3E522D] font-bold">
-                    <Sparkles className="size-3 text-[#B93821] shrink-0" />
-                    <span>Complete Live Atelier Access • Zoom Interactive</span>
+                    <Sparkles className="size-3 text-[#3E522D] shrink-0" />
+                    <span>
+                      {isMasterclassFree
+                        ? "Complimentary Masterclass Access • Direct Instant Confirmation • ₹0 Payable"
+                        : "Complete Live Atelier Access • Zoom Interactive"}
+                    </span>
                   </div>
                 </div>
 
@@ -373,7 +420,7 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
                         : masterclassCourse.activeBatch?.isExpired ||
                           !masterclassCourse.activeBatch?.isEnrollmentOpen
                         ? "Registration Closed"
-                        : masterclassCourse.details?.registrationMode === "free" || masterclassCourse.offerPrice === 0
+                        : isMasterclassFree
                         ? "Enrol for Free"
                         : "Enrol Now"}
                     </span>
@@ -382,7 +429,8 @@ export function CourseCatalogClient({ courses }: CourseCatalogClientProps) {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
         {/* ============================================================== */}
         {/* COURSE 1: WATERCOLOUR FOUNDATION (HORIZONTAL SIDE-BY-SIDE)    */}
         {/* ============================================================== */}

@@ -186,11 +186,20 @@ export async function updateAdminCourse(
   const originalPricePaise = Math.round(input.originalPrice * 100);
   const offerPricePaise = Math.round(input.offerPrice * 100);
 
-  // If structured details are provided, merge and store as JSON string in description
+  // If structured details are provided, merge and store as clean JSON string in description
   let storedDescription = input.description;
   if (input.details) {
     const existingDetails = parseCourseDetails(input.slug, input.description);
     const mergedDetails = { ...existingDetails, ...input.details };
+
+    // Prevent any recursive JSON string nesting in text fields
+    if (typeof mergedDetails.cardDescription === "string" && mergedDetails.cardDescription.trim().startsWith("{")) {
+      mergedDetails.cardDescription = existingDetails.cardDescription;
+    }
+    if (typeof mergedDetails.fullDescription === "string" && mergedDetails.fullDescription.trim().startsWith("{")) {
+      mergedDetails.fullDescription = existingDetails.fullDescription;
+    }
+
     storedDescription = JSON.stringify(mergedDetails);
   }
 
@@ -382,22 +391,36 @@ export async function getPublicCourses(): Promise<AdminCourseData[]> {
         (isWorkshop ? "" : "/images/foundation.jpeg");
       const activeBatch = await getBatchByCourseId(c.id);
 
+      const isFreeMode =
+        isWorkshop &&
+        (activeBatch?.registrationMode === "free" ||
+          (activeBatch as any)?.isFreeRegistration ||
+          (details as any)?.registrationMode === "free" ||
+          (details as any)?.batchSchedule?.registrationMode === "free" ||
+          (details as any)?.batchSchedules?.[activeBatch?.id || ""]?.registrationMode === "free");
+
+      const offerPricePaise = isFreeMode ? 0 : c.offer_price_paise;
+      const offerPrice = isFreeMode ? 0 : Math.round(c.offer_price_paise / 100);
+
       return {
         id: c.id,
         slug: c.slug,
         title: c.title,
         description: c.description,
         originalPricePaise: c.original_price_paise,
-        offerPricePaise: c.offer_price_paise,
+        offerPricePaise,
         originalPrice: Math.round(c.original_price_paise / 100),
-        offerPrice: Math.round(c.offer_price_paise / 100),
+        offerPrice,
         currency: c.currency,
         durationMinutes: c.duration_minutes,
         isActive: c.is_active,
         createdAt: c.created_at,
         updatedAt: c.updated_at,
         imagePath,
-        details,
+        details: {
+          ...details,
+          registrationMode: isFreeMode ? "free" : details.registrationMode,
+        },
         activeBatch,
       };
     })
@@ -574,6 +597,17 @@ export async function getPublicCourseBySlug(
     COURSE_IMAGES[course.slug] ||
     (isWorkshop ? "" : "/images/foundation.jpeg");
 
+  const isFreeMode =
+    isWorkshop &&
+    (activeBatch?.registrationMode === "free" ||
+      (activeBatch as any)?.isFreeRegistration ||
+      (details as any)?.registrationMode === "free" ||
+      (details as any)?.batchSchedule?.registrationMode === "free" ||
+      (details as any)?.batchSchedules?.[activeBatch?.id || ""]?.registrationMode === "free");
+
+  const offerPricePaise = isFreeMode ? 0 : course.offer_price_paise;
+  const offerPrice = isFreeMode ? 0 : Math.round(course.offer_price_paise / 100);
+
   return {
     course: {
       id: course.id,
@@ -581,16 +615,19 @@ export async function getPublicCourseBySlug(
       title: course.title,
       description: course.description,
       originalPricePaise: course.original_price_paise,
-      offerPricePaise: course.offer_price_paise,
+      offerPricePaise,
       originalPrice: Math.round(course.original_price_paise / 100),
-      offerPrice: Math.round(course.offer_price_paise / 100),
+      offerPrice,
       currency: course.currency,
       durationMinutes: course.duration_minutes,
       isActive: course.is_active,
       createdAt: course.created_at,
       updatedAt: course.updated_at,
       imagePath,
-      details,
+      details: {
+        ...details,
+        registrationMode: isFreeMode ? "free" : details.registrationMode,
+      },
       activeBatch,
     },
     activeBatch,

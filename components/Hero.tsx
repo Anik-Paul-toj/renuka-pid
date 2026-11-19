@@ -271,12 +271,26 @@ export const Hero: React.FC<HeroProps> = ({
                       Workshop Fee:
                     </span>
                   </div>
-                  <PriceDisplay
-                    amount={displayOfferPrice}
-                    originalAmount={displayOriginalPrice}
-                    size="2xl"
-                    badgeText="Special Offer"
-                  />
+                  {displayOfferPrice === 0 ? (
+                    <div className="flex items-center gap-2 font-price">
+                      <span className="font-price tracking-tight tabular-nums text-[#3E522D] font-extrabold text-2xl sm:text-3xl drop-shadow-2xs leading-none">
+                        FREE
+                      </span>
+                      <span className="font-price tabular-nums line-through text-[#6F6B61] text-xs sm:text-sm font-semibold leading-none">
+                        ₹{displayOriginalPrice}/-
+                      </span>
+                      <span className="rounded-md bg-[#3E522D] text-[#FAF8F2] px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider shadow-2xs">
+                        100% Free
+                      </span>
+                    </div>
+                  ) : (
+                    <PriceDisplay
+                      amount={displayOfferPrice}
+                      originalAmount={displayOriginalPrice}
+                      size="2xl"
+                      badgeText="Special Offer"
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -288,7 +302,13 @@ export const Hero: React.FC<HeroProps> = ({
                 disabled={effectiveExpired}
                 className="btn-hero-cta w-full sm:w-auto"
               >
-                <span>{effectiveExpired ? "REGISTRATION CLOSED" : workshopData.cta}</span>
+                <span>
+                  {effectiveExpired
+                    ? "REGISTRATION CLOSED"
+                    : displayOfferPrice === 0
+                    ? "ENROL FOR FREE"
+                    : workshopData.cta}
+                </span>
                 {!effectiveExpired && <ArrowRight className="size-[1.125rem] shrink-0" />}
               </button>
             </div>

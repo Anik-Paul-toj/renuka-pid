@@ -140,6 +140,26 @@ export const DEFAULT_WORKSHOP_DETAILS: CourseContentDetails = {
   registrationMode: "paid",
 };
 
+function cleanFieldText(val: any, fallback: string): string {
+  if (!val) return fallback;
+  if (typeof val !== "string") {
+    if (typeof val === "object") {
+      return cleanFieldText(val.cardDescription || val.fullDescription || val.description, fallback);
+    }
+    return String(val);
+  }
+  const trimmed = val.trim();
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    try {
+      const inner = JSON.parse(trimmed);
+      return cleanFieldText(inner.cardDescription || inner.fullDescription || inner.description, fallback);
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed.length > 0 ? trimmed : fallback;
+}
+
 /**
  * Safely parses course details from JSON string or returns baseline fallback
  */
@@ -171,17 +191,17 @@ export function parseCourseDetails(
           ...DEFAULT_WORKSHOP_DETAILS,
           ...parsed,
           cardSubtitle: parsed.cardSubtitle || DEFAULT_WORKSHOP_DETAILS.cardSubtitle,
-          cardDescription:
-            parsed.cardDescription && parsed.cardDescription.length > 50
-              ? parsed.cardDescription
-              : DEFAULT_WORKSHOP_DETAILS.cardDescription,
+          cardDescription: cleanFieldText(
+            parsed.cardDescription,
+            DEFAULT_WORKSHOP_DETAILS.cardDescription || ""
+          ),
           sessionDurationText: "120 Minutes (2 Hours)",
           sessionCountText: parsed.sessionCountText || DEFAULT_WORKSHOP_DETAILS.sessionCountText,
           durationMonthsText: parsed.durationMonthsText || DEFAULT_WORKSHOP_DETAILS.durationMonthsText,
-          fullDescription:
-            parsed.fullDescription && parsed.fullDescription.length > 150
-              ? parsed.fullDescription
-              : DEFAULT_WORKSHOP_DETAILS.fullDescription,
+          fullDescription: cleanFieldText(
+            parsed.fullDescription,
+            DEFAULT_WORKSHOP_DETAILS.fullDescription || ""
+          ),
           learningOutcomesHeading:
             parsed.learningOutcomesHeading || DEFAULT_WORKSHOP_DETAILS.learningOutcomesHeading,
           learningOutcomesSubheading:

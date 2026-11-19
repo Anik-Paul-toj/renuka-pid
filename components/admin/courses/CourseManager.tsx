@@ -259,13 +259,32 @@ export function CourseManager({
     setErrorMessage(null);
     setFieldErrors({});
 
+    const sanitizePlainText = (val?: string) => {
+      if (!val) return "";
+      const trimmed = val.trim();
+      if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          return (
+            parsed.cardDescription ||
+            parsed.fullDescription ||
+            parsed.description ||
+            ""
+          );
+        } catch {
+          return trimmed;
+        }
+      }
+      return trimmed;
+    };
+
     try {
       const detailsPayload = isLandingPageWorkshop
         ? {
             cardSubtitle: "One-Day Masterclass",
             cardSummary: "Interactive Live Masterclass on Zoom",
             cardDescription:
-              formData.description?.trim() ||
+              sanitizePlainText(formData.cardDescription) ||
               "Live Masterclass designed to fix basics and get you painting.",
             subjects: "Watercolour Essentials • Live Demonstration",
             cardPriceLabel:
@@ -274,7 +293,7 @@ export function CourseManager({
             sessionDurationText: `${formData.durationMinutes} mins`,
             durationMonthsText: "1 Day",
             fullDescription:
-              formData.description?.trim() ||
+              sanitizePlainText(formData.fullDescription) ||
               "Live intimate masterclass session on Zoom with personal guidance.",
             learningOutcomesHeading: "",
             learningOutcomesSubheading: "",
@@ -287,6 +306,11 @@ export function CourseManager({
             whyDescription: "",
             whyCallout: "",
             ctaText: "Register Now",
+            registrationMode: formData.registrationMode || "paid",
+            coverImage: activeCourse.details?.coverImage,
+            coverImagePublicId: activeCourse.details?.coverImagePublicId,
+            batchSchedule: (activeCourse.details as any)?.batchSchedule,
+            batchSchedules: (activeCourse.details as any)?.batchSchedules,
           }
         : {
             cardSubtitle: formData.cardSubtitle.trim(),
@@ -767,43 +791,7 @@ export function CourseManager({
                   </div>
 
                   {/* Availability & Description */}
-                  <div className="p-4 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 space-y-3">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        disabled={!isEditing}
-                        checked={formData.isActive}
-                        onChange={(e) =>
-                          handleInputChange("isActive", e.target.checked)
-                        }
-                        className="size-4 text-[#68705A] rounded-sm focus:ring-[#68705A]"
-                      />
-                      <div>
-                        <span className="text-xs font-bold text-[#14120E]">
-                          Masterclass is Active & Accepting Registrations
-                        </span>
-                        <p className="text-[0.68rem] text-[#6F6B61]">
-                          When active, the registration button and modal allow new enrolments.
-                        </p>
-                      </div>
-                    </label>
 
-                    <div className="pt-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#68705A] mb-1.5">
-                        Supporting Atelier Note (Optional)
-                      </label>
-                      <textarea
-                        rows={2}
-                        disabled={!isEditing}
-                        placeholder="Live interactive atelier sessions on Zoom with personal feedback and guidance."
-                        value={formData.description}
-                        onChange={(e) =>
-                          handleInputChange("description", e.target.value)
-                        }
-                        className="w-full rounded-md border border-[#464137]/20 bg-[#F7F4EC] px-3.5 py-2 text-xs text-[#14120E] font-medium outline-none focus:border-[#68705A] disabled:opacity-75 disabled:cursor-not-allowed"
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 {/* Right Column: Live Landing Page Visual Preview Matching Screenshot 2 */}

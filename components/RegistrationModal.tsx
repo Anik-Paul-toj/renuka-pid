@@ -624,9 +624,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8D1C7]/40 px-2.5 py-0.5 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[#444C38]">
                 <Sparkles className="size-3 text-[#444C38]" />
-                {activeBatch?.courseTitle || (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
-                  ? "Live Workshop Registration"
-                  : "Complimentary Masterclass")}
+                {isFreeMode
+                  ? "Complimentary Masterclass"
+                  : activeBatch?.courseTitle || (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
+                    ? "Live Workshop Registration"
+                    : "Complimentary Masterclass")}
               </span>
             </div>
 
@@ -634,9 +636,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               id="modal-title"
               className="mt-2 font-serif text-xl sm:text-2xl font-bold tracking-tight text-[#14120E]"
             >
-              {activeBatch?.courseTitle ? "Reserve Your Seat" : (activeBatch?.offerPricePaise && activeBatch.offerPricePaise > 0
-                ? "Reserve Your Seat"
-                : "Reserve Your Free Seat")}
+              {isFreeMode ? "Reserve Your Free Seat" : "Reserve Your Seat"}
             </h3>
 
             {/* Batch Selector if multiple announced batches exist */}

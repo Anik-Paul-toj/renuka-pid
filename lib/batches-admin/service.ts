@@ -122,6 +122,7 @@ export function formatBatchRecord(batchData: any): SafeBatchScheduleData {
     course?.slug === "the-watercolour-roadmap";
 
   const registrationMode: "paid" | "free" =
+    (courseDetails as any)?.batchSchedules?.[batchData.id]?.registrationMode ||
     (courseDetails as any)?.batchSchedule?.registrationMode ||
     (courseDetails as any)?.registrationMode ||
     "paid";

@@ -1027,7 +1027,7 @@ export function AdminBatchScheduleManager({
                         />
                         <div>
                           <span className="font-bold text-xs text-[#14120E] block">
-                            Paid Registration (₹499)
+                            Paid Registration (Standard Course Price)
                           </span>
                           <span className="text-[0.66rem] text-[#6F6B61] block mt-0.5">
                             Standard checkout: students complete payment via Razorpay to reserve a seat.

@@ -549,18 +549,34 @@ export function CourseDetailPageClient({
                         Course Fee
                       </span>
                       <div className="mt-1.5">
-                        <PriceDisplay
-                          amount={course.offerPrice}
-                          originalAmount={course.originalPrice}
-                          size="3xl"
-                          showSuffix
-                          badgeText="Special Offer"
-                        />
+                        {isWorkshop && (course.offerPrice === 0 || details.registrationMode === "free" || activeBatch?.registrationMode === "free" || (activeBatch as any)?.isFreeRegistration) ? (
+                          <div className="flex flex-wrap items-baseline gap-2.5 font-price">
+                            <span className="font-price tracking-tight tabular-nums text-[#3E522D] font-extrabold text-3xl sm:text-4xl drop-shadow-2xs leading-none">
+                              FREE
+                            </span>
+                            <span className="font-price tabular-nums line-through text-[#6F6B61] text-base font-semibold leading-none">
+                              ₹{course.originalPrice.toLocaleString("en-IN")}/-
+                            </span>
+                            <span className="rounded-md bg-[#3E522D] text-[#FAF8F2] px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider shadow-2xs">
+                              100% Free • This Batch Only
+                            </span>
+                          </div>
+                        ) : (
+                          <PriceDisplay
+                            amount={course.offerPrice}
+                            originalAmount={course.originalPrice}
+                            size="3xl"
+                            showSuffix
+                            badgeText="Special Offer"
+                          />
+                        )}
                       </div>
                       <div className="mt-2 flex items-center gap-1.5 text-[0.72rem] text-[#3E522D] font-bold">
-                        <Sparkles className="size-3.5 text-[#B93821] shrink-0" />
+                        <Sparkles className="size-3.5 text-[#3E522D] shrink-0" />
                         <span>
-                          {isWorkshop ? (
+                          {isWorkshop && (course.offerPrice === 0 || details.registrationMode === "free" || activeBatch?.registrationMode === "free" || (activeBatch as any)?.isFreeRegistration) ? (
+                            <>Complimentary Masterclass Access • Direct Instant Confirmation • ₹0 Payable</>
+                          ) : isWorkshop ? (
                             <>Complete Live Atelier Access • Zoom Interactive Paint-Along</>
                           ) : isFoundation ? (
                             <>Includes <span className="font-price font-semibold tabular-nums">₹{course.offerPrice.toLocaleString("en-IN")}</span> credit toward subsequent Artistry + Foundation course</>
@@ -615,7 +631,7 @@ export function CourseDetailPageClient({
                           ? "Dates To Be Announced"
                           : isRegistrationClosed
                           ? "Registration Closed"
-                          : details.registrationMode === "free"
+                          : details.registrationMode === "free" || course.offerPrice === 0 || activeBatch?.registrationMode === "free" || (activeBatch as any)?.isFreeRegistration
                           ? "Enrol for Free"
                           : details.ctaText ||
                             (isWorkshop
