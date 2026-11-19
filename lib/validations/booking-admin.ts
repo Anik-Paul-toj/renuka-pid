@@ -13,6 +13,8 @@ export const adminBookingsQuerySchema = z.object({
     .optional()
     .default("all"),
   batchId: z.string().trim().optional().default("all"),
+  startDate: z.string().trim().optional(),
+  endDate: z.string().trim().optional(),
 });
 
 export type AdminBookingsQuery = z.infer<typeof adminBookingsQuerySchema>;

@@ -31,6 +31,8 @@ export async function GET(request: NextRequest) {
       status: url.searchParams.get("status") || "all",
       paymentStatus: url.searchParams.get("paymentStatus") || "all",
       batchId: url.searchParams.get("batchId") || "all",
+      startDate: url.searchParams.get("startDate") || "",
+      endDate: url.searchParams.get("endDate") || "",
     };
 
     const validationResult = adminBookingsQuerySchema.safeParse(rawParams);

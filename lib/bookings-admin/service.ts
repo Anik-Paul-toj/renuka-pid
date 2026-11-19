@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminBookingsQuery } from "@/lib/validations/booking-admin";
+import { getISTStartOfDayISO, getISTEndOfDayISO } from "@/lib/batches-admin/format";
 
 export interface AdminBookingListItem {
   id: string;
@@ -115,7 +116,7 @@ export async function getBookingsList(
 ): Promise<{ success: true; data: AdminBookingsListResult } | { success: false; error: string; statusCode: number }> {
   try {
     const adminClient = createAdminClient();
-    const { page, limit, search, status, paymentStatus, batchId } = query;
+    const { page, limit, search, status, paymentStatus, batchId, startDate, endDate } = query;
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
@@ -218,6 +219,29 @@ export async function getBookingsList(
     // Apply Payment Status Filter
     if (hasPaymentFilter) {
       supabaseQuery = supabaseQuery.eq("payments.status", paymentStatus);
+    }
+
+    // Apply Registration Date Range Filter (based on booking created_at in IST)
+    // Always chronological: from past to future (auto-normalize if user inputs inverted range)
+    let effStartDate = startDate?.trim() || "";
+    let effEndDate = endDate?.trim() || "";
+    if (effStartDate && effEndDate && effStartDate > effEndDate) {
+      const temp = effStartDate;
+      effStartDate = effEndDate;
+      effEndDate = temp;
+    }
+
+    if (effStartDate) {
+      try {
+        const startIso = getISTStartOfDayISO(effStartDate);
+        supabaseQuery = supabaseQuery.gte("created_at", startIso);
+      } catch {}
+    }
+    if (effEndDate) {
+      try {
+        const endIso = getISTEndOfDayISO(effEndDate);
+        supabaseQuery = supabaseQuery.lte("created_at", endIso);
+      } catch {}
     }
 
     // Order & Paginate

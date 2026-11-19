@@ -33,6 +33,7 @@ import {
   StudentListSummary,
   CourseCategorySummary,
 } from "@/lib/students/service";
+import { formatBatchDateIST } from "@/lib/batches-admin/format";
 
 interface StudentsManagerProps {
   initialData: StudentListResult;
@@ -56,6 +57,9 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [paymentStatus, setPaymentStatus] = useState<string>("all");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [datePreset, setDatePreset] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -64,6 +68,71 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
   const [studentDetail, setStudentDetail] = useState<StudentDetail | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+
+  // Quick Date Preset handler
+  const handleDatePresetChange = (preset: string) => {
+    setDatePreset(preset);
+    const now = new Date();
+    const todayStr = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+    }).format(now); // "YYYY-MM-DD"
+
+    if (preset === "all") {
+      setStartDate("");
+      setEndDate("");
+    } else if (preset === "today") {
+      setStartDate(todayStr);
+      setEndDate(todayStr);
+    } else if (preset === "yesterday") {
+      const y = new Date(now.getTime() - 86400000);
+      const yStr = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+      }).format(y);
+      setStartDate(yStr);
+      setEndDate(yStr);
+    } else if (preset === "last7") {
+      const d7 = new Date(now.getTime() - 6 * 86400000);
+      const d7Str = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+      }).format(d7);
+      setStartDate(d7Str);
+      setEndDate(todayStr);
+    } else if (preset === "last30") {
+      const d30 = new Date(now.getTime() - 29 * 86400000);
+      const d30Str = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+      }).format(d30);
+      setStartDate(d30Str);
+      setEndDate(todayStr);
+    } else if (preset === "thisMonth") {
+      const firstDay = `${todayStr.slice(0, 7)}-01`;
+      setStartDate(firstDay);
+      setEndDate(todayStr);
+    }
+  };
+
+  const handleCustomDateChange = (type: "start" | "end", val: string) => {
+    setDatePreset("custom");
+    if (type === "start") {
+      setStartDate(val);
+      // Guarantee "past to future": if From date exceeds To date, auto-align To date
+      if (val && endDate && val > endDate) {
+        setEndDate(val);
+      }
+    } else {
+      setEndDate(val);
+      // Guarantee "past to future": if To date precedes From date, auto-align From date
+      if (val && startDate && val < startDate) {
+        setStartDate(val);
+      }
+    }
+  };
+
+  const clearDateFilter = () => {
+    setDatePreset("all");
+    setStartDate("");
+    setEndDate("");
+  };
 
   // Debounce search input by 300ms
   useEffect(() => {
@@ -87,6 +156,8 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
           status,
           paymentStatus,
           courseId: selectedCourseId,
+          startDate,
+          endDate,
         });
 
         const res = await fetch(`/api/admin/students?${params.toString()}`);
@@ -112,13 +183,13 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
         setIsLoading(false);
       }
     },
-    [debouncedSearch, status, paymentStatus, selectedCourseId]
+    [debouncedSearch, status, paymentStatus, selectedCourseId, startDate, endDate]
   );
 
   // Trigger fetch when search or filters change (reset to page 1)
   useEffect(() => {
     fetchStudents(1);
-  }, [debouncedSearch, status, paymentStatus, selectedCourseId, fetchStudents]);
+  }, [debouncedSearch, status, paymentStatus, selectedCourseId, startDate, endDate, fetchStudents]);
 
   // Open detail view for a student
   const handleOpenDetail = async (studentId: string) => {
@@ -163,13 +234,19 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
   }, [selectedStudentId]);
 
   const hasActiveFilters =
-    search.trim() !== "" || status !== "all" || paymentStatus !== "all" || selectedCourseId !== "all";
+    search.trim() !== "" ||
+    status !== "all" ||
+    paymentStatus !== "all" ||
+    selectedCourseId !== "all" ||
+    startDate !== "" ||
+    endDate !== "";
 
   const handleClearFilters = () => {
     setSearch("");
     setStatus("all");
     setPaymentStatus("all");
     setSelectedCourseId("all");
+    clearDateFilter();
   };
 
   // Helper to format course badge style
@@ -410,6 +487,74 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Registration Date Filter Row */}
+        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[#464137]/10 text-xs">
+          <div className="flex items-center gap-1.5 text-[#68705A] font-semibold text-[0.7rem] uppercase tracking-wider shrink-0">
+            <Calendar className="size-3.5 text-[#68705A]" />
+            <span>Registration Date:</span>
+          </div>
+
+          {/* Quick Date Presets */}
+          <select
+            value={datePreset}
+            onChange={(e) => handleDatePresetChange(e.target.value)}
+            className="rounded-lg border border-[#464137]/15 bg-[#F7F4EC] px-3 py-1.5 text-xs text-[#292923] outline-none focus:border-[#68705A]"
+          >
+            <option value="all">All Dates</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last7">Last 7 Days</option>
+            <option value="last30">Last 30 Days</option>
+            <option value="thisMonth">This Month</option>
+            <option value="custom">Custom Range</option>
+          </select>
+
+          {/* Date Range Inputs */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[0.68rem] text-[#6F6B61] font-medium">From:</span>
+            <input
+              type="date"
+              value={startDate}
+              max={endDate || undefined}
+              onChange={(e) => handleCustomDateChange("start", e.target.value)}
+              className="rounded-lg border border-[#464137]/15 bg-[#F7F4EC] px-2.5 py-1 text-xs text-[#292923] outline-none focus:border-[#68705A]"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-[0.68rem] text-[#6F6B61] font-medium">To:</span>
+            <input
+              type="date"
+              value={endDate}
+              min={startDate || undefined}
+              onChange={(e) => handleCustomDateChange("end", e.target.value)}
+              className="rounded-lg border border-[#464137]/15 bg-[#F7F4EC] px-2.5 py-1 text-xs text-[#292923] outline-none focus:border-[#68705A]"
+            />
+          </div>
+
+          {(startDate || endDate) && (
+            <button
+              type="button"
+              onClick={clearDateFilter}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#6F6B61]/10 text-[#6F6B61] hover:bg-[#6F6B61]/20 hover:text-[#292923] text-[0.68rem] font-semibold transition-colors"
+            >
+              <X className="size-3" />
+              <span>Clear Dates</span>
+            </button>
+          )}
+
+          {/* Active Date Filter Chip */}
+          {(startDate || endDate) && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#3E522D]/10 text-[#3E522D] border border-[#3E522D]/20 text-[0.66rem] font-bold">
+              <span>
+                {startDate && endDate && startDate === endDate
+                  ? `Joined ${formatBatchDateIST(startDate)}`
+                  : `Joined ${startDate ? formatBatchDateIST(startDate) : "Start"} → ${endDate ? formatBatchDateIST(endDate) : "Now"}`}
+              </span>
+            </span>
+          )}
         </div>
 
         {errorMessage && (

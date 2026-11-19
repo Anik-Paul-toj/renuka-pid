@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { StudentListQuery } from "@/lib/validations/student";
+import { getISTStartOfDayISO, getISTEndOfDayISO } from "@/lib/batches-admin/format";
 
 export interface EnrolledCourseInfo {
   courseId: string;
@@ -111,7 +112,7 @@ export async function getStudentsList(
 ): Promise<{ success: true; data: StudentListResult } | { success: false; error: string; statusCode: number }> {
   try {
     const adminClient = createAdminClient();
-    const { page, limit, search, status, paymentStatus, courseId } = query;
+    const { page, limit, search, status, paymentStatus, courseId, startDate, endDate } = query;
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
@@ -261,6 +262,29 @@ export async function getStudentsList(
     // Payment status filter
     if (hasPaymentFilter) {
       supabaseQuery = supabaseQuery.eq("bookings.payments.status", paymentStatus);
+    }
+
+    // Registration Date range filter on customer registration (created_at in IST)
+    // Always chronological: from past to future (auto-normalize if user inputs inverted range)
+    let effStartDate = startDate?.trim() || "";
+    let effEndDate = endDate?.trim() || "";
+    if (effStartDate && effEndDate && effStartDate > effEndDate) {
+      const temp = effStartDate;
+      effStartDate = effEndDate;
+      effEndDate = temp;
+    }
+
+    if (effStartDate) {
+      try {
+        const startIso = getISTStartOfDayISO(effStartDate);
+        supabaseQuery = supabaseQuery.gte("created_at", startIso);
+      } catch {}
+    }
+    if (effEndDate) {
+      try {
+        const endIso = getISTEndOfDayISO(effEndDate);
+        supabaseQuery = supabaseQuery.lte("created_at", endIso);
+      } catch {}
     }
 
     // Order and paginate

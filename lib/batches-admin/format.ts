@@ -654,3 +654,21 @@ export function isCohortEnrolmentEligible(
   if (isCohortCourse && !isBatchDateAnnounced(batch.startDate)) return false;
   return true;
 }
+
+/**
+ * Converts a YYYY-MM-DD date in Asia/Kolkata into UTC ISO string representing start of day (00:00:00.000).
+ */
+export function getISTStartOfDayISO(dateStr: string): string {
+  const clean = dateStr.trim().slice(0, 10);
+  const d = new Date(`${clean}T00:00:00+05:30`);
+  return d.toISOString();
+}
+
+/**
+ * Converts a YYYY-MM-DD date in Asia/Kolkata into UTC ISO string representing end of day (23:59:59.999).
+ */
+export function getISTEndOfDayISO(dateStr: string): string {
+  const clean = dateStr.trim().slice(0, 10);
+  const d = new Date(`${clean}T23:59:59.999+05:30`);
+  return d.toISOString();
+}

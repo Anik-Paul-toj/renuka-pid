@@ -13,6 +13,8 @@ export const studentListQuerySchema = z.object({
     .optional()
     .default("all"),
   courseId: z.string().optional().default("all"),
+  startDate: z.string().trim().optional(),
+  endDate: z.string().trim().optional(),
 });
 
 export type StudentListQuery = z.infer<typeof studentListQuerySchema>;
