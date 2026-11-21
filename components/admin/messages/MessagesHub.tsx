@@ -12,6 +12,7 @@ import {
   Ticket,
   ExternalLink,
   Plus,
+  Trash2,
   Users,
 } from "lucide-react";
 import { CreateTemplateModal } from "@/components/admin/messages/CreateTemplateModal";
@@ -188,6 +189,27 @@ function ConfirmationTab({
     }
   };
 
+  const remove = async (t: any) => {
+    const submitted = t.metaStatus !== "DRAFT";
+    const text = submitted
+      ? `Delete "${t.internalTitle}" (${t.metaTemplateName})?\n\nThis also permanently deletes it from Meta. It cannot be undone, and Meta may not allow the same name again for about 30 days.`
+      : `Delete the draft "${t.internalTitle}"?`;
+    if (!confirm(text)) return;
+    setBusy(t.id);
+    setMsg(null);
+    try {
+      const res = await fetch(`/api/admin/message-templates/${t.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data?.error || "Failed to delete template.");
+      setMsg({ ok: true, text: data.message || "Template deleted." });
+      await load();
+    } catch (e: any) {
+      setMsg({ ok: false, text: e.message });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const sampleVars = (tpl: any): Record<string, string> => {
     const out: Record<string, string> = {};
     for (const v of tpl.variableDefinitions || []) out[v.placeholder] = v.sampleValue || v.name;
@@ -218,7 +240,7 @@ function ConfirmationTab({
             <h2 className="text-lg font-serif font-bold text-stone-900">WhatsApp confirmation (Meta)</h2>
             <p className="text-xs text-stone-500 mt-0.5 max-w-2xl">
               Sent automatically to a student right after their booking is confirmed. Only templates
-              <strong> approved by Meta</strong> are used. Order: course-specific template, then the default, then
+              <strong> approved by Meta</strong> are used. Order: a template set for one course, then the active template, then
               <code className="mx-1">booking_confirmation</code>.
             </p>
           </div>
@@ -267,8 +289,8 @@ function ConfirmationTab({
           <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
             <AlertCircle className="size-4 shrink-0 mt-0.5" />
             <span>
-              No approved default confirmation template is set. Pick an approved template below and choose
-              &ldquo;Use as default&rdquo;, otherwise students may not get a WhatsApp confirmation.
+              No confirmation template is active. Pick an approved template below and choose
+              &ldquo;Make active&rdquo;, otherwise students may not get a WhatsApp confirmation.
             </span>
           </div>
         )}
@@ -283,7 +305,12 @@ function ConfirmationTab({
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {templates.map((t) => (
-              <div key={t.id} className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm space-y-3">
+              <div
+                key={t.id}
+                className={`rounded-xl border bg-white p-5 shadow-sm space-y-3 ${
+                  t.isDefaultConfirmation ? "border-[#68705A] ring-2 ring-[#68705A]/25" : "border-stone-200"
+                }`}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="text-sm font-bold text-stone-900 truncate">{t.internalTitle}</h3>
@@ -299,8 +326,20 @@ function ConfirmationTab({
                     </span>
                     {t.isDefaultConfirmation && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-[#68705A] px-2 py-0.5 text-[0.62rem] font-bold uppercase text-white">
-                        <BadgeCheck className="size-3" /> Default
+                        <BadgeCheck className="size-3" /> Active
                       </span>
+                    )}
+                    {!isReadOnly && (
+                      <button
+                        type="button"
+                        onClick={() => remove(t)}
+                        disabled={busy === t.id}
+                        aria-label={`Delete ${t.internalTitle}`}
+                        title={t.metaStatus === "DRAFT" ? "Delete draft" : "Delete (also deletes it from Meta)"}
+                        className="rounded-md p-1 text-stone-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40 cursor-pointer"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
                     )}
                   </div>
                 </div>
@@ -313,10 +352,10 @@ function ConfirmationTab({
                       type="button"
                       disabled={t.metaStatus !== "APPROVED" || t.isDefaultConfirmation || busy === t.id}
                       onClick={() => assign(t.id, { isDefault: true })}
-                      title={t.metaStatus !== "APPROVED" ? "Only Meta-approved templates can be used" : undefined}
+                      title={t.metaStatus !== "APPROVED" ? "Only Meta-approved templates can be made active" : undefined}
                       className="rounded-lg bg-[#68705A] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#575E4B] disabled:opacity-40 cursor-pointer"
                     >
-                      Use as default
+                      {t.isDefaultConfirmation ? "Currently active" : "Make active"}
                     </button>
                     <label className="flex items-center gap-1.5 text-xs text-stone-600">
                       Only for course:
