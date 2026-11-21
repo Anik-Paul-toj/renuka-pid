@@ -292,7 +292,18 @@ export async function getBatchByCourseId(
     (b: any) => isBatchDateAnnounced(b.start_date) && b.start_date >= today
   );
 
-  if (upcomingOpen.length > 0) {
+  // Explicit admin choice ("Make live on website") wins over automatic resolution
+  const courseRow = rawList[0]?.courses;
+  const liveBatchId: string | undefined = courseRow?.slug
+    ? (parseCourseDetails(courseRow.slug, courseRow.description) as any)?.liveBatchId
+    : undefined;
+  const manualLive = liveBatchId
+    ? rawList.find((b: any) => b.id === liveBatchId)
+    : undefined;
+
+  if (manualLive) {
+    batchData = manualLive;
+  } else if (upcomingOpen.length > 0) {
     batchData = upcomingOpen[0];
   } else if (openBatches.length > 0) {
     batchData = openBatches[0];

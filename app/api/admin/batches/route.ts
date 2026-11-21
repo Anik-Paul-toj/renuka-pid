@@ -30,10 +30,14 @@ export async function GET(request: NextRequest) {
 
     if (courseId) {
       if (all) {
-        const batches = await getBatchesByCourseId(courseId);
+        const [batches, liveBatch] = await Promise.all([
+          getBatchesByCourseId(courseId),
+          getBatchByCourseId(courseId),
+        ]);
         return NextResponse.json({
           success: true,
-          batches,
+          liveBatchId: liveBatch?.id ?? null,
+          batches: batches.map((b) => ({ ...b, isLive: b.id === liveBatch?.id })),
         });
       }
       const batch = await getBatchByCourseId(courseId);

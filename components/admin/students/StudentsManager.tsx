@@ -25,6 +25,8 @@ import {
   BookOpen,
   GraduationCap,
   Layers,
+  FileDown,
+  ChevronDown,
 } from "lucide-react";
 import {
   StudentListItem,
@@ -34,6 +36,7 @@ import {
   CourseCategorySummary,
 } from "@/lib/students/service";
 import { formatBatchDateIST } from "@/lib/batches-admin/format";
+import { downloadStudentsPdf, StudentPdfGroupBy } from "@/lib/students/export-pdf";
 
 interface StudentsManagerProps {
   initialData: StudentListResult;
@@ -62,6 +65,61 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
   const [datePreset, setDatePreset] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // PDF export state
+  const [exportOpen, setExportOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPdf = async (groupBy: StudentPdfGroupBy) => {
+    setExportOpen(false);
+    setIsExporting(true);
+    setErrorMessage(null);
+    try {
+      // Fetch every page of the currently filtered list
+      const all: StudentListItem[] = [];
+      let page = 1;
+      let totalPages = 1;
+      do {
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: "100",
+          search: debouncedSearch.trim(),
+          status,
+          paymentStatus,
+          courseId: selectedCourseId,
+          startDate,
+          endDate,
+        });
+        const res = await fetch(`/api/admin/students?${params.toString()}`);
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data?.error?.message || "Failed to load students for export.");
+        }
+        all.push(...(data.data.students || []));
+        totalPages = data.data.pagination?.totalPages || 1;
+        page += 1;
+      } while (page <= totalPages);
+
+      const parts: string[] = [];
+      const courseName = courses.find((c) => c.id === selectedCourseId)?.title;
+      if (courseName) parts.push(`Course: ${courseName}`);
+      if (startDate || endDate) parts.push(`Registered ${startDate || "start"} to ${endDate || "today"}`);
+      if (status !== "all") parts.push(`Status: ${status}`);
+      if (paymentStatus !== "all") parts.push(`Payment: ${paymentStatus}`);
+      if (debouncedSearch.trim()) parts.push(`Search: "${debouncedSearch.trim()}"`);
+
+      await downloadStudentsPdf({
+        students: all,
+        groupBy,
+        courseId: selectedCourseId,
+        filterSummary: parts.join("  |  ") || undefined,
+      });
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Failed to generate PDF.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Detail Modal state
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -278,6 +336,52 @@ export function StudentsManager({ initialData }: StudentsManagerProps) {
           </div>
 
           <div className="flex items-center gap-2.5">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setExportOpen((o) => !o)}
+                disabled={isExporting}
+                aria-haspopup="menu"
+                aria-expanded={exportOpen}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#68705A] text-xs font-semibold text-[#FAF8F2] hover:bg-[#575E4B] transition-colors shadow-2xs disabled:opacity-60 cursor-pointer"
+              >
+                <FileDown className="size-3.5" />
+                <span>{isExporting ? "Preparing PDF..." : "Download PDF"}</span>
+                <ChevronDown className="size-3.5" />
+              </button>
+              {exportOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setExportOpen(false)} />
+                  <div
+                    role="menu"
+                    className="absolute right-0 z-40 mt-2 w-64 overflow-hidden rounded-xl border border-[#464137]/15 bg-white shadow-lg"
+                  >
+                    <p className="px-4 pt-3 pb-1 text-[0.65rem] font-bold uppercase tracking-wider text-[#6F6B61]">
+                      Names &amp; phone numbers, grouped by
+                    </p>
+                    {([
+                      ["course", "Course-wise", "One section per course"],
+                      ["batch", "Batch-wise", "One section per batch of each course"],
+                      ["date", "Date-wise", "One section per booking date"],
+                    ] as const).map(([key, label, hint]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        role="menuitem"
+                        onClick={() => handleExportPdf(key)}
+                        className="block w-full px-4 py-2.5 text-left hover:bg-[#F7F4EC] cursor-pointer"
+                      >
+                        <span className="block text-sm font-semibold text-[#292923]">{label}</span>
+                        <span className="block text-[0.7rem] text-[#6F6B61]">{hint}</span>
+                      </button>
+                    ))}
+                    <p className="border-t border-[#464137]/10 px-4 py-2 text-[0.68rem] text-[#6F6B61]">
+                      Uses the filters currently applied below.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
             <button
               onClick={() => fetchStudents(pagination.page)}
               disabled={isLoading}

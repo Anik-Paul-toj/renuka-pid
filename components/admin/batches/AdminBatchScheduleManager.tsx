@@ -19,6 +19,11 @@ import {
   Image as ImageIcon,
   RefreshCw,
   Trash2,
+  Plus,
+  Users,
+  History,
+  Pencil,
+  Radio,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -26,6 +31,7 @@ import {
   formatBatchTimeIST,
   isRegistrationDeadlineExpired,
   calculateRegistrationClosingDateTime,
+  getTodayISTString,
 } from "@/lib/batches-admin/format";
 
 interface BatchFormData {
@@ -139,7 +145,112 @@ export function AdminBatchScheduleManager({
   const [originalData, setOriginalData] = useState<BatchFormData | null>(null);
 
   // Fetch batch for selected course
-  const loadBatch = async (courseId: string) => {
+  const [batches, setBatches] = useState<any[]>([]);
+  const [isSettingLive, setIsSettingLive] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const deleteBatch = async () => {
+    if (isReadOnly || !formData.id) return;
+    const name = formData.batchName;
+    setIsDeleting(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    try {
+      const res = await fetch(`/api/admin/batches/${encodeURIComponent(formData.id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.success) throw new Error(data?.error || "Failed to delete batch.");
+      setConfirmDelete(false);
+      await loadBatch(selectedCourseId);
+      setSuccessMessage(`Batch "${name}" was deleted.`);
+    } catch (err: any) {
+      setConfirmDelete(false);
+      setErrorMessage(err.message || "Failed to delete batch.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const makeLive = async (batchId: string) => {
+    if (isReadOnly || !batchId) return;
+    setIsSettingLive(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    try {
+      const res = await fetch(`/api/admin/batches/${encodeURIComponent(batchId)}/live`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.success) throw new Error(data?.error || "Failed to set live batch.");
+      await loadBatch(selectedCourseId, batchId);
+      setSuccessMessage("This batch is now live on the website.");
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to set live batch.");
+    } finally {
+      setIsSettingLive(false);
+    }
+  };
+
+  const buildBlankBatch = (courseId: string): BatchFormData => ({
+    id: "",
+    courseId,
+    courseTitle: activeCourse.title,
+    courseSlug: activeCourse.slug,
+    batchName: "",
+    startDate: "",
+    endDate: "",
+    lastRegistrationDate: "",
+    registrationClosesBeforeHours: 2,
+    startTime: activeCourse.defaultTiming,
+    endTime: activeCourse.defaultEndTime,
+    status: "open",
+    registrationMode: "paid",
+    totalSeats: 100,
+    seatsBooked: 0,
+  });
+
+  const applyBatch = (b: any) => {
+    setConfirmDelete(false);
+    const initialForm: BatchFormData = {
+      id: b.id,
+      courseId: b.courseId,
+      courseTitle: b.courseTitle || activeCourse.title,
+      courseSlug: b.courseSlug || activeCourse.slug,
+      batchName: b.batchName || "",
+      startDate: b.startDate || "",
+      endDate: b.endDate || "",
+      lastRegistrationDate: b.lastRegistrationDate || b.startDate || "",
+      registrationClosesBeforeHours: b.registrationClosesBeforeHours || 2,
+      startTime: b.startTime || "6:30 PM",
+      endTime: b.endTime || "8:00 PM",
+      status: b.status || (b.isEnrollmentOpen ? "open" : "closed"),
+      registrationMode: (b.registrationMode as "paid" | "free") || "paid",
+      totalSeats: b.totalSeats || 100,
+      seatsBooked: b.seatsBooked || 0,
+    };
+    setFormData(initialForm);
+    setOriginalData(initialForm);
+    setFieldErrors({});
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    if (b.coverImageUrl) {
+      setCoverImageUrl(b.coverImageUrl);
+      setCoverImagePublicId(b.coverImagePublicId || null);
+    } else {
+      setCoverImageUrl(activeCourse.defaultImage);
+      setCoverImagePublicId(null);
+    }
+  };
+
+  const isPreviousBatch = (b: any) => {
+    if (b.status === "completed") return true;
+    if (b.status === "tba" || !b.startDate || b.startDate.startsWith("2099")) return false;
+    return (b.endDate || b.startDate) < getTodayISTString();
+  };
+
+  const loadBatch = async (courseId: string, selectId?: string) => {
     setIsLoading(true);
     setSuccessMessage(null);
     setErrorMessage(null);
@@ -149,63 +260,24 @@ export function AdminBatchScheduleManager({
 
     try {
       const res = await fetch(
-        `/api/admin/batches?courseId=${encodeURIComponent(courseId)}`,
-        {
-          cache: "no-store",
-        }
+        `/api/admin/batches?courseId=${encodeURIComponent(courseId)}&all=true`,
+        { cache: "no-store" }
       );
       const data = await res.json();
+      const list: any[] = data?.success && Array.isArray(data.batches) ? data.batches : [];
+      setBatches(list);
 
-      if (data?.success && data?.batch) {
-        const b = data.batch;
-        const initialForm: BatchFormData = {
-          id: b.id,
-          courseId: b.courseId,
-          courseTitle: b.courseTitle || activeCourse.title,
-          courseSlug: b.courseSlug || activeCourse.slug,
-          batchName: b.batchName || "",
-          startDate: b.startDate || "",
-          endDate: b.endDate || "",
-          lastRegistrationDate: b.lastRegistrationDate || b.startDate || "",
-          registrationClosesBeforeHours: b.registrationClosesBeforeHours || 2,
-          startTime: b.startTime || "6:30 PM",
-          endTime: b.endTime || "8:00 PM",
-          status: b.status || (b.isEnrollmentOpen ? "open" : "closed"),
-          registrationMode: (b.registrationMode as "paid" | "free") || "paid",
-          totalSeats: b.totalSeats || 100,
-          seatsBooked: b.seatsBooked || 0,
-        };
-        setFormData(initialForm);
-        setOriginalData(initialForm);
+      const target =
+        list.find((b) => b.id === selectId) ||
+        list.find((b) => !isPreviousBatch(b)) ||
+        list[0];
 
-        if (b.coverImageUrl) {
-          setCoverImageUrl(b.coverImageUrl);
-          setCoverImagePublicId(b.coverImagePublicId || null);
-        } else {
-          setCoverImageUrl(activeCourse.defaultImage);
-          setCoverImagePublicId(null);
-        }
+      if (target) {
+        applyBatch(target);
       } else {
-        // Fallback default structure
-        const defaultForm: BatchFormData = {
-          id: "",
-          courseId,
-          courseTitle: activeCourse.title,
-          courseSlug: activeCourse.slug,
-          batchName: `${activeCourse.title} — Upcoming Live Batch`,
-          startDate: "2026-11-01",
-          endDate: "2026-11-02",
-          lastRegistrationDate: "2026-11-01",
-          registrationClosesBeforeHours: 2,
-          startTime: "6:30 PM",
-          endTime: "8:00 PM",
-          status: "open",
-          registrationMode: "paid",
-          totalSeats: 100,
-          seatsBooked: 0,
-        };
-        setFormData(defaultForm);
-        setOriginalData(defaultForm);
+        const blank = buildBlankBatch(courseId);
+        setFormData(blank);
+        setOriginalData(blank);
         setCoverImageUrl(activeCourse.defaultImage);
         setCoverImagePublicId(null);
       }
@@ -214,6 +286,22 @@ export function AdminBatchScheduleManager({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const startNewBatch = () => {
+    if (isReadOnly) return;
+    const blank = buildBlankBatch(selectedCourseId);
+    setFormData(blank);
+    setOriginalData(blank);
+    setFieldErrors({});
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setCoverImageUrl(activeCourse.defaultImage);
+    setCoverImagePublicId(null);
+    setTimeout(
+      () => document.getElementById("batch-editor")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      50
+    );
   };
 
   useEffect(() => {
@@ -418,12 +506,16 @@ export function AdminBatchScheduleManager({
     setFieldErrors({});
 
     try {
+      const isCreate = !formData.id;
       const res = await fetch(
-        `/api/admin/batches/${encodeURIComponent(formData.id)}`,
+        isCreate
+          ? "/api/admin/batches"
+          : `/api/admin/batches/${encodeURIComponent(formData.id)}`,
         {
-          method: "PATCH",
+          method: isCreate ? "POST" : "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            ...(isCreate ? { courseId: selectedCourseId } : {}),
             batchName: formData.batchName.trim(),
             startDate: formData.startDate,
             endDate: effectiveEndDate || null,
@@ -451,10 +543,13 @@ export function AdminBatchScheduleManager({
         throw new Error(result?.error || "Failed to update batch schedule.");
       }
 
+      const savedId = result.batch?.id || formData.id;
+      await loadBatch(selectedCourseId, savedId);
       setSuccessMessage(
-        `Batch schedule for ${formData.courseTitle} updated successfully! Public course routes updated.`
+        isCreate
+          ? `New batch "${formData.batchName.trim()}" added to ${formData.courseTitle}.`
+          : `Batch "${formData.batchName.trim()}" updated successfully! Public course routes updated.`
       );
-      setOriginalData({ ...formData });
 
       if (onBatchUpdated) {
         onBatchUpdated(result.batch);
@@ -504,11 +599,6 @@ export function AdminBatchScheduleManager({
               <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#292923]">
                 Batch & Schedule Management
               </h2>
-              <p className="text-xs text-[#6F6B61] mt-1 max-w-2xl">
-                Configure workshop start dates, registration deadlines,
-                timings, and cover images. Changes update immediately on
-                public course cards.
-              </p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -547,8 +637,136 @@ export function AdminBatchScheduleManager({
         </div>
       )}
 
+      {/* Batches under this course: current/upcoming + previous */}
+      {(() => {
+        const current = batches.filter((b) => !isPreviousBatch(b));
+        const previous = batches.filter((b) => isPreviousBatch(b));
+        const statusStyle: Record<string, string> = {
+          open: "bg-emerald-100 text-emerald-800",
+          upcoming: "bg-sky-100 text-sky-800",
+          closed: "bg-amber-100 text-amber-800",
+          completed: "bg-stone-200 text-stone-700",
+          tba: "bg-violet-100 text-violet-800",
+        };
+        const renderCard = (b: any) => {
+          const selected = b.id === formData.id;
+          return (
+            <button
+              key={b.id}
+              type="button"
+              onClick={() => applyBatch(b)}
+              className={`text-left rounded-xl border p-4 transition-all cursor-pointer ${
+                selected
+                  ? "border-[#68705A] bg-[#68705A]/10 ring-2 ring-[#68705A]/25 shadow-sm"
+                  : "border-[#464137]/15 bg-[#FAF8F2] hover:border-[#68705A]/50 hover:shadow-xs"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-sm font-bold text-[#292923] leading-snug line-clamp-2">
+                  {b.batchName}
+                </span>
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide ${
+                    statusStyle[b.status] || statusStyle.closed
+                  }`}
+                >
+                  {b.status === "tba" ? "TBA" : b.status}
+                </span>
+              </div>
+              {b.isLive && (
+                <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#B93821] px-2.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-white">
+                  <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                  Live on website
+                </div>
+              )}
+              <div className="mt-2 space-y-1 text-xs text-[#6F6B61]">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="size-3.5" />
+                  <span>{b.status === "tba" ? "Date to be announced" : formatBatchDateIST(b.startDate)}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="size-3.5" />
+                  <span>{formatBatchTimeIST(b.startTime, b.endTime)}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Users className="size-3.5" />
+                  <span className="tabular-nums">
+                    {b.seatsBooked}/{b.totalSeats} seats booked
+                  </span>
+                </div>
+              </div>
+              {selected && (
+                <div className="mt-2 inline-flex items-center gap-1 text-[0.68rem] font-bold text-[#68705A]">
+                  <Pencil className="size-3" />
+                  Editing
+                </div>
+              )}
+            </button>
+          );
+        };
+        return (
+          <div className="rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs p-5 sm:p-6 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-[#292923]">
+                  Batches under {activeCourse.title}
+                </h3>
+                <p className="text-xs text-[#6F6B61] mt-0.5">
+                  {batches.length === 0
+                    ? "No batches yet. Add the first one."
+                    : `${current.length} current / upcoming · ${previous.length} previous`}
+                </p>
+              </div>
+              {!isReadOnly && (
+                <button
+                  type="button"
+                  onClick={startNewBatch}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#68705A] px-4 py-2.5 text-xs font-bold text-[#FAF8F2] shadow-xs hover:bg-[#575E4B] transition-colors cursor-pointer"
+                >
+                  <Plus className="size-4" />
+                  Add new batch
+                </button>
+              )}
+            </div>
+
+            <div>
+              <h4 className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[#68705A]">
+                Current &amp; upcoming
+              </h4>
+              {current.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-[#464137]/25 p-4 text-xs text-[#6F6B61]">
+                  No current or upcoming batches for this course. Use &ldquo;Add new batch&rdquo; to schedule one.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {current.map(renderCard)}
+                </div>
+              )}
+            </div>
+
+            <details className="group" open={previous.length > 0 && current.length === 0}>
+              <summary className="flex cursor-pointer list-none items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[#6F6B61] hover:text-[#292923]">
+                <History className="size-3.5" />
+                Previous batches ({previous.length})
+              </summary>
+              <div className="mt-3">
+                {previous.length === 0 ? (
+                  <p className="rounded-lg border border-dashed border-[#464137]/25 p-4 text-xs text-[#6F6B61]">
+                    No previous batches yet. Completed and past batches appear here.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                    {previous.map(renderCard)}
+                  </div>
+                )}
+              </div>
+            </details>
+          </div>
+        );
+      })()}
+
       {/* Main Grid: Form on Left, Live Preview on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div id="batch-editor" className="grid scroll-mt-20 grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Editor Form Column */}
         <div className="lg:col-span-7 space-y-6">
           {/* ========================================================== */}
@@ -685,6 +903,36 @@ export function AdminBatchScheduleManager({
             onSubmit={handleSave}
             className="p-5 sm:p-6 rounded-xl bg-[#FAF8F2] border border-[#464137]/15 shadow-xs space-y-5"
           >
+            <div className="flex items-center justify-between gap-3 border-b border-[#464137]/10 pb-3">
+              <h3 className="font-serif text-base font-bold text-[#292923]">
+                {formData.id ? "Edit batch" : "Add new batch"}
+              </h3>
+              {formData.id ? (
+                batches.find((b) => b.id === formData.id)?.isLive ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#B93821] px-3 py-1 text-[0.68rem] font-bold uppercase tracking-wider text-white">
+                    <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                    Live on website
+                  </span>
+                ) : (
+                  !isReadOnly && (
+                    <button
+                      type="button"
+                      onClick={() => makeLive(formData.id)}
+                      disabled={isSettingLive}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#B93821]/40 bg-[#FBEAE5] px-3 py-1.5 text-xs font-bold text-[#B93821] hover:bg-[#B93821] hover:text-white transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                      <Radio className="size-3.5" />
+                      {isSettingLive ? "Setting live..." : "Make live on website"}
+                    </button>
+                  )
+                )
+              ) : (
+                <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-sky-800">
+                  New - not saved yet
+                </span>
+              )}
+            </div>
+
             {/* Feedback Alerts */}
             {successMessage && (
               <div className="p-3.5 rounded-lg bg-[#3E522D]/10 border border-[#3E522D]/25 flex items-start gap-2 text-xs text-[#3E522D] font-medium">
@@ -1087,6 +1335,38 @@ export function AdminBatchScheduleManager({
                     <span>Reset Changes</span>
                   </button>
 
+                  {formData.id && !isReadOnly && (
+                    confirmDelete ? (
+                      <div className="mr-auto flex flex-wrap items-center gap-2 rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs text-rose-900">
+                        <span className="font-semibold">Delete this batch permanently?</span>
+                        <button
+                          type="button"
+                          onClick={deleteBatch}
+                          disabled={isDeleting}
+                          className="rounded-md bg-rose-600 px-3 py-1 font-bold text-white hover:bg-rose-700 disabled:opacity-50 cursor-pointer"
+                        >
+                          {isDeleting ? "Deleting..." : "Yes, delete"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDelete(false)}
+                          disabled={isDeleting}
+                          className="rounded-md border border-rose-300 px-3 py-1 font-semibold hover:bg-rose-100 cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(true)}
+                        className="mr-auto inline-flex items-center gap-1.5 rounded-lg border border-rose-300 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="size-3.5" />
+                        Delete batch
+                      </button>
+                    )
+                  )}
                   <button
                     type="submit"
                     disabled={isReadOnly || isSaving}
@@ -1100,7 +1380,7 @@ export function AdminBatchScheduleManager({
                     ) : (
                       <>
                         <Save className="size-3.5" />
-                        <span>Save Batch Schedule</span>
+                        <span>{formData.id ? "Save Batch Schedule" : "Create Batch"}</span>
                       </>
                     )}
                   </button>
