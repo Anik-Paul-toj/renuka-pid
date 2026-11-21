@@ -35,6 +35,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "YT Video", href: "/admin/yt-video", icon: Video },
   { name: "Course / Workshop", href: "/admin/courses", icon: GraduationCap },
   { name: "Batches / Schedule", href: "/admin/batches", icon: Calendar },
   { name: "Gallery / Media", href: "/admin/media", icon: ImageIcon },
