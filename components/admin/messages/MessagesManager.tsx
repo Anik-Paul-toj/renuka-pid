@@ -34,6 +34,7 @@ interface MessagesManagerProps {
   courses?: CourseItem[];
   batches?: BatchItem[];
   userRole?: string;
+  embedded?: boolean;
 }
 
 // Convert database tokens {{...}} into friendly brackets [Field Name] for natural editing
@@ -86,6 +87,7 @@ export function MessagesManager({
   courses = [],
   batches = [],
   userRole = "admin",
+  embedded = false,
 }: MessagesManagerProps) {
   const [templates, setTemplates] = useState<MessageTemplateRecord[]>(initialTemplates);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(
@@ -278,16 +280,18 @@ export function MessagesManager({
   }, [body, selectedCourse, selectedBatch, dateValue, formattedTimeRange, joinLink]);
 
   return (
-    <div className="space-y-6 w-full pb-16">
+    <div className={embedded ? "space-y-6 w-full" : "space-y-6 w-full pb-16"}>
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight">
-          Messages
-        </h1>
-        <p className="text-sm text-stone-500 mt-1">
-          Compose and customize messages sent to students.
-        </p>
-      </div>
+      {!embedded && (
+        <div>
+          <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight">
+            Messages
+          </h1>
+          <p className="text-sm text-stone-500 mt-1">
+            Compose and customize messages sent to students.
+          </p>
+        </div>
+      )}
 
       {/* Message Template Selector */}
       <div className="flex flex-wrap gap-2 pt-1">
