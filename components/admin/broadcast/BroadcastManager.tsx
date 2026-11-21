@@ -181,7 +181,9 @@ export function BroadcastManager({
 
   // Meta Approved Templates for WhatsApp
   const [approvedTemplates, setApprovedTemplates] = useState<any[]>([]);
-  const [broadcastPurpose, setBroadcastPurpose] = useState<"batch_reminder" | "upcoming_batches">("batch_reminder");
+  // Booking confirmations and "course live now" announcements are sent from /admin/messages.
+  // Broadcast handles the remaining purpose: batch reminders.
+  const broadcastPurpose = "batch_reminder" as const;
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [useMetaTemplate, setUseMetaTemplate] = useState<boolean>(true);
   const [templateVariablesMap, setTemplateVariablesMap] = useState<Record<string, string>>({});
@@ -210,7 +212,8 @@ export function BroadcastManager({
   const purposeFilteredTemplates = useMemo(() => {
     return approvedTemplates.filter((t) => {
       const p = t.templatePurpose || t.template_purpose || "batch_reminder";
-      if (p === "confirmation") return false;
+      const metaName = String(t.metaTemplateName || t.meta_template_name || "").toLowerCase();
+      if (p === "confirmation" || metaName.includes("confirm")) return false;
       return p === broadcastPurpose;
     });
   }, [approvedTemplates, broadcastPurpose]);
@@ -670,54 +673,26 @@ export function BroadcastManager({
                   </div>
                 ) : (
                   <>
-                    {/* Template Purpose Selector */}
-                    <div>
-                      <label className="text-xs font-bold text-stone-700 block mb-1.5">
-                        Template Purpose
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setBroadcastPurpose("batch_reminder")}
-                          className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all ${
-                            broadcastPurpose === "batch_reminder"
-                              ? "bg-amber-100/80 border-amber-500 text-amber-950 shadow-xs"
-                              : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="size-3.5 text-amber-700" />
-                            <span>Batch Reminder</span>
-                          </div>
-                          <p className="text-[0.66rem] font-normal text-stone-500 mt-0.5">
-                            Reminders to students of a specific batch date
-                          </p>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setBroadcastPurpose("upcoming_batches")}
-                          className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all ${
-                            broadcastPurpose === "upcoming_batches"
-                              ? "bg-purple-100/80 border-purple-500 text-purple-950 shadow-xs"
-                              : "bg-white border-stone-200 text-stone-700 hover:bg-stone-50"
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5">
-                            <Sparkles className="size-3.5 text-purple-700" />
-                            <span>Upcoming Batches</span>
-                          </div>
-                          <p className="text-[0.66rem] font-normal text-stone-500 mt-0.5">
-                            Announcements & new cohort schedule launches
-                          </p>
-                        </button>
+                    {/* Purpose note: confirmation + course-live-now live in Messages */}
+                    <div className="flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-100/70 p-2.5 text-xs text-amber-950">
+                      <Clock className="size-3.5 mt-0.5 shrink-0 text-amber-700" />
+                      <div>
+                        <p className="font-bold">Batch Reminder templates</p>
+                        <p className="mt-0.5 font-normal text-stone-600">
+                          Reminders to students of a specific batch date. Booking confirmations and &ldquo;course live
+                          now&rdquo; announcements are sent from{" "}
+                          <a href="/admin/messages" className="font-semibold text-emerald-700 hover:underline">
+                            Messages
+                          </a>
+                          .
+                        </p>
                       </div>
                     </div>
 
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="text-xs font-bold text-stone-700">
-                          Select Approved {broadcastPurpose === "upcoming_batches" ? "Upcoming Batches" : "Batch Reminder"} Template
+                          Select Approved Batch Reminder Template
                         </label>
                         <a
                           href="/admin/message-templates"
@@ -729,7 +704,7 @@ export function BroadcastManager({
 
                       {purposeFilteredTemplates.length === 0 ? (
                         <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-600">
-                          No approved {broadcastPurpose === "upcoming_batches" ? "Upcoming Batches" : "Batch Reminder"} templates found.
+                          No approved Batch Reminder templates found.
                           <a href="/admin/message-templates" className="ml-1 text-emerald-700 font-semibold hover:underline">
                             Create or sync one &rarr;
                           </a>
@@ -749,60 +724,6 @@ export function BroadcastManager({
                       )}
                     </div>
 
-                    {activeApprovedTemplate && (
-                      <div className="space-y-3 bg-white p-3.5 rounded-xl border border-emerald-100 text-xs">
-                        <div className="flex items-center justify-between border-b border-stone-100 pb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                              APPROVED BY META
-                            </span>
-                            <span className="font-mono text-stone-600 text-[11px]">
-                              {activeApprovedTemplate.metaTemplateName || activeApprovedTemplate.meta_template_name}
-                            </span>
-                          </div>
-                          <span className="text-[10px] uppercase font-bold text-stone-400">
-                            Category: {activeApprovedTemplate.category}
-                          </span>
-                        </div>
-
-                        {/* Dynamic Variables Mapping UI */}
-                        {Object.keys(templateVariablesMap).length > 0 && (
-                          <div className="space-y-2 pt-1">
-                            <span className="font-bold text-stone-700 block">
-                              Dynamic Variables Mapping
-                            </span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {Object.entries(templateVariablesMap).map(([placeholder, val]) => (
-                                <div
-                                  key={placeholder}
-                                  className="p-2 rounded-lg bg-stone-50 border border-stone-200 space-y-1"
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <span className="font-mono font-bold text-emerald-800 text-[11px]">
-                                      {placeholder}
-                                    </span>
-                                    <span className="text-[10px] text-stone-400">
-                                      Variable placeholder
-                                    </span>
-                                  </div>
-                                  <input
-                                    type="text"
-                                    value={val}
-                                    onChange={(e) =>
-                                      setTemplateVariablesMap((prev) => ({
-                                        ...prev,
-                                        [placeholder]: e.target.value,
-                                      }))
-                                    }
-                                    className="w-full px-2 py-1 bg-white border border-stone-300 rounded text-xs text-stone-800 focus:outline-none focus:border-emerald-600"
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </>
                 )}
               </div>

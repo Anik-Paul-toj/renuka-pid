@@ -3,7 +3,7 @@ import { getAdminSession } from "@/lib/auth/admin";
 import {
   getTemplateById,
   updateTemplateDraft,
-  deleteTemplateDraft,
+  deleteTemplate,
 } from "@/lib/whatsapp/template-management";
 
 export const dynamic = "force-dynamic";
@@ -89,15 +89,21 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const deleted = await deleteTemplateDraft(id);
+    const result = await deleteTemplate(id);
 
-    if (!deleted) {
-      return NextResponse.json({ error: "Template not found or cannot be deleted" }, { status: 404 });
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error || "Template could not be deleted" },
+        { status: result.notFound ? 404 : 502 }
+      );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Template draft deleted successfully",
+      deletedFromMeta: result.deletedFromMeta,
+      message: result.deletedFromMeta
+        ? "Template deleted from Meta and from this app."
+        : "Template deleted.",
     });
   } catch (error: any) {
     return NextResponse.json(

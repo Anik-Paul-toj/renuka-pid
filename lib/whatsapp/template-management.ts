@@ -524,6 +524,66 @@ export async function deleteTemplateDraft(id: string): Promise<boolean> {
 }
 
 /**
+ * Deletes a template. If it was submitted to Meta (has a real Meta template id or a
+ * non-draft status), it is deleted from Meta first; the local row is only removed once
+ * Meta confirms (or reports that the template no longer exists there).
+ */
+export async function deleteTemplate(
+  id: string
+): Promise<{ success: boolean; deletedFromMeta: boolean; error?: string; notFound?: boolean }> {
+  const template = await getTemplateById(id);
+  if (!template) return { success: false, deletedFromMeta: false, notFound: true, error: "Template not found." };
+
+  const { version, wabaId, accessToken, isConfigured } = getMetaWabaCredentials();
+  const realMetaId =
+    template.metaTemplateId && /^\d+$/.test(template.metaTemplateId) ? template.metaTemplateId : null;
+  const wasSubmitted = Boolean(realMetaId) || template.metaStatus !== "DRAFT";
+  let deletedFromMeta = false;
+
+  if (wasSubmitted && isConfigured) {
+    const qs = new URLSearchParams({ name: template.metaTemplateName });
+    if (realMetaId) qs.set("hsm_id", realMetaId);
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/${version}/${wabaId}/message_templates?${qs.toString()}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${accessToken}` },
+          signal: AbortSignal.timeout(15000),
+        }
+      );
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.success !== false) {
+        deletedFromMeta = true;
+      } else {
+        const err = data?.error;
+        const msg: string =
+          err?.error_user_msg || err?.message || `Meta API deletion failed with HTTP ${response.status}`;
+        // Already gone on Meta's side: safe to clean up locally
+        const alreadyGone = /does not exist|not found|no template/i.test(msg) || err?.code === 100 && /exist/i.test(msg);
+        if (!alreadyGone) {
+          return { success: false, deletedFromMeta: false, error: `Meta refused to delete this template: ${msg}` };
+        }
+      }
+    } catch (e: any) {
+      return {
+        success: false,
+        deletedFromMeta: false,
+        error: `Could not reach Meta to delete this template (${e?.message || "network error"}). Nothing was deleted.`,
+      };
+    }
+  }
+
+  const supabase = createAdminClient();
+  try {
+    await supabase.from("whatsapp_message_templates").delete().eq("id", id);
+  } catch {}
+  inMemoryTemplates.delete(id);
+
+  return { success: true, deletedFromMeta };
+}
+
+/**
  * Builds the exact Meta WABA API template payload.
  * Ensures example body_text arrays and header parameters conform strictly to Meta guidelines.
  */
@@ -931,8 +991,13 @@ export async function getApprovedTemplatesForBroadcast(options?: {
   return allTemplates.filter((t) => {
     if (t.metaStatus !== "APPROVED") return false;
 
-    // Normal broadcasts strictly exclude confirmation templates
-    if (options?.purpose !== "all" && t.templatePurpose === "confirmation") {
+    // Normal broadcasts strictly exclude confirmation templates (by purpose, or by name
+    // in case an imported template was labelled with the wrong purpose)
+    if (
+      options?.purpose !== "all" &&
+      (t.templatePurpose === "confirmation" ||
+        t.metaTemplateName.toLowerCase().includes("confirm"))
+    ) {
       return false;
     }
 

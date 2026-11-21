@@ -415,13 +415,19 @@ export function TemplateManager({
     }
   };
 
-  // Delete local draft
-  const handleDeleteDraft = async (id: string) => {
+  // Delete a template (drafts locally; submitted templates are also deleted from Meta)
+  const handleDeleteTemplate = async (tpl: any) => {
     if (isReadOnly) return;
-    if (!confirm("Are you sure you want to delete this template draft?")) return;
+    const submitted = tpl.metaStatus !== "DRAFT";
+    const message = submitted
+      ? `Delete "${tpl.internalTitle}" (${tpl.metaTemplateName})?\n\nThis permanently deletes it from Meta as well. WhatsApp messages that use it will stop working, and Meta may not let you re-create a template with the same name for about 30 days.\n\nThis cannot be undone.`
+      : `Delete the draft "${tpl.internalTitle}"?`;
+    if (!confirm(message)) return;
 
+    setActionError(null);
+    setActionSuccess(null);
     try {
-      const res = await fetch(`/api/admin/message-templates/${id}`, {
+      const res = await fetch(`/api/admin/message-templates/${tpl.id}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -429,8 +435,8 @@ export function TemplateManager({
         throw new Error(data.error || "Failed to delete template.");
       }
 
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
-      setActionSuccess("Template deleted successfully.");
+      setTemplates((prev) => prev.filter((t) => t.id !== tpl.id));
+      setActionSuccess(data.message || "Template deleted successfully.");
     } catch (err: any) {
       setActionError(err.message || "Failed to delete.");
     }
@@ -794,12 +800,12 @@ export function TemplateManager({
                             </button>
                           )}
 
-                          {tpl.metaStatus === "DRAFT" && !isReadOnly && (
+                          {!isReadOnly && (
                             <button
                               type="button"
-                              onClick={() => handleDeleteDraft(tpl.id)}
+                              onClick={() => handleDeleteTemplate(tpl)}
                               className="p-1.5 rounded-md hover:bg-rose-100 text-rose-700 transition-colors"
-                              title="Delete Draft"
+                              title={tpl.metaStatus === "DRAFT" ? "Delete draft" : "Delete template (also deletes it from Meta)"}
                             >
                               <Trash2 className="size-3.5" />
                             </button>
