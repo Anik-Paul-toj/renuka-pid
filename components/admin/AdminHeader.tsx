@@ -19,10 +19,13 @@ const ROUTE_LABELS: Record<string, string> = {
   "/admin/courses": "Course & Workshop",
   "/admin/batches": "Batches & Schedule",
   "/admin/media": "Gallery & Media",
+  "/admin/testimonials": "Testimonials",
+  "/admin/yt-video": "YT Video",
+  "/admin/message-templates": "Message Templates",
   "/admin/students": "Student Directory",
   "/admin/bookings": "Seat Bookings",
   "/admin/payments": "Payments & Orders",
-  "/admin/messages": "Message Templates",
+  "/admin/messages": "Messages",
   "/admin/broadcast": "Broadcast Announcements",
   "/admin/notifications": "Notifications",
   "/admin/settings": "Admin & Studio Settings",
@@ -40,7 +43,12 @@ export function AdminHeader({
   const pathname = usePathname();
   const router = useRouter();
 
-  const currentLabel = ROUTE_LABELS[pathname] || "Admin Portal";
+  const currentLabel =
+    ROUTE_LABELS[pathname] ||
+    Object.entries(ROUTE_LABELS).find(
+      ([href]) => href !== "/admin" && pathname.startsWith(`${href}/`)
+    )?.[1] ||
+    "Admin Portal";
 
   const handleLogout = async () => {
     try {
@@ -54,7 +62,7 @@ export function AdminHeader({
   };
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5 bg-[#FAF8F2] border-b border-[#464137]/15 shadow-xs">
+    <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5 bg-[#FAF8F2]/85 backdrop-blur-md border-b border-[#464137]/10">
       {/* Left: Mobile Toggle & Dynamic Breadcrumbs */}
       <div className="flex items-center gap-3 min-w-0">
         <button
