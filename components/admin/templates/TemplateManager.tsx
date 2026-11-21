@@ -561,7 +561,7 @@ export function TemplateManager({
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -726,7 +726,7 @@ export function TemplateManager({
                           {tpl.metaTemplateName}
                         </div>
                         {bodyComp?.text && (
-                          <div className="text-[0.68rem] text-[#6F6B61] line-clamp-1 mt-1 max-w-sm">
+                          <div className="text-[0.68rem] text-[#6F6B61] line-clamp-1 mt-1 max-w-3xl">
                             {bodyComp.text}
                           </div>
                         )}

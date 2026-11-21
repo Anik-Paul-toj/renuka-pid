@@ -278,7 +278,7 @@ export function MessagesManager({
   }, [body, selectedCourse, selectedBatch, dateValue, formattedTimeRange, joinLink]);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight">

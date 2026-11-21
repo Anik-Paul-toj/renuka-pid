@@ -107,7 +107,7 @@ export function AdminSidebar({
         {onCloseMobile && (
           <button
             onClick={onCloseMobile}
-            className="lg:hidden p-1.5 rounded-md text-[#6F6B61] hover:bg-[#F7F4EC] hover:text-[#292923]"
+            className="p-1.5 rounded-md text-[#6F6B61] hover:bg-[#F7F4EC] hover:text-[#292923]"
             aria-label="Close menu"
           >
             <X className="size-5" />
@@ -213,23 +213,25 @@ export function AdminSidebar({
 
   return (
     <>
-      {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 sticky top-0 h-screen">
-        {navContent}
-      </aside>
-
-      {/* Mobile Drawer Backdrop & Slide-out Menu */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
-            onClick={onCloseMobile}
-          />
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#FAF8F2] z-10 shadow-2xl">
-            {navContent}
-          </div>
-        </div>
-      )}
+      {/* Slide-out drawer (all screen sizes) */}
+      <div
+        className={`fixed inset-0 z-50 ${mobileOpen ? "" : "pointer-events-none"}`}
+        aria-hidden={!mobileOpen}
+      >
+        <div
+          className={`absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300 ${
+            mobileOpen ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={onCloseMobile}
+        />
+        <aside
+          className={`absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-[#FAF8F2] shadow-2xl transition-transform duration-300 ease-out ${
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          {navContent}
+        </aside>
+      </div>
     </>
   );
 }

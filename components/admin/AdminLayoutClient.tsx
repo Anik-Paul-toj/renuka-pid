@@ -16,6 +16,13 @@ export function AdminLayoutClient({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  React.useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMobileOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
   return (
     <div className="min-h-screen bg-[#F7F4EC] flex text-[#292923]">
       {/* Sidebar with mobile drawer state */}
@@ -32,7 +39,7 @@ export function AdminLayoutClient({
           user={user}
           onOpenMobile={() => setMobileOpen(true)}
         />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[88rem] w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full">
           {children}
         </main>
       </div>

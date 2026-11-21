@@ -67,8 +67,8 @@ export function AdminHeader({
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onOpenMobile}
-          className="lg:hidden p-2 -ml-2 rounded-md text-[#464137] hover:bg-[#F7F4EC] hover:text-[#292923]"
-          aria-label="Open sidebar navigation"
+          className="p-2 -ml-2 rounded-md text-[#464137] hover:bg-[#EEE9DE] hover:text-[#292923] cursor-pointer"
+          aria-label="Open navigation menu"
         >
           <Menu className="size-5" />
         </button>

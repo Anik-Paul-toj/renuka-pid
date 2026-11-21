@@ -159,7 +159,7 @@ export function NotificationsManager({
   const { logs, summary, pagination } = data;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight">

@@ -559,7 +559,7 @@ export function BroadcastManager({
   };
 
   return (
-    <div className="space-y-8 max-w-2xl mx-auto pb-16">
+    <div className="space-y-8 w-full pb-16">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight">
