@@ -165,30 +165,6 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Failed Notifications Alert Banner (if any) */}
-      {metrics.failedNotificationsCount > 0 && (
-        <div className="p-4 sm:p-5 rounded-xl bg-[#FBEAE5] border border-[#C25443]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="size-5 text-[#C25443] shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-xs font-bold text-[#8C2C1D]">
-                {metrics.failedNotificationsCount} Failed Notification Delivery Attempt{metrics.failedNotificationsCount === 1 ? "" : "s"}
-              </h4>
-              <p className="text-[0.75rem] text-[#8C2C1D]/90 mt-0.5">
-                Some confirmation or reminder emails encountered transmission errors and may require retry.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/admin/notifications?status=failed"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#C25443] hover:bg-[#A84435] text-white text-xs font-bold transition-colors shrink-0"
-          >
-            <span>Review &amp; Retry Logs</span>
-            <ArrowUpRight className="size-3.5" />
-          </Link>
-        </div>
-      )}
-
       {/* Real Recent Activity: Bookings & Payments */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Bookings */}
@@ -358,6 +334,31 @@ export default async function AdminDashboardPage() {
           </p>
         </Link>
       </div>
+
+      {/* Failed Notifications Alert (if any) — compact, below the activity cards */}
+      {metrics.failedNotificationsCount > 0 && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-lg border border-[#464137]/15 border-l-4 border-l-[#C25443] bg-[#FAF8F2] px-4 py-3"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <AlertTriangle className="size-4 text-[#C25443] shrink-0" />
+            <p className="text-xs text-[#292923] truncate sm:whitespace-normal">
+              <span className="font-bold text-[#8C2C1D]">
+                {metrics.failedNotificationsCount} failed notification{metrics.failedNotificationsCount === 1 ? "" : "s"}
+              </span>
+              <span className="text-[#6F6B61]"> — some emails may need a retry.</span>
+            </p>
+          </div>
+          <Link
+            href="/admin/notifications?status=failed"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#C25443] hover:text-[#A84435] shrink-0"
+          >
+            <span>Review</span>
+            <ArrowUpRight className="size-3.5" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

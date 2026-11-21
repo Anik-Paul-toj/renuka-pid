@@ -4,6 +4,7 @@ import "./globals.css";
 import { SplashScreen } from "@/components/SplashScreen";
 import { PWAProvider } from "@/components/PWAProvider";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { DevAgentation } from "@/components/DevAgentation";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
@@ -111,6 +112,7 @@ export default function RootLayout({
         <PWAProvider />
         {/* PWA: install prompt banner (Chromium + iOS Safari) */}
         <InstallPrompt />
+        <DevAgentation />
       </body>
     </html>
   );
