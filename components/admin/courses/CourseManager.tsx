@@ -235,6 +235,11 @@ export function CourseManager({
       : 0;
   const internalPaise = Math.round(offer * 100);
 
+  const isDirty =
+    isEditing &&
+    !!activeCourse &&
+    JSON.stringify(formData) !== JSON.stringify(buildFormData(activeCourse));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isReadOnly || !activeCourse) return;
@@ -447,33 +452,68 @@ export function CourseManager({
         </div>
       </div>
 
-      {/* Course Selection Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#464137]/15 pb-2 overflow-x-auto">
+      {/* Course Selector */}
+      <div
+        role="tablist"
+        aria-label="Select course"
+        className="flex gap-3 overflow-x-auto pb-1"
+      >
         {courses.map((course) => {
           const isWorkshopTab =
             course.slug === "the-watercolour" ||
             course.slug === "the-watercolour-roadmap";
+          const selected = course.id === selectedCourseId;
           return (
             <button
               key={course.id}
+              role="tab"
+              aria-selected={selected}
               onClick={() => handleSelectCourse(course)}
-              className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                course.id === selectedCourseId
-                  ? "bg-[#68705A] text-[#FAF8F2] shadow-sm"
-                  : "bg-[#FAF8F2] text-[#6F6B61] hover:text-[#292923] border border-[#464137]/15"
+              className={`min-w-[14rem] text-left rounded-xl border px-4 py-3 transition-all cursor-pointer ${
+                selected
+                  ? "bg-[#68705A] border-[#68705A] text-[#FAF8F2] shadow-md"
+                  : "bg-[#FAF8F2] border-[#464137]/15 text-[#292923] hover:border-[#68705A]/50 hover:shadow-xs"
               }`}
             >
-              <span>{course.title}</span>
-              {isWorkshopTab && (
-                <span className="text-[0.62rem] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-[#C8D1C7]/40 text-[#444C38]">
-                  Landing Page
+              <span className="block text-sm font-bold leading-snug line-clamp-2">
+                {course.title}
+              </span>
+              <span className="mt-2 flex items-center gap-2 text-[0.68rem] font-semibold">
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${
+                    course.isActive
+                      ? selected
+                        ? "bg-emerald-200/90 text-emerald-900"
+                        : "bg-emerald-100 text-emerald-800"
+                      : selected
+                        ? "bg-amber-200/90 text-amber-900"
+                        : "bg-amber-100 text-amber-800"
+                  }`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${
+                      course.isActive ? "bg-emerald-500" : "bg-amber-500"
+                    }`}
+                  />
+                  {course.isActive ? "Live" : "Hidden"}
                 </span>
-              )}
-              {course.isActive ? (
-                <span className="size-2 rounded-full bg-emerald-400"></span>
-              ) : (
-                <span className="size-2 rounded-full bg-amber-400"></span>
-              )}
+                {isWorkshopTab && (
+                  <span
+                    className={`uppercase tracking-wider ${
+                      selected ? "text-[#FAF8F2]/80" : "text-[#68705A]"
+                    }`}
+                  >
+                    Landing Page
+                  </span>
+                )}
+                <span
+                  className={`ml-auto tabular-nums ${
+                    selected ? "text-[#FAF8F2]" : "text-[#B93821]"
+                  }`}
+                >
+                  ₹{course.offerPrice?.toLocaleString("en-IN")}
+                </span>
+              </span>
             </button>
           );
         })}
@@ -487,6 +527,14 @@ export function CourseManager({
             <p className="font-bold">Changes Saved</p>
             <p className="mt-0.5">{successMessage}</p>
           </div>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={() => setSuccessMessage(null)}
+            className="ml-auto text-emerald-700 hover:text-emerald-900 cursor-pointer"
+          >
+            <X className="size-4" />
+          </button>
         </div>
       )}
 
@@ -497,6 +545,14 @@ export function CourseManager({
             <p className="font-bold">Update Failed</p>
             <p className="mt-0.5">{errorMessage}</p>
           </div>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={() => setErrorMessage(null)}
+            className="ml-auto text-rose-700 hover:text-rose-900 cursor-pointer"
+          >
+            <X className="size-4" />
+          </button>
         </div>
       )}
 
@@ -564,15 +620,15 @@ export function CourseManager({
         {!isLandingPageWorkshop ? (
           <div className="flex border-b border-[#464137]/15 bg-[#FAF8F2] px-4 overflow-x-auto">
             {[
-              { id: "basic", label: "1. Basic Info", icon: Info },
-              { id: "batch-schedule", label: "2. Batch Schedule", icon: Calendar },
-              { id: "listing", label: "3. Listing Card", icon: Layers },
-              { id: "pricing", label: "4. Pricing", icon: IndianRupee },
-              { id: "duration", label: "5. Sessions & Duration", icon: Clock },
-              { id: "description", label: "6. Description", icon: FileText },
-              { id: "outcomes", label: "7. Learning Outcomes", icon: BookOpen },
-              { id: "schedule", label: "8. Curriculum Schedule", icon: Calendar },
-              { id: "cta", label: "9. Additional & CTA", icon: MousePointerClick },
+              { id: "basic", label: "Basic Info", icon: Info },
+              { id: "batch-schedule", label: "Batch Schedule", icon: Calendar },
+              { id: "listing", label: "Listing Card", icon: Layers },
+              { id: "pricing", label: "Pricing", icon: IndianRupee },
+              { id: "duration", label: "Sessions & Duration", icon: Clock },
+              { id: "description", label: "Description", icon: FileText },
+              { id: "outcomes", label: "Learning Outcomes", icon: BookOpen },
+              { id: "schedule", label: "Curriculum Schedule", icon: Calendar },
+              { id: "cta", label: "Additional & CTA", icon: MousePointerClick },
             ].map((tab) => {
               const Icon = tab.icon;
               const isCurrent = activeTab === tab.id;
@@ -596,8 +652,8 @@ export function CourseManager({
         ) : (
           <div className="flex border-b border-[#464137]/15 bg-[#FAF8F2] px-4 overflow-x-auto">
             {[
-              { id: "basic", label: "1. Workshop Settings & Pricing", icon: Sparkles },
-              { id: "batch-schedule", label: "2. Batch Schedule & Cover Image", icon: Calendar },
+              { id: "basic", label: "Workshop Settings & Pricing", icon: Sparkles },
+              { id: "batch-schedule", label: "Batch Schedule & Cover Image", icon: Calendar },
             ].map((tab) => {
               const Icon = tab.icon;
               const isCurrent = activeTab === tab.id;
@@ -1781,7 +1837,14 @@ export function CourseManager({
 
           {/* Form Actions Footer */}
           {isEditing && (
-            <div className="pt-4 border-t border-[#464137]/15 flex items-center justify-end gap-3">
+            <div className="sticky bottom-0 z-20 -mx-6 -mb-6 mt-6 px-6 py-3 border-t border-[#464137]/15 bg-[#FAF8F2]/95 backdrop-blur flex items-center justify-end gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+              <span
+                className={`mr-auto text-xs font-semibold ${
+                  isDirty ? "text-amber-700" : "text-[#6F6B61]"
+                }`}
+              >
+                {isDirty ? "● Unsaved changes" : "Editing"}
+              </span>
               <button
                 type="button"
                 onClick={handleCancel}
