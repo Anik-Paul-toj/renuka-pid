@@ -289,7 +289,7 @@ export const masterclassData: MasterclassData = {
   aboutArtist: {
     eyebrow: "ABOUT THE ARTIST",
     heading: "Meet Renuka Aggarwal",
-    role: "Art Educator | Founder, Renuka Art Studio",
+    role: "Art Educator | Founder, Renuka Art Studio | Co-Owner, Meraki Institute of Fine Art",
     introduction:
       "With over 15 years of experience in art education, Renuka Aggarwal is an experienced Art Educator dedicated to helping people discover their creativity, build artistic confidence, and reconnect with the joy of creating.",
     bio: [
@@ -526,7 +526,7 @@ export const masterclassData: MasterclassData = {
     overline: "ABOUT RENUKA",
     headline: "Meet ",
     name: "Renuka Aggarwal",
-    subtitle: "ART EDUCATOR | FOUNDER, RENUKA ART STUDIO",
+    subtitle: "ART EDUCATOR | FOUNDER, RENUKA ART STUDIO | CO-OWNER, MERAKI INSTITUTE OF FINE ART",
     paragraphs: [
       "She is the Director and Co-Owner of Meraki Institute of Fine Art, an established art education institute in Delhi where she has guided and mentored thousands of students across different age groups and skill levels.",
       "Her teaching philosophy goes beyond simply learning techniques. Renuka believes that art is a way of seeing, expressing and connecting with ourselves.",

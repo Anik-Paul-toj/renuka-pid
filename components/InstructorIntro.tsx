@@ -66,7 +66,7 @@ export const InstructorIntro: React.FC = () => {
   // Content fallbacks to guarantee robust rendering
   const eyebrow = aboutArtist?.eyebrow || instructorStory?.overline || "ABOUT THE ARTIST";
   const heading = aboutArtist?.heading || (instructorStory ? `${instructorStory.headline} ${instructorStory.name}` : "Meet Renuka Aggarwal");
-  const role = aboutArtist?.role || instructorStory?.subtitle || "Art Educator | Founder, Renuka Art Studio";
+  const role = aboutArtist?.role || instructorStory?.subtitle || "Art Educator | Founder, Renuka Art Studio | Co-Owner, Meraki Institute of Fine Art";
   const introduction = aboutArtist?.introduction || (instructorStory?.paragraphs?.[0] ?? "");
   const bio = (aboutArtist?.bio && aboutArtist.bio.length > 0)
     ? aboutArtist.bio
