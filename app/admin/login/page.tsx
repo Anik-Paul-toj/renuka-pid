@@ -67,7 +67,7 @@ function LoginForm() {
             <input
               type="email"
               required
-              placeholder="admin@renukaartstudio.com"
+              placeholder="renukaartstudio@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-md border border-[#464137]/15 bg-[#F7F4EC] pl-10 pr-4 py-3 text-sm text-[#292923] outline-none transition-all placeholder:text-[#6F6B61]/50 focus:border-[#68705A] focus:ring-1 focus:ring-[#68705A]"
